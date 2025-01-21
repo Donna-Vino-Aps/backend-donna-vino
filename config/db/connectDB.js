@@ -1,16 +1,12 @@
 import mongoose from "mongoose";
-import { logError, logInfo } from "../../src/utils/logging";
+import { logInfo, logError } from "../../src/utils/logging.js";
 
 const connectDB = () => {
   return new Promise((resolve, reject) => {
-    // Configuración de strictQuery
     mongoose.set("strictQuery", false);
 
     mongoose
-      .connect(process.env.MONGODB_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      })
+      .connect(process.env.MONGODB_URI)
       .then(() => {
         logInfo("MongoDB connected successfully");
         resolve();
