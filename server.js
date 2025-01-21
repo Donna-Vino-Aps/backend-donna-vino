@@ -1,9 +1,9 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import app from "./app.js";
-import { logInfo, logError } from "./util/logging.js";
-import connectDB from "./db/connectDB.js";
+import app from "./src/app.js";
+import { logInfo, logError } from "./src/utils/logging.js";
+import connectDB from "../backend-donna-vino/config/db/connectDB.js";
 
 // The environment should set the port
 const port = process.env.PORT;

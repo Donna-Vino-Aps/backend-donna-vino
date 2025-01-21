@@ -131,7 +131,6 @@ userSchema.pre("save", async function (next) {
     }
   } else {
     next();
-    // Log to indicate that no password modification occurred
     logInfo("No password modification detected.");
   }
 });
