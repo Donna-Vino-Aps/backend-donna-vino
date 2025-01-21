@@ -6,7 +6,7 @@ export const requireAuth = (req, res, next) => {
   const session = req.cookies.session;
   const authHeader = req.headers.authorization;
 
-  // logInfo("Verifying token in session cookie or Authorization header...");
+  logInfo("Verifying token in session cookie or Authorization header...");
 
   // Helper function to verify the token and authenticate the user
   const verifyToken = (token) => {
@@ -48,6 +48,7 @@ export const requireAuth = (req, res, next) => {
     const token = authHeader.split(" ")[1];
     verifyToken(token); // Verify the token from the Authorization header
   }
+
   // 3. If neither a valid session cookie nor Authorization header is found, respond with 401
   else {
     logError("No session cookie or authorization token found.");
