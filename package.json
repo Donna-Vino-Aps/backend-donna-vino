@@ -3,9 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
-  "type": "module",
   "scripts": {
-    "test": "jest --config jest.config.cjs",
+    "test": "jest --config jest.config.js",
     "test:watch": "jest --watch",
     "prepare": "husky install",
     "code-style-check": "npm run prettier && npm run lint",
