@@ -5,8 +5,7 @@
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "start": "node server.js",
-    "test": "jest --config jest.config.mjs",
+    "test": "jest --config jest.config.cjs",
     "test:watch": "jest --watch",
     "prepare": "husky install",
     "code-style-check": "npm run prettier && npm run lint",
@@ -15,19 +14,30 @@
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
     "prettier": "prettier ./src --check",
-    "prettier:fix": "prettier ./src --write"
+    "prettier:fix": "prettier ./src --write",
+    "setup": "npm install",
+    "start": "node ./server.js"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "engines": {
-    "node": ">=18.0.0",
-    "npm": ">=9.0.0"
+  "author": "Donna Vinno Aps",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Donna-Vino-Aps/backend-donna-vino.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Donna-Vino-Aps/backend-donna-vino.git"
   },
   "devDependencies": {
     "husky": "^9.1.7",
     "jest": "^29.7.0",
-    "jest-watch-typeahead": "^2.2.2"
+    "jest-watch-typeahead": "^2.2.2",
+    "prettier": "^3.4.2",
+    "eslint": "^8.40.0",
+    "babel-jest": "^29.7.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-jest": "^25.3.0"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",
