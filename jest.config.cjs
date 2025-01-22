@@ -8,7 +8,6 @@ module.exports = {
   testEnvironment: "node",
   moduleNameMapper: {
     "^express$": "<rootDir>/node_modules/express",
-    "^ipaddr.js$": "<rootDir>/node_modules/ipaddr.js",
     "^cookie-parser$": "<rootDir>/node_modules/cookie-parser",
     "^dotenv$": "<rootDir>/node_modules/dotenv",
     "^cors$": "<rootDir>/node_modules/cors",

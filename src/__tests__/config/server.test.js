@@ -1,4 +1,4 @@
-import { logError, logInfo } from "../../utils/logging.js";
+import { logError } from "../../utils/logging.js";
 import connectDB from "../../../config/db/connectDB.js";
 import app from "../../app.js";
 import { startServer } from "../../../config/server.js";
