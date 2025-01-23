@@ -135,5 +135,4 @@ We welcome contributions! Please follow the established linting and formatting r
 
 ---
 
-```
 
