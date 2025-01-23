@@ -2,15 +2,10 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
-// import { fileURLToPath } from "url";
 import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
-
-// Define __dirname for ESM
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
 
 const resolvePath = (relativePath) => {
   return path.resolve(process.cwd(), relativePath);
@@ -119,12 +114,12 @@ export const verifyEmail = (req, res) => {
   UserVerification.findOne({ userId }) // Find the verification record
     .then((result) => {
       if (result) {
-        logInfo("UserVerification record found:", result); // Log the found verification record
+        logInfo("UserVerification record found:", result);
         const { expiresAt, uniqueString: hashedUniqueString } = result;
 
         if (expiresAt < Date.now()) {
           // If the link has expired
-          logInfo("Verification link has expired"); // Log if the link is expired
+          logInfo("Verification link has expired");
           UserVerification.deleteOne({ userId }) // Delete the expired verification record
             .then(() => {
               User.deleteOne({ _id: userId }) // Delete the user
@@ -137,7 +132,7 @@ export const verifyEmail = (req, res) => {
                   logError(error);
                   const message =
                     "Clearing user with expired unique string failed.";
-                  logInfo(message, error); // Log the error message
+                  logInfo(message, error);
                   res.redirect(`/user/verified?error=true&message=${message}`);
                 });
             })
@@ -145,28 +140,28 @@ export const verifyEmail = (req, res) => {
               logError(error);
               const message =
                 "Clearing expired user verification record failed.";
-              logInfo(message, error); // Log the error message
+              logInfo(message, error);
               res.redirect(`/user/verified?error=true&message=${message}`);
             });
         } else {
           // If the link is still valid
-          logInfo("Verification link is still valid"); // Log if the link is still valid
+          logInfo("Verification link is still valid");
           bcrypt
             .compare(uniqueString, hashedUniqueString) // Compare the unique strings
             .then((match) => {
               if (match) {
                 // If they match
-                logInfo("Unique strings match"); // Log if the strings match
+                logInfo("Unique strings match");
                 User.updateOne({ _id: userId }, { verified: true }) // Update the user's verified status
                   .then(() => {
-                    logInfo("User verification status updated successfully"); // Log success message
+                    logInfo("User verification status updated successfully");
                     res.sendFile(resolvePath("views/verified.html"));
                   })
                   .catch((error) => {
                     logError(error);
                     const message =
                       "An error occurred while finalizing successful verification.";
-                    logInfo(message, error); // Log the error message
+                    logInfo(message, error);
                     res.redirect(
                       `/user/verified?error=true&message=${message}`,
                     );
@@ -175,7 +170,7 @@ export const verifyEmail = (req, res) => {
                 // If the unique strings do not match
                 const message =
                   "Invalid verification details passed. Check your inbox.";
-                logInfo(message); // Log the message
+                logInfo(message);
                 res.redirect(`/user/verified?error=true&message=${message}`);
               }
             })
@@ -183,7 +178,7 @@ export const verifyEmail = (req, res) => {
               logError(error);
               const message =
                 "An error occurred while updating user record to show verified.";
-              logInfo(message, error); // Log the error message
+              logInfo(message, error);
               res.redirect(`/user/verified?error=true&message=${message}`);
             });
         }
@@ -191,7 +186,7 @@ export const verifyEmail = (req, res) => {
         // If no verification record is found
         const message =
           "Account record doesn't exist or has been verified already. Please sign up or log in.";
-        logInfo(message); // Log the message
+        logInfo(message);
         res.redirect(`/user/verified?error=true&message=${message}`);
       }
     })
@@ -199,7 +194,7 @@ export const verifyEmail = (req, res) => {
       logError(error);
       const message =
         "An error occurred while checking for existing user verification record";
-      logInfo(message, error); // Log the error message
+      logInfo(message, error);
       res.redirect(`/user/verified?error=true&message=${message}`);
     });
 };

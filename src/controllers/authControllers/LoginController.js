@@ -1,4 +1,4 @@
-import { logInfo } from "../../util/logging.js";
+// import { logInfo } from "../../util/logging.js";
 import validationErrorMessage from "../../util/validationErrorMessage.js";
 import User from "../../models/userModels.js";
 import bcrypt from "bcrypt";
@@ -35,7 +35,7 @@ export const login = async (req, res) => {
     const userFound = await User.findOne({ email: email });
 
     if (userFound) {
-      logInfo(`User found: ${JSON.stringify(userFound)}`);
+      // logInfo(`User found: ${JSON.stringify(userFound)}`);
 
       const isPasswordValid = await bcrypt.compare(
         password,

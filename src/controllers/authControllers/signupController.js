@@ -1,4 +1,4 @@
-import { logError, logInfo } from "../../util/logging.js";
+// import { logError, logInfo } from "../../util/logging.js";
 import validationErrorMessage from "../../util/validationErrorMessage.js";
 import { validateUser } from "../../models/userModels.js";
 import User from "../../models/userModels.js";
@@ -53,19 +53,19 @@ export const signup = async (req, res) => {
     // Send the verification email
     try {
       await sendVerificationEmail(newUser);
-      logInfo(`Verification email sent for user: ${newUser.email}`);
+      // logInfo(`Verification email sent for user: ${newUser.email}`);
     } catch (error) {
-      logError("Error sending verification email: " + error.message);
+      // logError("Error sending verification email: " + error.message);
     }
 
-    logInfo(`User created successfully: ${newUser.email}`);
+    // logInfo(`User created successfully: ${newUser.email}`);
     return res.status(201).json({
       success: true,
       msg: "User created successfully",
       user: newUser,
     });
   } catch (error) {
-    logError("Error in signup process: " + error.message);
+    // logError("Error in signup process: " + error.message);
     return res
       .status(500)
       .json({ success: false, msg: "Unable to create user, try again later" });

@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
-import { logError, logInfo } from "../../util/logging.js";
+// import { logError, logInfo } from "../../util/logging.js";
 
 const resolvePath = (relativePath) => {
   return path.resolve(process.cwd(), relativePath);
@@ -23,7 +23,7 @@ export const sendWelcomeEmail = async (user) => {
   try {
     welcomeEmailTemplate = fs.readFileSync(welcomeTemplatePath, "utf-8");
   } catch (error) {
-    logError(`Error reading welcome email template: ${error.message}`);
+    // logError(`Error reading welcome email template: ${error.message}`);
     return {
       status: "FAILED",
       message: "Internal server error",
@@ -50,7 +50,7 @@ export const sendWelcomeEmail = async (user) => {
     await newVerification.save(); // Save the verification record
 
     await transporter.sendMail(mailOptions);
-    logInfo("Welcome email sent successfully");
+    // logInfo("Welcome email sent successfully");
 
     return {
       status: "PENDING",
@@ -61,7 +61,7 @@ export const sendWelcomeEmail = async (user) => {
       },
     };
   } catch (error) {
-    logError(`Welcome email failed: ${error.message}`);
+    // logError(`Welcome email failed: ${error.message}`);
     return {
       status: "FAILED",
       message: "Welcome email failed",
