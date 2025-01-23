@@ -12,7 +12,12 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x]
+        node-version: [18.x]
+
+    env:
+      AUTH_EMAIL: ${{ secrets.AUTH_EMAIL }}
+      AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+      NODE_ENV: development
 
     steps:
       # 1. Checkout the code
