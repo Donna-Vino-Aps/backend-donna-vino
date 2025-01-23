@@ -1,16 +1,17 @@
-````markdown
+
+```markdown
 # Donna Vino Backend Server
 
-This repository contains the backend server for the Donna Vino e-commerce platform. The server is built with Node.js and Express and includes features for authentication, database management, and more.
+This repository contains the backend server for the Donna Vino e-commerce platform. The server is built with **Node.js** and **Express** and includes features for authentication, database management, and more.
 
 ---
 
 ## Features
 
-- **Authentication**: Utilizes JSON Web Tokens (JWT) for secure user authentication.
+- **Authentication**: Utilizes **JSON Web Tokens (JWT)** for secure user authentication.
 - **Cookies and CORS**: Implements cookie parsing and Cross-Origin Resource Sharing (CORS) for seamless client-server communication.
-- **Testing**: Comprehensive test coverage with Jest for unit and integration tests.
-- **Linting and Code Formatting**: Ensures consistent code style with ESLint and Prettier.
+- **Testing**: Comprehensive test coverage with **Jest** for unit and integration tests.
+- **Linting and Code Formatting**: Ensures consistent code style with **ESLint** and **Prettier**.
 
 ---
 
@@ -24,16 +25,15 @@ Ensure you have the following installed on your machine:
 - **npm** (comes with Node.js)
 
 ### Installation
-
+```
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/Donna-Vino-Aps/backend-donna-vino.git
- ```
-  
-  
-````
+   ```
 
 2. Install dependencies:
+
    ```bash
    npm run setup
    ```
@@ -48,7 +48,7 @@ To start the server, run:
 npm run start
 ```
 
-For development with live-reloading, use:
+For development with live reloading, use:
 
 ```bash
 npm run dev
@@ -79,6 +79,7 @@ This project uses **Jest** for testing. Here’s how you can run the tests:
   ```
 
 - Check test coverage:
+
   ```bash
   npm run test:coverage
   ```
@@ -89,31 +90,42 @@ This project uses **Jest** for testing. Here’s how you can run the tests:
 
 ### Prettier
 
-To check code formatting:
+- To check code formatting:
 
-```bash
-npm run prettier
-```
+  ```bash
+  npm run prettier
+  ```
 
-To automatically fix formatting issues:
+- To automatically fix formatting issues:
 
-```bash
-npm run prettier:fix
-```
+  ```bash
+  npm run prettier:fix
+  ```
 
 ### ESLint
 
-To check for linting errors:
+- To check for linting errors:
 
-```bash
-npm run lint
-```
+  ```bash
+  npm run lint
+  ```
 
-To automatically fix linting issues:
+- To automatically fix linting issues:
 
-```bash
-npm run lint:fix
-```
+  ```bash
+  npm run lint:fix
+  ```
+
+---
+
+## Pre-Commit and Pre-Push Hooks
+
+This project uses **husky** to run checks before committing or pushing code:
+
+- **Pre-commit**: Runs linting and code formatting checks.
+- **Pre-push**: Ensures all tests pass before code is pushed to the repository.
+
+These hooks are automatically enabled after running `npm install`.
 
 ---
 
@@ -125,8 +137,6 @@ We welcome contributions! Please follow the established linting and formatting r
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 ```
 
-```
