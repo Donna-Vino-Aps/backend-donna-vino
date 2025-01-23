@@ -14,6 +14,7 @@ export const login = async (req, res) => {
 
   const { email, password, ...additionalFields } = req.body.user;
 
+  //
   // Validation Errors
   try {
     const errors = [];
