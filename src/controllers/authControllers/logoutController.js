@@ -1,4 +1,4 @@
-// import { logInfo, logError } from "../../util/logging.js";
+import { logInfo, logError } from "../../util/logging.js";
 
 export const logout = (req, res) => {
   try {
@@ -31,7 +31,7 @@ export const logout = (req, res) => {
     if (req.headers["authorization"]) {
       // Here you could implement any logic related to invalidating the token if necessary
       // For example: invalidateToken(req.headers['authorization']);
-      // logInfo("User is logged out via token");
+      logInfo("User is logged out via token");
     }
 
     // Log the user logout
@@ -42,7 +42,7 @@ export const logout = (req, res) => {
       message: "User successfully logged out",
     });
   } catch (error) {
-    // logError("Logout error: ", error);
+    logError("Logout error: ", error);
     res.status(500).json({
       success: false,
       message: error.message || "An error occurred during logout",
