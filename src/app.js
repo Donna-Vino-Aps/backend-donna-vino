@@ -2,9 +2,9 @@ import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-// import { requireAuth } from "./middleware/authMiddleware.js";
-// import userRouter from "./routes/userRoutes.js";
-// import authRouter from "./routes/authRoutes.js";
+import { requireAuth } from "./middleware/authMiddleware.js";
+import userRouter from "./routes/userRoutes.js";
+import authRouter from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -43,7 +43,7 @@ app.use(
  * As we also host our client code on heroku we want to separate the API endpoints.
  */
 
-// app.use("/api/auth", authRouter);
-// app.use("/api/user", requireAuth, userRouter);
+app.use("/api/auth", authRouter);
+app.use("/api/user", requireAuth, userRouter);
 
 export default app;

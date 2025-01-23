@@ -1,4 +1,3 @@
-// eslint.config.js o .eslintrc.js
 const { defineConfig } = require("eslint-define-config");
 
 module.exports = defineConfig([

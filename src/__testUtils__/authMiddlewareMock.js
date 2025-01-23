@@ -1,4 +1,4 @@
-import { logInfo } from "../util/logging.js";
+import { logInfo } from "../util/logging";
 
 export const requireAuthMock = (req, res, next) => {
   const session = req.cookies.session;
