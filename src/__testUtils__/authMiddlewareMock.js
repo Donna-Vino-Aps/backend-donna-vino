@@ -1,9 +1,9 @@
-import { logInfo } from "../util/logging";
+// import { logInfo } from "../util/logging";
 
 export const requireAuthMock = (req, res, next) => {
   const session = req.cookies.session;
 
-  logInfo("Verifying request in authMiddlewareMock file...");
+  // logInfo("Verifying request in authMiddlewareMock file...");
 
   const simulatedVariables = {
     cookies: {
@@ -36,6 +36,6 @@ export const requireAuthMock = (req, res, next) => {
   }
 
   const successMessage = `User authenticated successfully. User ID: ${validUserId.data.userId}`;
-  logInfo(successMessage);
+  // logInfo(successMessage);
   next();
 };
