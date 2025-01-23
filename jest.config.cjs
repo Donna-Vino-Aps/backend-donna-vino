@@ -7,7 +7,7 @@ module.exports = {
   setupFilesAfterEnv: ["./jest.setup.js"],
   testEnvironment: "node",
   moduleNameMapper: {
-    "^(.*/.*)\\.js$": "$1",
+    "^(\\.{1,2}/.*)\\.js$": "$1",
   },
   testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
   moduleFileExtensions: ["js", "jsx", "mjs"],
