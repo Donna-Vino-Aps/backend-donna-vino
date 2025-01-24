@@ -8,6 +8,7 @@ module.exports = {
   testEnvironment: "node",
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^.+\\.js$": "<rootDir>/$1",
   },
   testRegex: "(/__tests__/.*|(\\.|/)(test|spec))\\.[jt]sx?$",
   moduleFileExtensions: ["js", "jsx", "mjs"],
