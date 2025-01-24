@@ -31,10 +31,10 @@ jobs:
           cache: "npm"
 
       # 3. Install OpenSSL 1.1 (required for MongoDB Memory Server)
-      - name: Install OpenSSL 1.1
+      - name: Install OpenSSL 3
         run: |
           sudo apt-get update
-          sudo apt-get install -y libssl1.1
+          sudo apt-get install -y libssl3
 
       # 4. Clean Node.js and Jest Cache
       - name: Clean Node.js and Jest Cache
@@ -58,7 +58,6 @@ jobs:
       # 7. Run Jest tests
       - name: Run Tests
         run: npm test
-        continue-on-error: true # Esto hace que el flujo continúe incluso si los tests fallan, si es necesario
 
       # 8. Run code style checks
       - name: Run Code Style Checks
