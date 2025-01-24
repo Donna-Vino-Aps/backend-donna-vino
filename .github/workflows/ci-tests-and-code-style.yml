@@ -30,11 +30,11 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      # 3. Install OpenSSL 3 (required for MongoDB Memory Server)
-      - name: Install OpenSSL 3
+      # 3. Install OpenSSL 1.1 (required for MongoDB Memory Server)
+      - name: Install OpenSSL 1.1
         run: |
           sudo apt-get update
-          sudo apt-get install -y libssl3
+          sudo apt-get install -y libssl1.1
 
       # 4. Clean Node.js and Jest Cache
       - name: Clean Node.js and Jest Cache
