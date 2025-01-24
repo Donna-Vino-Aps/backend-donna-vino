@@ -2,7 +2,7 @@ import { logInfo, logError } from "../../util/logging.js";
 
 export const logout = (req, res) => {
   try {
-    // Check if cookies exist and log them, otherwise log the token if available
+    // Check if cookies exist and log them, otherwise log the token if available.
     if (Object.keys(req.cookies).length > 0) {
       // logInfo("Current cookies:", req.cookies);
     } else if (req.headers["authorization"]) {
