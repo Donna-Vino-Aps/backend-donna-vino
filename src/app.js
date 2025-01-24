@@ -17,10 +17,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 const allowedOrigins = [
-  "http://localhost:8081",
-  "http://192.168.178.182:3000",
-  "https://habit-tracker-app-front.netlify.app",
-  "http://192.168.178.182:8081",
+  "http://localhost:3000",
 ];
 
 // CORS configuration
