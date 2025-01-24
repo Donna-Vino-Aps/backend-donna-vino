@@ -2,7 +2,9 @@
 ```markdown
 # Donna Vino Backend Server
 
-This repository contains the backend server for the Donna Vino e-commerce platform. The server is built with **Node.js** and **Express** and includes features for authentication, database management, and more.
+This repository contains the backend server for the Donna Vino e-commerce platform.
+The server is built with **Node.js** and **Express** and includes features for authentication,
+database management, and more.
 
 ---
 
