@@ -34,7 +34,7 @@ jobs:
       - name: Install OpenSSL 1.1
         run: |
           sudo apt-get update
-          sudo apt-get install -y openssl1.1
+          sudo apt-get install -y libssl1.1
 
       # 4. Clean Node.js and Jest Cache
       - name: Clean Node.js and Jest Cache
