@@ -18,7 +18,16 @@ export const connectToMockDB = async () => {
     );
   }
 
-  mongoMemServer = await MongoMemoryServer.create();
+  mongoMemServer = await MongoMemoryServer.create({
+    instance: {
+      dbName: "test-db", // Custom database name
+    },
+    binary: {
+      version: "5.0.0", // Specify MongoDB version
+    },
+    timeoutMS: 20000, // Set a timeout to avoid long waits
+  });
+
   const uri = mongoMemServer.getUri();
 
   await mongoose.connect(uri, {

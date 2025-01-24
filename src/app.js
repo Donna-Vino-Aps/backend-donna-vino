@@ -16,9 +16,7 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-const allowedOrigins = [
-  "http://localhost:3000",
-];
+const allowedOrigins = ["http://localhost:3000"];
 
 // CORS configuration
 app.use(
