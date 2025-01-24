@@ -3,10 +3,9 @@ module.exports = {
     [
       "@babel/preset-env",
       {
-        targets: {
-          node: "current",
-        },
+        targets: "current",
       },
     ],
   ],
+  plugins: ["@babel/plugin-transform-runtime"],
 };
