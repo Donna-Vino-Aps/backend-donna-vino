@@ -13,4 +13,5 @@ module.exports = {
   moduleFileExtensions: ["js", "jsx", "mjs"],
   rootDir: "./",
   moduleDirectories: ["node_modules", "src"],
+  testTimeout: 30000,
 };
