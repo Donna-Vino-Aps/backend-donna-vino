@@ -42,7 +42,7 @@ export const handleError = (error) => {
   // Log the error
   logError(error);
 
-  // Handle the error as needed
+  // Handle the error as needed.
   // For example, you could send it to an error tracking service
   // or display a user-friendly error message to the user
 };
