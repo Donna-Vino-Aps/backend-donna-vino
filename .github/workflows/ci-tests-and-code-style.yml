@@ -17,7 +17,9 @@ jobs:
     env:
       AUTH_EMAIL: ${{ secrets.AUTH_EMAIL }}
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
-      NODE_ENV: test
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      NODE_ENV: development
 
     steps:
       # 1. Checkout the code
