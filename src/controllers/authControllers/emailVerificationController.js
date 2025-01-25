@@ -8,7 +8,8 @@ import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
 
 const resolvePath = (relativePath) => {
-  return path.resolve(process.cwd(), relativePath);
+  const basePath = process.env.GITHUB_ACTIONS ? __dirname : process.cwd();
+  return path.resolve(basePath, relativePath);
 };
 
 // Setting server URL based on the environment
@@ -23,6 +24,7 @@ export const sendVerificationEmail = async (user) => {
   const uniqueString = uuidv4() + _id; // Generate a unique string using uuid and user ID
 
   // Read the HTML template
+  logInfo("Current working directory:", process.cwd());
   const templatePath = resolvePath("templates/emailTemplate.html");
   let emailTemplate;
 
