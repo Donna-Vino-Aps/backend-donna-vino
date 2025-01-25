@@ -23,7 +23,7 @@ export const connectToMockDB = async () => {
       dbName: "test-db", // Custom database name
     },
     binary: {
-      version: "4.4.0", // Specify MongoDB version
+      version: "5.0.0", // Specify MongoDB version
     },
     timeoutMS: 20000, // Set a timeout to avoid long waits
   });
