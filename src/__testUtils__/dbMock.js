@@ -24,7 +24,6 @@ export const connectToMockDB = async () => {
     },
     binary: {
       version: "6.0.0", // Specify MongoDB version
-      downloadDir: "/tmp/mongo-binaries", // Custom temporary path
     },
     timeoutMS: 20000, // Set a timeout to avoid long waits
   });
