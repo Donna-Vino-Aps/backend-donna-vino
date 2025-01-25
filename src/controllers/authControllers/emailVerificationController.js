@@ -8,12 +8,15 @@ import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
 
 const resolvePath = (relativePath) => {
-  return path.resolve(process.cwd(), relativePath);
+  const basePath = process.env.GITHUB_ACTIONS
+    ? path.join(process.cwd(), "src")
+    : __dirname;
+  return path.resolve(basePath, relativePath);
 };
 
-// Setting server URL based on the environment
+// Setting server URL based o the environment
 const development = "http://localhost:3000";
-const production = "https://zen-timer-app-server-7f9db58def4c.herokuapp.com";
+const production = "https://donna-vino-deploy-in-heroku.com"; // update this!
 const currentUrl =
   process.env.NODE_ENV === "production" ? production : development;
 

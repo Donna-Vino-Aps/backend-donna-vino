@@ -124,6 +124,4 @@ describe("signupController", () => {
       "BAD REQUEST: Name can only contain letters, numbers, and a single space between words.",
     );
   });
-
-  // Aquí seguirían los otros tests con los nombres de usuario actualizados...
 });

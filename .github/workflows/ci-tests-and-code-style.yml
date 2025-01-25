@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     strategy:
       matrix:
@@ -17,6 +17,8 @@ jobs:
     env:
       AUTH_EMAIL: ${{ secrets.AUTH_EMAIL }}
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      MONGODB_URI: ${{ secrets.MONGODB_URI }}
       NODE_ENV: development
 
     steps:
@@ -30,23 +32,18 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      # 3. Install OpenSSL 1.1 (required for MongoDB Memory Server)
-      - name: Install OpenSSL 1.1
+      # 3. Install libssl1.1 to fix the MongoDB Memory Server issue
+      - name: Install libssl1.1
         run: |
           sudo apt-get update
           sudo apt-get install -y libssl1.1
 
-      # 4. Clean Node.js and Jest Cache
-      - name: Clean Node.js and Jest Cache
-        run: |
-          npm cache clean --force
-          npx jest --clearCache
-
-      # 5. Install dependencies (fresh install)
+      # 4. Install dependencies (npm install instead of npm ci)
       - name: Install Dependencies
-        run: npm ci
+        run: |
+          npm install
 
-      # 6. Build the application (if applicable)
+      # 5. Build the application (if applicable)
       - name: Build Application
         run: |
           if [ -f "package.json" ] && [ -f "webpack.config.js" ]; then
@@ -55,10 +52,10 @@ jobs:
             echo "No build step required. Skipping..."
           fi
 
-      # 7. Run Jest tests
+      # 6. Run Jest tests
       - name: Run Tests
         run: npm test
 
-      # 8. Run code style checks
+      # 7. Run code style checks
       - name: Run Code Style Checks
         run: npm run code-style-check
