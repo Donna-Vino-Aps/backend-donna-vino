@@ -30,15 +30,12 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      # 3. Clean System Cache and MongoDB Binaries
+      # 3. Clean System and MongoDB Binary Cache
       - name: Clean System Cache and MongoDB Binaries
         run: |
           rm -rf /home/runner/.cache/mongodb-binaries || true
           sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://archive.ubuntu.com/ubuntu/pool/main/o/openssl1.1/openssl1.1_1.1.1f-1ubuntu2.10_amd64.deb
-          sudo dpkg -i openssl1.1_1.1.1f-1ubuntu2.10_amd64.deb
-          sudo apt-get install -y libssl-dev
+          sudo apt-get install -y libssl3 || echo "Libssl3 could not be installed."
 
       # 4. Clean Node.js and Jest Cache
       - name: Clean Node.js and Jest Cache
