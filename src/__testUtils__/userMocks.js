@@ -1,4 +1,4 @@
-// import User, { validateUser } from "../models/userModels";
+import User, { validateUser } from "../models/userModels";
 
 export const addUserToMockDB = async (newUser) => {
   const validationResult = validateUser(newUser);

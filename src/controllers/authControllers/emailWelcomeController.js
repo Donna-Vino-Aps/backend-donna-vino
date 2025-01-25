@@ -42,7 +42,7 @@ export const sendWelcomeEmail = async (user) => {
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: email,
-    subject: "Welcome to Zen Timer App",
+    subject: "Welcome to Donna Vinno Aps",
     html: welcomeEmailTemplate,
   };
 
