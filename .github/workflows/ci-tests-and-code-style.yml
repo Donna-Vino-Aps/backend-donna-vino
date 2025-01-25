@@ -18,6 +18,7 @@ jobs:
       AUTH_EMAIL: ${{ secrets.AUTH_EMAIL }}
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
       NODE_ENV: development
+      MONGO_LOGLEVEL: 1 # Enable MongoDB debugging logs
 
     steps:
       # 1. Checkout the code
@@ -35,7 +36,7 @@ jobs:
         run: |
           rm -rf /home/runner/.cache/mongodb-binaries || true
           sudo apt-get update
-          sudo apt-get install -y libssl1.1 || echo "Libssl1.1 could not be installed."
+          sudo apt-get install -y libssl3 || echo "Libssl3 could not be installed."
 
       # 4. Clean Node.js and Jest Cache
       - name: Clean Node.js and Jest Cache
