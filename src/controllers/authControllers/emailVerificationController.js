@@ -24,7 +24,8 @@ export const sendVerificationEmail = async (user) => {
   const uniqueString = uuidv4() + _id; // Generate a unique string using uuid and user ID
 
   // Read the HTML template
-  logInfo("Current working directory:", process.cwd());
+  logInfo("Current working directory in CI:", process.cwd());
+  logInfo("Resolved template path in CI:", templatePath);
   const templatePath = resolvePath("templates/emailTemplate.html");
   let emailTemplate;
 
