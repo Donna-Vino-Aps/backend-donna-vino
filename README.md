@@ -1,9 +1,8 @@
-````markdown
----
 ## Donna Vino Backend Server
 
 This repository contains the backend server for the Donna Vino e-commerce platform.
 The server is built with **Node.js** and **Express** and includes features for authentication, database management, and more.
+
 ---
 
 ## Features
@@ -31,15 +30,12 @@ Ensure you have the following installed on your machine:
    ```bash
    git clone https://github.com/Donna-Vino-Aps/backend-donna-vino.git
    ```
-````
 
 2. Install dependencies:
 
    ```bash
    npm run setup
    ```
-
----
 
 ## Running the Server
 
@@ -135,7 +131,3 @@ These hooks are automatically enabled after running `npm install`.
 We welcome contributions! Please follow the established linting and formatting rules and ensure all tests pass before submitting a pull request.
 
 ---
-
-```
-
-```
