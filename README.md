@@ -33,8 +33,6 @@ Ensure you have the following installed on your machine:
    ```
 ````
 
-````
-
 2. Install dependencies:
 
    ```bash
@@ -137,4 +135,7 @@ These hooks are automatically enabled after running `npm install`.
 We welcome contributions! Please follow the established linting and formatting rules and ensure all tests pass before submitting a pull request.
 
 ---
-````
+
+```
+
+```
