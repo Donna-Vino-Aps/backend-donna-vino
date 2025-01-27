@@ -1,78 +1,122 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Email Verification</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        font-family: sans-serif;
         margin: 0;
         padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
       }
+
       .container {
-        background-color: #f9f7f3;
-        max-width: 600px;
-        margin: auto;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 600px;
+        margin: 0 auto;
+        background-color: #f4f4f4;
       }
-      h2 {
+
+      .header {
         text-align: center;
-        color: #333;
+        padding-bottom: 20px;
       }
-      p {
+
+      .header img {
+        max-width: 100%;
+        height: auto;
+        margin-bottom: 10px;
+      }
+
+      .header h1 {
+        font-size: 24px;
+        margin: 0;
+      }
+
+      .content p {
+        text-align: center;
         font-size: 16px;
-        color: #333;
+        line-height: 1.5;
+        margin-bottom: 10px;
       }
-      .button-container {
+
+      .cta {
         text-align: center;
-        margin: 20px 0;
+        margin: 50px;
       }
-      .button {
-        background-color: #4caf50;
-        color: white;
-        padding: 14px 25px;
-        text-align: center;
-        text-decoration: none;
+
+      .cta a {
         display: inline-block;
-        border-radius: 5px;
-        font-size: 16px;
-      }
-      .button a {
-        color: white;
+        padding: 10px 20px;
+        background-color: #b2151b;
+        color: #fff;
         text-decoration: none;
+        border-radius: 5px;
       }
+
       .footer {
-        font-size: 14px;
-        color: #666;
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+        padding: 20px;
+      }
+
+      .footer a {
+        color: #888;
+        text-decoration: none;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>Welcome to Donna Vino Aps!</h2>
-      <p>
-        Verify your email address to complete the signup and log into your
-        account.
-      </p>
-      <p>This link <b>expires in 6 hours</b>.</p>
-      <div class="button-container">
-        <a href="{{VERIFY_URL}}" class="button" style="color: white !important"
-          >Verify Email</a
-        >
+      <div class="header">
+        <img
+          src="https://plus.unsplash.com/premium_photo-1682097091093-dd18b37764a5?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8d2luZXxlbnwwfHwwfHx8MA%3D%3D"
+          alt="Avatar"
+          style="width: 100%"
+        />
+        <h1>Welcome to Donna Vino Aps!</h1>
       </div>
-      <p class="footer">
-        If you did not sign up for this account, you can ignore this email.
-      </p>
-      <p class="footer">Thank you,<br />The Donna Vino Team</p>
+
+      <div class="content">
+        <p>
+          Verify your email address to complete the signup and log into your
+          account.
+        </p>
+        <p>This link expires in 6 hours.</p>
+      </div>
+
+      <div class="cta">
+        <a href="{{VERIFY_URL}}">Verify Email</a>
+      </div>
+      <div class="content">
+        <p>
+          If you did not sign up for this account, you can ignore this email.
+        </p>
+        <p>Thank you,<br />The Donna Vino Team</p>
+      </div>
+      <div class="footer">
+        <p>Want updates through more platforms?</p>
+        <div>
+          <img
+            src="/public/icons/facebook-line.svg"
+            alt="facebook"
+            style="width: 50px"
+          />
+          <img
+            src="/public/icons/instagram-original.svg"
+            alt="instagram"
+            style="width: 30px"
+          />
+          <img
+            src="/public/icons/linkedin-alt.svg"
+            alt="linkedin"
+            style="width: 50px"
+          />
+        </div>
+        <p>Wildersgade 23, 1408 København K</p>
+        <p>
+          <a href="#">Unsubscribe</a> | <a href="#">Privacy policy</a> |
+          <a href="#">Contact us</a>
+        </p>
+      </div>
     </div>
   </body>
 </html>
