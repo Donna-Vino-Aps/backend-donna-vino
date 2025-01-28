@@ -23,6 +23,7 @@
         border-radius: 8px;
         border: 1px solid #ddd;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
       }
       h2 {
         text-align: center;
@@ -37,7 +38,7 @@
         margin: 20px 0;
       }
       .button {
-        background-color: #4caf50;
+        background-color: #ED1C24;
         color: white;
         padding: 14px 25px;
         text-align: center;
@@ -50,29 +51,72 @@
         color: white;
         text-decoration: none;
       }
-      .footer {
+      
+      .info {
         font-size: 14px;
         color: #666;
       }
+      img {
+        width: 85px;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+        padding: 20px;
+      }
+
+      .footer a {
+        color: #888;
+        text-decoration: none;
+      }
+
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>Welcome to Donna Vino App!</h2>
+      <h2>Welcome to Donna Vino Aps!</h2>
       <p>
         Verify your email address to complete the signup and log into your
         account.
       </p>
-      <p>This link <b>expires in 6 hours</b>.</p>
+      <p>Click the link below to verify. The link <b>expires in 6 hours</b>.</p>
       <div class="button-container">
         <a href="{{VERIFY_URL}}" class="button" style="color: white !important"
           >Verify Email</a
         >
       </div>
-      <p class="footer">
-        If you did not sign up for this account, you can ignore this email.
+      <p class="info">
+        (If you did not sign up for this account, you can ignore this email.)
       </p>
-      <p class="footer">Thank you,<br />The Zen Timer App Team</p>
+      <p class="info">Thank you,<br />The Donna Vino Team</p>
+      <img src="../public/img/donna-vino-logo-transparent.png">
+      <div class="footer">
+        <p>Want updates through more platforms?</p>
+        <div>
+          <img
+            src="/public/icons/facebook-line.svg"
+            alt="facebook"
+            style="width: 50px"
+          />
+          <img
+            src="/public/icons/instagram-original.svg"
+            alt="instagram"
+            style="width: 30px"
+          />
+          <img
+            src="/public/icons/linkedin-alt.svg"
+            alt="linkedin"
+            style="width: 50px"
+          />
+        </div>
+        <p>Wildersgade 23, 1408 København K</p>
+        <p>
+          <a href="#">Unsubscribe</a> | <a href="#">Privacy policy</a> |
+          <a href="#">Contact us</a>
+        </p>
+      </div>
     </div>
   </body>
 </html>
