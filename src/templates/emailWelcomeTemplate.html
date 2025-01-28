@@ -1,54 +1,46 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="http://fonts.googleapis.com/css?family=Roboto"
+      rel="stylesheet"
+      type="text/css"
+    />
+
+    <title>Donna Vino Aps</title>
     <style>
       body {
-        font-family: sans-serif;
-        margin: 0;
-        padding: 0;
-      }
-
-      .container {
-        width: 600px;
-        margin: 0 auto;
+        font-family: "Roboto", sans-serif;
         background-color: #f4f4f4;
       }
 
-      .header {
+      .container {
         text-align: center;
-        padding-bottom: 20px;
+        max-width: 100%;
+      }
+
+      .header {
+        padding-top: 40px;
+        text-align: center;
       }
 
       .header img {
-        max-width: 100%;
-        height: auto;
+        max-width: 20%;
+        height: 60px;
         margin-bottom: 10px;
       }
 
-      .header h1 {
-        font-size: 24px;
-        margin: 0;
+      .header video {
+        max-width: 50%;
       }
 
       .content p {
         text-align: center;
         font-size: 16px;
         line-height: 1.5;
-        margin-bottom: 10px;
-      }
-
-      .cta {
-        text-align: center;
-        margin: 50px;
-      }
-
-      .cta a {
-        display: inline-block;
-        padding: 10px 20px;
-        background-color: #b2151b;
-        color: #fff;
-        text-decoration: none;
-        border-radius: 5px;
+        padding: 20px;
       }
 
       .footer {
@@ -58,9 +50,34 @@
         padding: 20px;
       }
 
-      .footer a {
-        color: #888;
+      .footer img {
+        filter: brightness(40%);
+        margin: 10px;
+        width: 20px;
+      }
+
+      .button a {
+        background-color: #183127;
+        border-radius: 6px;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
         text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+
+      .wine-glasses {
+        max-width: 24px;
+        padding-left: 10px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 0px;
+        }
       }
     </style>
   </head>
@@ -68,49 +85,37 @@
     <div class="container">
       <div class="header">
         <img
-          src="https://plus.unsplash.com/premium_photo-1682097091093-dd18b37764a5?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8d2luZXxlbnwwfHwwfHx8MA%3D%3D"
+          src="/src/public/images/donna-vino-logo-transparent.png"
           alt="Avatar"
-          style="width: 100%"
         />
-        <h1>Welcome to Donna Vino Aps!</h1>
+
+        <h2>Welcome to our family!</h2>
       </div>
 
       <div class="content">
         <p>
-          Verify your email address to complete the signup and log into your
-          account.
+          Get ready to embark on a thrilling journey of discovery as you explore
+          a world of exquisite wines. We're excited to have you join our
+          community.
         </p>
-        <p>This link expires in 6 hours.</p>
       </div>
 
-      <div class="cta">
-        <a href="{{VERIFY_URL}}">Verify Email</a>
+      <div class="button">
+        <a href="{{VERIFY_URL}}">Go to website</a>
       </div>
+
       <div class="content">
-        <p>
-          If you did not sign up for this account, you can ignore this email.
-        </p>
+        <spam>Let's raise a glass to new beginnings!</spam>
+        <img class="wine-glasses" src="/src/public/icons/wine-glasses.png" />
+
         <p>Thank you,<br />The Donna Vino Team</p>
       </div>
+
       <div class="footer">
         <p>Want updates through more platforms?</p>
-        <div>
-          <img
-            src="/public/icons/facebook-line.svg"
-            alt="facebook"
-            style="width: 50px"
-          />
-          <img
-            src="/public/icons/instagram-original.svg"
-            alt="instagram"
-            style="width: 30px"
-          />
-          <img
-            src="/public/icons/linkedin-alt.svg"
-            alt="linkedin"
-            style="width: 50px"
-          />
-        </div>
+        <img src="/src/public/icons/facebook-line.svg" alt="facebook" />
+        <img src="/src/public/icons/instagram-original.svg" alt="instagram" />
+        <img src="/src/public/icons/linkedin-alt.svg" alt="linkedin" />
         <p>Wildersgade 23, 1408 København K</p>
         <p>
           <a href="#">Unsubscribe</a> | <a href="#">Privacy policy</a> |
