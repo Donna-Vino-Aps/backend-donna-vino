@@ -23,6 +23,7 @@
         border-radius: 8px;
         border: 1px solid #ddd;
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
       }
       h2 {
         text-align: center;
@@ -37,7 +38,7 @@
         margin: 20px 0;
       }
       .button {
-        background-color: #4caf50;
+        background-color: #183f27;
         color: white;
         padding: 14px 25px;
         text-align: center;
@@ -50,29 +51,139 @@
         color: white;
         text-decoration: none;
       }
+
+      .info {
+        font-size: 13px;
+        color: #666;
+        font-style: italic;
+      }
+
       .footer {
         font-size: 14px;
-        color: #666;
+        color: #444444;
+      }
+
+      img {
+        width: 85px;
+        position: relative;
+        bottom: 3px;
+      }
+
+      @media (max-width: 768px) {
+        h2 {
+          font-size: 22px;
+        }
+
+        p {
+          font-size: 13px;
+        }
+
+        .button {
+          font-size: 14px;
+        }
+
+        .info {
+          font-size: 12px;
+        }
+
+        .footer {
+          font-size: 13px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        h2 {
+          font-size: 20px;
+        }
+
+        p {
+          font-size: 11px;
+        }
+
+        .button-container {
+          margin: 15px 0;
+        }
+
+        .button {
+          font-size: 12px;
+        }
+
+        .info {
+          font-size: 11px;
+        }
+
+        .footer {
+          font-size: 12px;
+        }
+
+        .logo {
+          margin: 5px 0;
+        }
+      }
+
+      @media (max-width: 456px) {
+        h2 {
+          font-size: 18px;
+        }
+
+        p {
+          font-size: 10px;
+        }
+
+        .info {
+          font-size: 10px;
+        }
+
+        .button-container {
+          margin: 10px 0;
+        }
+
+        .button {
+          font-size: 11px;
+        }
+
+        .footer {
+          font-size: 11px;
+        }
+      }
+
+      @media (max-width: 382px) {
+        p {
+          font-size: 8px;
+        }
+
+        .button {
+          font-size: 9px;
+        }
+
+        .info {
+          font-size: 8px;
+        }
+
+        .footer {
+          font-size: 10px;
+        }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <h2>Welcome to Donna Vino App!</h2>
+      <h2>You Are Almost There!</h2>
       <p>
         Verify your email address to complete the signup and log into your
         account.
       </p>
-      <p>This link <b>expires in 6 hours</b>.</p>
+      <p>The link <b>expires in 6 hours</b>.</p>
       <div class="button-container">
         <a href="{{VERIFY_URL}}" class="button" style="color: white !important"
           >Verify Email</a
         >
       </div>
-      <p class="footer">
-        If you did not sign up for this account, you can ignore this email.
+      <p class="info">
+        (If you did not sign up for this account, you can ignore this email)
       </p>
-      <p class="footer">Thank you,<br />The Zen Timer App Team</p>
+      <p class="footer">Thank you,<br />The Donna Vino Team</p>
+      <img class="logo" src="../public/img/donna-vino-logo-transparent.png" />
     </div>
   </body>
 </html>
