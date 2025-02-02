@@ -16,7 +16,7 @@ const resolvePath = (relativePath) => {
 
 // Setting server URL based o the environment
 const development = "http://localhost:3000";
-const production = "https://donna-vino-deploy-in-heroku.com"; // update this!
+const production = "https://backend-donna-vino-c5c2e1c03c18.herokuapp.com";
 const currentUrl =
   process.env.NODE_ENV === "production" ? production : development;
 
@@ -26,7 +26,7 @@ export const sendVerificationEmail = async (user) => {
   const uniqueString = uuidv4() + _id; // Generate a unique string using uuid and user ID
 
   // Read the HTML template
-  const templatePath = resolvePath("templates/emailTemplate.html");
+  const templatePath = resolvePath("../../templates/verifyEmailTemplate.html");
   let emailTemplate;
 
   try {
