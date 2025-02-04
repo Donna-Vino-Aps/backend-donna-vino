@@ -39,7 +39,7 @@ describe("signupController", () => {
       name: "John Doe",
       email: "john.doe@example.com",
       password: "Password1234!",
-      dateOfBirth: "Tue Feb 01 1990",
+      dateOfBirth: "1990-02-01",
     };
 
     sendVerificationEmail.mockResolvedValue(true); // Simulate successful email sending
@@ -59,7 +59,7 @@ describe("signupController", () => {
       name: "John Doe",
       email: "john.doe@example.com",
       password: "Password1234!",
-      dateOfBirth: "Tue Feb 01 1990",
+      dateOfBirth: "1990-02-01",
     };
 
     sendVerificationEmail.mockResolvedValue(false); // Simulate email sending failure
@@ -82,7 +82,7 @@ describe("signupController", () => {
     expect(response.status).toBe(400);
     expect(response.body.success).toBe(false);
     expect(response.body.msg).toBe(
-      "BAD REQUEST: Email is not in a valid format, Password must be at least 8 characters long, Password must contain at least one uppercase letter, Password must contain at least one special character., Date Of Birth is a required field with valid format (e.g., 'Tue Feb 01 2022').",
+      "BAD REQUEST: Email is not in a valid format, Password must be at least 8 characters long, Password must contain at least one uppercase letter, Password must contain at least one special character., Date Of Birth is a required field with valid format (YYYY-MM-DD, e.g., '2024-02-04').",
     );
   });
 
@@ -113,7 +113,7 @@ describe("signupController", () => {
       name: "John!",
       email: "john.doe@example.com",
       password: "Password1234!",
-      dateOfBirth: "Tue Feb 01 1990",
+      dateOfBirth: "1990-02-01",
     };
 
     const response = await request.post("/api/auth/sign-up/").send({ user });
