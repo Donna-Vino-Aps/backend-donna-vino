@@ -6,7 +6,7 @@ describe("validateUser function", () => {
       name: "Jane Doe",
       email: "janedoe@example.com",
       password: "Password123!",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "2024-02-04",
     };
 
     const errors = validateUser(user);
@@ -38,7 +38,7 @@ describe("validateUser function", () => {
       name: null,
       email: "janedoe@example.com",
       password: "Password123!",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "1990-02-01",
     };
     const errors = validateUser(user);
 
@@ -51,7 +51,7 @@ describe("validateUser function", () => {
       name: "",
       email: "janedoe@example.com",
       password: "Password123!",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "1990-02-01",
     };
     const errors = validateUser(user);
 
@@ -65,25 +65,25 @@ describe("validateUser function", () => {
         name: " Jane Smith",
         email: "janedoe@example.com",
         password: "Password123!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
       {
         name: "Jane Smith ",
         email: "janedoe@example.com",
         password: "Password123!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
       {
         name: "Jane!",
         email: "janedoe@example.com",
         password: "Password123!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
       {
         name: "Jane@",
         email: "janedoe@example.com",
         password: "Password123!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
     ];
 
@@ -101,7 +101,7 @@ describe("validateUser function", () => {
       name: "John Doe",
       email: null,
       password: "Password123!",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "1990-02-01",
     };
     const errors = validateUser(user);
 
@@ -119,7 +119,7 @@ describe("validateUser function", () => {
       name: "John Doe",
       email: "",
       password: "Password123!",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "1990-02-01",
     };
     const errors = validateUser(user);
 
@@ -146,7 +146,7 @@ describe("validateUser function", () => {
         ...user,
         name: "Jane Doe",
         password: "Password123!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       });
       expect(errors).toHaveLength(1);
       expect(errors).toContainEqual("Email is not in a valid format");
@@ -184,7 +184,7 @@ describe("validateUser function", () => {
         ...user,
         name: "Jane Doe",
         email: "janedoe@example.com",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       });
 
       expect(errors).toEqual(expect.arrayContaining(expectedErrors));
@@ -197,7 +197,7 @@ describe("validateUser function", () => {
       name: "Jane Doe",
       email: "janedoe@example.com",
       password: "12345678!",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "1990-02-01",
     };
     const errors = validateUser(user);
 
@@ -212,7 +212,7 @@ describe("validateUser function", () => {
       name: "Jane Doe",
       email: "janedoe@example.com",
       password: "A12345678",
-      dateOfBirth: "Tue Feb 01 2022",
+      dateOfBirth: "1990-02-01",
     };
     const errors = validateUser(user);
 
@@ -235,7 +235,7 @@ describe("validateUser function", () => {
       expect(errors).toEqual(
         expect.arrayContaining([
           "Date Of Birth is a required field.",
-          "Date Of Birth is a required field with valid format (e.g., 'Tue Feb 01 2022').",
+          "Date Of Birth is a required field with valid format (YYYY-MM-DD, e.g., '2024-02-04').",
         ]),
       );
     });

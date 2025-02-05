@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import validateAllowedFields from "../util/validateAllowedFields.js";
+import { logInfo } from "../util/logging.js";
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },

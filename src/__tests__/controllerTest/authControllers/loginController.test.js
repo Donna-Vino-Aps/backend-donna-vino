@@ -28,7 +28,7 @@ describe("loginController", () => {
       name: "John Doe",
       email: "johndoe@example.com",
       password: "Password123!",
-      dateOfBirth: "Tue Feb 01 1990",
+      dateOfBirth: "1990-02-01",
     };
 
     await request.post("/api/auth/sign-up").send({ user: testUser });
