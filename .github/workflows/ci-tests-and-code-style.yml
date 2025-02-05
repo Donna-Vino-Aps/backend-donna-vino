@@ -19,6 +19,9 @@ jobs:
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      MAIL_HOST: ${{ secrets.MAIL_HOST}}
+      MAIL_PORT: ${{secrets.MAIL_PORT}}
+      MAIL_SECURE: ${{secrets.MAIL_SECURE}}
       NODE_ENV: development
 
     steps:
