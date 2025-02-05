@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 import validateAllowedFields from "../util/validateAllowedFields.js";
+import { logInfo } from "../util/logging.js";
 
 const userSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -42,7 +43,7 @@ export const validateUser = (
 
   if ((requireEmail && userObject.email === null) || userObject.email === "") {
     errorList.push("Email is a required field");
-    // logInfo("User create Validation failed: Email is required field.");
+    logInfo("User create Validation failed: Email is required field.");
   }
 
   if (
@@ -81,13 +82,11 @@ export const validateUser = (
     errorList.push("Date Of Birth is a required field.");
   }
 
-  const isValidDateOfBirth = /^[A-Z][a-z]{2} [A-Z][a-z]{2} \d{2} \d{4}$/.test(
-    userObject.dateOfBirth,
-  );
+  const isValidDateOfBirth = /^\d{4}-\d{2}-\d{2}$/.test(userObject.dateOfBirth);
 
   if (requireDateOfBirth && (!userObject.dateOfBirth || !isValidDateOfBirth)) {
     errorList.push(
-      "Date Of Birth is a required field with valid format (e.g., 'Tue Feb 01 2022').",
+      "Date Of Birth is a required field with valid format (YYYY-MM-DD, e.g., '2024-02-04').",
     );
   }
 
