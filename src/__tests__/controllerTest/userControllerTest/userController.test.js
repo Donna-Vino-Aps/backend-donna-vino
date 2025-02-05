@@ -33,13 +33,13 @@ describe("getUsers Controller", () => {
         name: "User 1",
         email: "user1@example.com",
         password: "Password1!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
       {
         name: "User 2",
         email: "user2@example.com",
         password: "Password2!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
     ];
 
@@ -90,13 +90,13 @@ describe("getUsers Controller", () => {
         name: "User 1",
         email: "user1@example.com",
         password: "Password1!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
       {
         name: "User 2",
         email: "user2@example.com",
         password: "Password2!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
     ];
 
@@ -143,13 +143,13 @@ describe("getUsers Controller", () => {
         name: "User 1",
         email: "user1@example.com",
         password: "Password1!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
       {
         name: "User 2",
         email: "user2@example.com",
         password: "Password2!",
-        dateOfBirth: "Tue Feb 01 2022",
+        dateOfBirth: "1990-02-01",
       },
     ];
 

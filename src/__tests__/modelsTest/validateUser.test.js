@@ -232,6 +232,7 @@ describe("validateUser function", () => {
         email: "janedoe@example.com",
         password: "Password123!",
       });
+
       expect(errors).toEqual(
         expect.arrayContaining([
           "Date Of Birth is a required field.",
