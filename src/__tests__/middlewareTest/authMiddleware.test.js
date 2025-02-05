@@ -32,7 +32,7 @@ describe("requireAuth Middleware Tests", () => {
       name: "Test User",
       email: "testuser@example.com",
       password: "Test1234!",
-      dateOfBirth: "Tue Feb 01 1990",
+      dateOfBirth: "1990-02-01",
     };
 
     // User sign-up
