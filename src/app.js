@@ -16,7 +16,10 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-const allowedOrigins = ["http://localhost:3000"];
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://donna-vino-ecommerce-45b8fd279992.herokuapp.com",
+];
 
 // CORS configuration
 app.use(
