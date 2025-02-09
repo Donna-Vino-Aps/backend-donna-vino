@@ -7,11 +7,15 @@ import {
   closeMockDatabase,
   clearMockDatabase,
 } from "../../../__testUtils__/dbMock.js";
-
+import { addMockReviewsToDB } from "../../../__testUtils__/reviewMock.js";
 const request = supertest(app);
 
 beforeAll(async () => {
   await connectToMockDB();
+});
+
+beforeEach(async () => {
+  await addMockReviewsToDB();
 });
 
 afterEach(async () => {
@@ -20,6 +24,21 @@ afterEach(async () => {
 
 afterAll(async () => {
   await closeMockDatabase();
+});
+
+describe("GET /api/reviews", () => {
+  it("should return a list of reviews", async () => {
+    const response = await request.get("/api/reviews");
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(Array.isArray(response.body.reviews)).toBe(true);
+    expect(response.body.reviews.length).toBeGreaterThan(0);
+    expect(response.body.reviews[0]).toHaveProperty("userId");
+    expect(response.body.reviews[0]).toHaveProperty("rating");
+    expect(response.body.reviews[0]).toHaveProperty("reviewText");
+    expect(response.body.reviews[0]).toHaveProperty("createdAt");
+  });
 });
 
 describe("POST /api/reviews", () => {
