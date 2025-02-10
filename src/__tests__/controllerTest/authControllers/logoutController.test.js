@@ -71,7 +71,7 @@ describe("logoutController", () => {
 
     expect(logoutResponse.status).toBe(200);
     expect(logoutResponse.body.success).toBe(true);
-    expect(logoutResponse.body.message).toBe("User succesfully logged out");
+    expect(logoutResponse.body.message).toBe("User successfully logged out");
 
     // Verify that the session cookies have been cleared by checking they contain an expired date
     const cookies = logoutResponse.headers["set-cookie"];
@@ -94,7 +94,7 @@ describe("logoutController", () => {
 
     expect(logoutResponse.status).toBe(200);
     expect(logoutResponse.body.success).toBe(true);
-    expect(logoutResponse.body.message).toBe("User succesfully logged out");
+    expect(logoutResponse.body.message).toBe("User successfully logged out");
   });
 
   test("Should return unauthorized error if no session cookie or token is provided", async () => {
