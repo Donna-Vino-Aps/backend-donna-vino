@@ -6,7 +6,7 @@ import {
 
 const reviewRouter = express.Router();
 
-reviewRouter.get("/reviews", getReviews);
-reviewRouter.post("/reviews", submitReview);
+reviewRouter.get("/", getReviews);
+reviewRouter.post("/", submitReview);
 
 export default reviewRouter;

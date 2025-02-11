@@ -45,6 +45,6 @@ app.use(
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", requireAuth, userRouter);
-app.use("/api", reviewRouter);
+app.use("/api/reviews", reviewRouter);
 
 export default app;
