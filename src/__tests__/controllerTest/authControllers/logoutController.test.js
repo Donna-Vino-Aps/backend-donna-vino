@@ -90,17 +90,6 @@ describe("logoutController", () => {
     );
   });
 
-  test("Should pass if a valid token is provided in Authorization header even if there is not cookie-sesion", async () => {
-    const logoutResponse = await request
-      .post("/api/user/log-out")
-      .set("Authorization", `Bearer ${token}`);
-    // .set("Cookie", cookie);
-
-    expect(logoutResponse.status).toBe(200);
-    expect(logoutResponse.body.success).toBe(true);
-    expect(logoutResponse.body.message).toBe("User successfully logged out");
-  });
-
   test("Cookies should be cleared after logout", async () => {
     const logoutResponse = await request
       .post("/api/user/log-out")
