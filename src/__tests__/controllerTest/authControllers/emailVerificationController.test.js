@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
+
 import transporter from "../../../config/emailConfig.js";
 import UserVerification from "../../../models/userVerification.js";
 import User from "../../../models/userModels.js";
@@ -13,7 +14,6 @@ import {
 } from "../../../controllers/authControllers/emailVerificationController.js";
 import { logError, logInfo } from "../../../util/logging.js";
 
-// Mock dependencies
 jest.mock("bcrypt", () => ({
   hash: jest.fn(),
   compare: jest.fn(),
@@ -56,6 +56,7 @@ describe("Auth Controller Unit Tests", () => {
       expect(resolvePath(relativePath)).toBe(expectedPath);
     });
 
+    const __dirname = path.resolve();
     it("should resolve path correctly in local environment", () => {
       delete process.env.GITHUB_ACTIONS;
       const relativePath = "../templates/verifyEmailTemplate.html";
