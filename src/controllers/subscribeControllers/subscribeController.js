@@ -63,12 +63,15 @@ const subscribeUser = (req, res) => {
   transporter.sendMail(mailOptions, (error) => {
     if (error) {
       console.error("Error sending email:", error);
-      return res
-        .status(500)
-        .json({ error: "Failed to send confirmation email" });
+      return res.status(500).json({
+        success: false,
+        message: "Failed to send confirmation email",
+        error: error.message || "Failed to send confirmation email",
+      });
     }
 
     res.status(200).json({
+      success: true,
       message: "Subscription successful! Check your email for confirmation.",
     });
   });
