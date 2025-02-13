@@ -2,22 +2,13 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.MAIL_HOST,
-  port: process.env.MAIL_PORT,
-  secure: process.env.MAIL_SECURE === "true",
-  auth: {
-    user: process.env.AUTH_EMAIL,
-    pass: process.env.AUTH_PASSWORD,
-  },
-});
-
 const resolvePath = (relativePath) => {
-  const basePath = new URL(".", import.meta.url).pathname;
-  return path.resolve(basePath, relativePath);
+  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  return path.resolve(__dirname, relativePath);
 };
 
 const subscribeUser = (req, res) => {
@@ -52,6 +43,16 @@ const subscribeUser = (req, res) => {
 
   welcomeEmailTemplate = welcomeEmailTemplate.replace("{{EMAIL}}", email);
 
+  const transporter = nodemailer.createTransport({
+    host: process.env.MAIL_HOST,
+    port: process.env.MAIL_PORT,
+    secure: process.env.MAIL_SECURE === "true",
+    auth: {
+      user: process.env.AUTH_EMAIL,
+      pass: process.env.AUTH_PASSWORD,
+    },
+  });
+
   const mailOptions = {
     from: process.env.AUTH_EMAIL,
     to: email,
@@ -59,7 +60,7 @@ const subscribeUser = (req, res) => {
     html: welcomeEmailTemplate,
   };
 
-  transporter.sendMail(mailOptions, (error, info) => {
+  transporter.sendMail(mailOptions, (error) => {
     if (error) {
       console.error("Error sending email:", error);
       return res
