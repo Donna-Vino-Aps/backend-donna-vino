@@ -31,7 +31,6 @@ describe("subscribeUser", () => {
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("<html>Welcome {{EMAIL}}</html>");
 
-
     path.resolve.mockImplementation((...args) => args.join("/"));
     path.dirname.mockReturnValue("/mock/dir");
   });
