@@ -98,7 +98,6 @@ describe("logoutController", () => {
   });
 
   test("Should return unauthorized error if no session cookie or token is provided", async () => {
-
     const logoutResponse = await request.post("/api/user/log-out");
 
     expect(logoutResponse.status).toBe(401);

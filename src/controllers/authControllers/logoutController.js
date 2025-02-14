@@ -21,9 +21,7 @@ export const logout = (req, res) => {
 
     logInfo("User successfully logged out");
 
-    return res.status(200)
-    .header("Authorization","")
-    .json({
+    return res.status(200).header("Authorization", "").json({
       success: true,
       message: "User successfully logged out",
     });

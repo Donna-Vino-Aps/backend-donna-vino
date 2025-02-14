@@ -7,7 +7,10 @@ export const requireAuth = (req, res, next) => {
   let token;
 
   // If neither a session cookie nor an authorization header is provided, return 401
-  if ((!session || session.trim() === "") && (!authHeader || authHeader.trim() === ""))  {
+  if (
+    (!session || session.trim() === "") &&
+    (!authHeader || authHeader.trim() === "")
+  ) {
     logError("No session cookie found.");
     return res.status(401).send({
       success: false,
@@ -15,12 +18,14 @@ export const requireAuth = (req, res, next) => {
     });
   }
 
-    // Use the session cookie if available; otherwise, extract the token from the Authorization header
-    if (session && session.trim() !== "") {
+  // Use the session cookie if available; otherwise, extract the token from the Authorization header
+  if (session && session.trim() !== "") {
     token = session;
     logInfo("Verifying token from session cookie.");
   } else if (authHeader && authHeader.trim() !== "") {
-    token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
+    token = authHeader.startsWith("Bearer ")
+      ? authHeader.split(" ")[1]
+      : authHeader;
     logInfo("Verifying token from Authorization header.");
   }
 
