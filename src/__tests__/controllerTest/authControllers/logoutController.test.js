@@ -38,7 +38,6 @@ afterAll(async () => {
 describe("logoutController", () => {
   let testUser;
   let cookie;
-  let token;
 
   // Before each test, create a test user, sign them up, and log them in to get the cookie and token
   beforeEach(async () => {
@@ -61,7 +60,6 @@ describe("logoutController", () => {
       .send({ user: { email: testUser.email, password: testUser.password } });
 
     cookie = loginResponse.headers["set-cookie"];
-    token = loginResponse.body.token;
   });
 
   test("Should successfully log out and clear session cookies", async () => {
