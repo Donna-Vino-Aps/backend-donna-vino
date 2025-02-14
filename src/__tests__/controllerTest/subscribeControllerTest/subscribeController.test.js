@@ -102,6 +102,7 @@ describe("subscribeUser", () => {
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
+      success: true,
       message: "Subscription successful! Check your email for confirmation.",
     });
   });
@@ -118,7 +119,9 @@ describe("subscribeUser", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
-      error: "Failed to send confirmation email",
+      success: false,
+      message: "Failed to send confirmation email",
+      error: "Failed to send email",
     });
   });
 });
