@@ -1,4 +1,5 @@
 import supertest from "supertest";
+import express from "express";
 import {
   connectToMockDB,
   closeMockDatabase,
@@ -9,6 +10,7 @@ import { sendVerificationEmail } from "../../../controllers/authControllers/emai
 
 const request = supertest(app);
 
+// Mock the email verification controller to avoid side effects during tests
 jest.mock(
   "../../../controllers/authControllers/emailVerificationController.js",
   () => ({
@@ -18,14 +20,17 @@ jest.mock(
   }),
 );
 
+// Connect to the mock database before all tests
 beforeAll(async () => {
   await connectToMockDB();
 });
 
+// Clear the mock database after each test to ensure test isolation
 afterEach(async () => {
   await clearMockDatabase();
 });
 
+// Close the mock database connection after all tests
 afterAll(async () => {
   await closeMockDatabase();
 });
@@ -34,6 +39,7 @@ describe("logoutController", () => {
   let testUser;
   let cookie;
 
+  // Before each test, create a test user, sign them up, and log them in to get the cookie
   beforeEach(async () => {
     testUser = {
       name: "Test User",
@@ -42,20 +48,20 @@ describe("logoutController", () => {
       dateOfBirth: "1990-02-01",
     };
 
+    // Mock the sendVerificationEmail function to always resolve to true
     sendVerificationEmail.mockResolvedValue(true);
 
     // User sign-up
     await request.post("/api/auth/sign-up").send({ user: testUser });
 
-    // User login, getting cookie and token
+    // User log-in to obtain the session cookie and token
     const loginResponse = await request
       .post("/api/auth/log-in")
       .send({ user: { email: testUser.email, password: testUser.password } });
-
     cookie = loginResponse.headers["set-cookie"];
   });
 
-  test("Should pass if the session cookie is cleared after logout", async () => {
+  test("Should successfully log out and clear session cookies", async () => {
     const logoutResponse = await request
       .post("/api/user/log-out")
       .set("Cookie", cookie);
@@ -64,7 +70,7 @@ describe("logoutController", () => {
     expect(logoutResponse.body.success).toBe(true);
     expect(logoutResponse.body.message).toBe("User successfully logged out");
 
-    // Check that the session cookie is cleared correctly
+    // Verify that the session cookies have been cleared by checking they contain an expired date
     const cookies = logoutResponse.headers["set-cookie"];
     expect(cookies).toEqual(
       expect.arrayContaining([
@@ -78,36 +84,23 @@ describe("logoutController", () => {
     );
   });
 
-  test("Should fail if no valid session cookie is provided", async () => {
-    const logoutResponse = await request.post("/api/user/log-out");
+  test("Should pass if a valid token is provided in the Authorization header even if no session cookie is provided", async () => {
+    // Retrieve the token locally
+    const loginResponseForToken = await request
+      .post("/api/auth/log-in")
+      .send({ user: { email: testUser.email, password: testUser.password } });
+    const token = loginResponseForToken.body.token;
 
-    expect(logoutResponse.status).toBe(401); // 401 Unauthorized
-    expect(logoutResponse.body.success).toBe(false);
-    expect(logoutResponse.body.msg).toBe(
-      "BAD REQUEST: Authentication required.",
-    );
-  });
-
-  test("Cookies should be cleared after logout", async () => {
     const logoutResponse = await request
       .post("/api/user/log-out")
-      .set("Cookie", cookie);
+      .set("Authorization", `Bearer ${token}`);
 
-    const cookies = logoutResponse.headers["set-cookie"];
-
-    expect(cookies).toEqual(
-      expect.arrayContaining([
-        expect.stringContaining(
-          "session=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
-        ),
-        expect.stringContaining(
-          "zenTimerToken=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT",
-        ),
-      ]),
-    );
+    expect(logoutResponse.status).toBe(200);
+    expect(logoutResponse.body.success).toBe(true);
+    expect(logoutResponse.body.message).toBe("User successfully logged out");
   });
 
-  test("Should not allow logout without being logged in", async () => {
+  test("Should return unauthorized error if no session cookie or token is provided", async () => {
     const logoutResponse = await request.post("/api/user/log-out");
 
     expect(logoutResponse.status).toBe(401);
@@ -115,5 +108,28 @@ describe("logoutController", () => {
     expect(logoutResponse.body.msg).toBe(
       "BAD REQUEST: Authentication required.",
     );
+  });
+
+  test("Should simulate internal error during logout", async () => {
+    // Create a separate Express instance to simulate an internal error in the logout route
+    const errorApp = express();
+    errorApp.use(express.json());
+    errorApp.post("/api/user/log-out", (_req, _res) => {
+      // Simulate an error during the logout process
+      throw new Error("Simulated internal error");
+    });
+    // Error-handling middleware to format error responses in JSON
+    errorApp.use((err, _req, res, _next) => {
+      res.status(500).json({ success: false, message: err.message });
+    });
+
+    const errorRequest = supertest(errorApp);
+    const logoutErrorResponse = await errorRequest
+      .post("/api/user/log-out")
+      .set("Cookie", cookie);
+
+    expect(logoutErrorResponse.status).toBe(500);
+    expect(logoutErrorResponse.body.success).toBe(false);
+    expect(logoutErrorResponse.body.message).toBe("Simulated internal error");
   });
 });
