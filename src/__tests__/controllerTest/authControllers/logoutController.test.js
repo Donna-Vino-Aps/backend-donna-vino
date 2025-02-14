@@ -33,7 +33,6 @@ afterAll(async () => {
 describe("logoutController", () => {
   let testUser;
   let cookie;
-  let token;
 
   beforeEach(async () => {
     testUser = {
@@ -54,7 +53,6 @@ describe("logoutController", () => {
       .send({ user: { email: testUser.email, password: testUser.password } });
 
     cookie = loginResponse.headers["set-cookie"];
-    token = loginResponse.body.token;
   });
 
   test("Should pass if the session cookie is cleared after logout", async () => {
