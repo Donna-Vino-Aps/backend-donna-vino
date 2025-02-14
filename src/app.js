@@ -6,6 +6,7 @@ import { requireAuth } from "./middleware/authMiddleware.js";
 import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
+import subscribeRouter from "./routes/subscribeRoutes.js";
 
 dotenv.config();
 
@@ -46,5 +47,6 @@ app.use(
 app.use("/api/auth", authRouter);
 app.use("/api/user", requireAuth, userRouter);
 app.use("/api/reviews", reviewRouter);
+app.use("/api/subscribe", subscribeRouter);
 
 export default app;
