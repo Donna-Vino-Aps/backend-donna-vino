@@ -38,9 +38,8 @@ afterAll(async () => {
 describe("logoutController", () => {
   let testUser;
   let cookie;
-  let token;
 
-  // Before each test, create a test user, sign them up, and log them in to get the cookie and token
+  // Before each test, create a test user, sign them up, and log them in to get the cookie
   beforeEach(async () => {
     testUser = {
       name: "Test User",
@@ -59,9 +58,7 @@ describe("logoutController", () => {
     const loginResponse = await request
       .post("/api/auth/log-in")
       .send({ user: { email: testUser.email, password: testUser.password } });
-
     cookie = loginResponse.headers["set-cookie"];
-    token = loginResponse.body.token;
   });
 
   test("Should successfully log out and clear session cookies", async () => {
@@ -88,6 +85,12 @@ describe("logoutController", () => {
   });
 
   test("Should pass if a valid token is provided in the Authorization header even if no session cookie is provided", async () => {
+    // Retrieve the token locally
+    const loginResponseForToken = await request
+      .post("/api/auth/log-in")
+      .send({ user: { email: testUser.email, password: testUser.password } });
+    const token = loginResponseForToken.body.token;
+
     const logoutResponse = await request
       .post("/api/user/log-out")
       .set("Authorization", `Bearer ${token}`);
