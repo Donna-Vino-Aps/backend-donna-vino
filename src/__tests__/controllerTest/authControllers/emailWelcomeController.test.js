@@ -4,7 +4,6 @@ import fs from "fs";
 import { createTransporter } from "../../../config/emailConfig.js";
 import UserVerification from "../../../models/userVerification.js";
 import path from "path";
-import { logError, logInfo } from "../../../util/logging.js";
 
 jest.mock("fs");
 jest.mock("../../../util/logging.js", () => ({

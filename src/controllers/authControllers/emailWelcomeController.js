@@ -28,25 +28,25 @@ const createVerificationRecord = async (userId, uniqueString) => {
 
 export const sendWelcomeEmail = async (user) => {
   try {
-    console.log("Step 1: Extracting user data...");
+    logInfo("Step 1: Extracting user data...");
     const { _id, email } = user;
     const uniqueString = uuidv4() + _id;
 
-    console.log("Step 2: Reading email template...");
+    logInfo("Step 2: Reading email template...");
     const welcomeTemplatePath = resolvePath(
       "../../templates/emailWelcomeTemplate.html",
     );
     const welcomeEmailTemplate = readTemplate(welcomeTemplatePath);
 
-    console.log("Step 3: Hashing unique string...");
+    logInfo("Step 3: Hashing unique string...");
     const hashedUniqueString = await bcrypt.hash(uniqueString, 10);
 
-    console.log("Step 4: Saving verification record...");
+    logInfo("Step 4: Saving verification record...");
     await createVerificationRecord(_id, hashedUniqueString);
 
-    console.log("Step 5: Creating transporter...");
+    logInfo("Step 5: Creating transporter...");
     const transporter = createTransporter();
-    console.log(
+    logInfo(
       "Step 5b: Checking sendMail function exists?",
       !!transporter.sendMail,
     );
@@ -58,7 +58,7 @@ export const sendWelcomeEmail = async (user) => {
       html: welcomeEmailTemplate,
     });
 
-    console.log("Step 5d: Email sent response:", emailResponse);
+    logInfo("Step 5d: Email sent response:", emailResponse);
     return {
       status: "PENDING",
       message: "Welcome email sent",

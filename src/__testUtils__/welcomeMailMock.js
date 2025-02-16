@@ -1,9 +1,3 @@
-import fs from "fs";
-import bcrypt from "bcrypt";
-import { createTransporter } from "../../../config/emailConfig.js";
-import UserVerification from "../../../models/userVerification.js";
-import { logError, logInfo } from "../../../util/logging.js";
-
 jest.mock("fs", () => ({
   existsSync: jest.fn(),
   readFileSync: jest.fn(),
