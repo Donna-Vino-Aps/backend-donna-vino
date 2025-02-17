@@ -2,78 +2,70 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
-import transporter from "../../config/emailConfig.js";
+import { createTransporter } from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
-// import { logError, logInfo } from "../../util/logging.js";
+import { logError, logInfo } from "../../util/logging.js";
 
-const resolvePath = (relativePath) => {
-  return path.resolve(__dirname, relativePath);
+const resolvePath = (relativePath) => path.resolve(__dirname, relativePath);
+
+const readTemplate = (filePath) => {
+  if (!fs.existsSync(filePath)) {
+    throw new Error(`Template not found at: ${filePath}`);
+  }
+  return fs.readFileSync(filePath, "utf-8");
 };
 
-// Function to send a welcome email
+const createVerificationRecord = async (userId, uniqueString) => {
+  const hashedUniqueString = await bcrypt.hash(uniqueString, 10);
+  const newVerification = new UserVerification({
+    userId,
+    uniqueString: hashedUniqueString,
+    createdAt: Date.now(),
+    expiresAt: Date.now() + 21600000, // 6 hours
+  });
+  await newVerification.save();
+};
+
 export const sendWelcomeEmail = async (user) => {
-  const { _id, email } = user;
-  const uniqueString = uuidv4() + _id; // Generate a unique string using uuid and user ID
-
-  const welcomeTemplatePath = resolvePath(
-    "../../templates/emailWelcomeTemplate.html",
-  );
-
-  // Verify if the template file exists
-  if (!fs.existsSync(welcomeTemplatePath)) {
-    logError?.(`Welcome email template not found at: ${welcomeTemplatePath}`);
-    return {
-      status: "FAILED",
-      message: "Internal server error: Template not found",
-    };
-  }
-
-  let welcomeEmailTemplate;
   try {
-    welcomeEmailTemplate = fs.readFileSync(welcomeTemplatePath, "utf-8");
-  } catch (error) {
-    logError?.(`Error reading welcome email template: ${error.message}`);
-    return {
-      status: "FAILED",
-      message: "Internal server error",
-    };
-  }
+    logInfo("Step 1: Extracting user data...");
+    const { _id, email } = user;
+    const uniqueString = uuidv4() + _id;
 
-  const mailOptions = {
-    from: process.env.AUTH_EMAIL,
-    to: email,
-    subject: "Welcome to Donna Vinno Aps",
-    html: welcomeEmailTemplate,
-  };
+    logInfo("Step 2: Reading email template...");
+    const welcomeTemplatePath = resolvePath(
+      "../../templates/emailWelcomeTemplate.html",
+    );
+    const welcomeEmailTemplate = readTemplate(welcomeTemplatePath);
 
-  const saltRounds = 10;
-  try {
-    const hashedUniqueString = await bcrypt.hash(uniqueString, saltRounds);
-    const newVerification = new UserVerification({
-      userId: _id,
-      uniqueString: hashedUniqueString,
-      createdAt: Date.now(),
-      expiresAt: Date.now() + 21600000, // 6 hours
+    logInfo("Step 3: Hashing unique string...");
+    const hashedUniqueString = await bcrypt.hash(uniqueString, 10);
+
+    logInfo("Step 4: Saving verification record...");
+    await createVerificationRecord(_id, hashedUniqueString);
+
+    logInfo("Step 5: Creating transporter...");
+    const transporter = createTransporter();
+    logInfo(
+      "Step 5b: Checking sendMail function exists?",
+      !!transporter.sendMail,
+    );
+
+    const emailResponse = await transporter.sendMail({
+      from: process.env.AUTH_EMAIL,
+      to: email,
+      subject: "Welcome to Donna Vinno Aps",
+      html: welcomeEmailTemplate,
     });
 
-    await newVerification.save(); // Save the verification record
-
-    await transporter.sendMail(mailOptions);
-    logInfo?.("Welcome email sent successfully");
-
+    logInfo("Step 5d: Email sent response:", emailResponse);
     return {
       status: "PENDING",
       message: "Welcome email sent",
-      data: {
-        userId: _id,
-        email,
-      },
+      data: { userId: _id, email },
     };
   } catch (error) {
     logError?.(`Welcome email failed: ${error.message}`);
-    return {
-      status: "FAILED",
-      message: "Welcome email failed",
-    };
+    return { status: "FAILED", message: "Welcome email failed" };
   }
 };
