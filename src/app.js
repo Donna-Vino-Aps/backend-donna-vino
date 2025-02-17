@@ -7,6 +7,7 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import subscribeRouter from "./routes/subscribeRoutes.js";
+import emailRouter from "./routes/emailRoutes.js";
 
 dotenv.config();
 
@@ -48,5 +49,6 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", requireAuth, userRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/subscribe", subscribeRouter);
+app.use("/api/send-email", emailRouter);
 
 export default app;
