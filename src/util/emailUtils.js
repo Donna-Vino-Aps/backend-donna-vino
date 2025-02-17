@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 export const sendEmail = async (to, subject, html) => {
   try {
     const data = await resend.emails.send({
-      from: "info@donnavino.dk",
+      from: process.env.AUTH_EMAIL,
       to,
       subject,
       html,
