@@ -11,6 +11,12 @@ jest.mock("../../../util/logging.js", () => ({
   logInfo: jest.fn(),
 }));
 
+jest.mock("resend", () => ({
+  Resend: jest.fn().mockImplementation(() => ({
+    sendEmail: jest.fn().mockResolvedValue({}),
+  })),
+}));
+
 jest.mock("bcrypt", () => ({
   hash: jest.fn().mockResolvedValue("hashed-string"),
   compare: jest.fn().mockResolvedValue(true),
