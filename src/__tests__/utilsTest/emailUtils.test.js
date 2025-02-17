@@ -4,8 +4,14 @@ import { sendEmail } from "../../util/emailUtils";
 jest.mock("resend");
 
 describe("sendEmail", () => {
+  const mockFromEmail = "mock@example.com";
+  const mockApiKey = "test-api-key";
+
   beforeEach(() => {
     jest.clearAllMocks();
+
+    process.env.AUTH_EMAIL = mockFromEmail;
+    process.env.RESEND_API_KEY = mockApiKey;
   });
 
   it("should send an email successfully", async () => {
@@ -17,8 +23,9 @@ describe("sendEmail", () => {
     const html = "<p>Test HTML content</p>";
 
     const result = await sendEmail(to, subject, html);
+
     expect(mockSend).toHaveBeenCalledWith({
-      from: "info@donnavino.dk",
+      from: process.env.AUTH_EMAIL,
       to,
       subject,
       html,
@@ -36,8 +43,9 @@ describe("sendEmail", () => {
     const html = "<p>Test HTML content</p>";
 
     await expect(sendEmail(to, subject, html)).rejects.toThrow(mockError);
+
     expect(mockSend).toHaveBeenCalledWith({
-      from: "info@donnavino.dk",
+      from: process.env.AUTH_EMAIL,
       to,
       subject,
       html,
