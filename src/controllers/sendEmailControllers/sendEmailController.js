@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { sendEmail } from "../../util/emailUtils.js";
 
 const resolvePath = (relativePath) => {
-  const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  const __dirname = path.resolve();
   return path.resolve(__dirname, relativePath);
 };
 
