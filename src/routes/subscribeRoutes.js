@@ -1,5 +1,5 @@
 import express from "express";
-import { subscribeUser } from "../controllers/subscribeControllers/subscribeController.js";
+import { subscribeUser } from "../controllers/sendEmailControllers/subscribeController.js";
 
 const subscribeRouter = express.Router();
 
