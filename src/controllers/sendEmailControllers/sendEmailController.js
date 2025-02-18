@@ -3,8 +3,7 @@ import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
 
 const resolvePath = (relativePath) => {
-  const __dirname = path.resolve();
-  return path.resolve(__dirname, relativePath);
+  return path.resolve(process.cwd(), relativePath);
 };
 
 export const sendEmailController = async (req, res) => {
@@ -16,7 +15,7 @@ export const sendEmailController = async (req, res) => {
       .json({ error: "to, subject, and templateName are required" });
   }
 
-  const templatePath = resolvePath(`../../templates/${templateName}.html`);
+  const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
   if (!fs.existsSync(templatePath)) {
     console.error(`Email template not found at: ${templatePath}`);
