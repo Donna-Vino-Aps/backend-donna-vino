@@ -54,7 +54,7 @@ export const signInWithGoogleController = async (req, res) => {
     let user;
     if (!token) {
       if (!email || !name || !picture) {
-        return res.status(400).json({ error: "Missing user data" });
+        return res.status(401).json({ error: "Missing user data" });
       }
 
       user = await User.findOne({ email });
