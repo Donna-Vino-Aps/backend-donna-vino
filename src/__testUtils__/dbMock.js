@@ -17,7 +17,7 @@ export const connectToMockDB = async () => {
       `Error in testing: mongoMemServer should not be set when calling connectToMockDB. Expected null or undefined, but received: ${mongoMemServer.toString()}`,
     );
   }
-
+  mongoose.set("strictQuery", false);
   mongoMemServer = await MongoMemoryServer.create({
     instance: {
       dbName: "test-db", // Custom database name
