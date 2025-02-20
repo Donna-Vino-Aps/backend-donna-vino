@@ -1,5 +1,5 @@
 #!/bin/sh
 # .husky/pre-push
 
-# Run tests before pushing
-npm test
+# Run Vitest tests before pushing
+npm run test:vitest
