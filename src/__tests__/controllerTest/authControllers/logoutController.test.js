@@ -20,6 +20,12 @@ jest.mock(
   }),
 );
 
+jest.mock("resend", () => ({
+  Resend: jest.fn().mockImplementation(() => ({
+    sendEmail: jest.fn().mockResolvedValue({}),
+  })),
+}));
+
 // Connect to the mock database before all tests
 beforeAll(async () => {
   await connectToMockDB();
