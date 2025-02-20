@@ -22,6 +22,8 @@ jobs:
       MAIL_HOST: ${{ secrets.MAIL_HOST}}
       MAIL_PORT: ${{secrets.MAIL_PORT}}
       MAIL_SECURE: ${{secrets.MAIL_SECURE}}
+      GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+      GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
       NODE_ENV: development
 
     steps:
