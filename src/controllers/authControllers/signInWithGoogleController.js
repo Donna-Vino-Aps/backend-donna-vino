@@ -49,10 +49,13 @@ export const signInWithGoogleController = async (req, res) => {
       }
     }
 
-    const { token, email, name, picture } = req.body;
+    // CHANGE: Use id_token (JWT) instead of token.
+    // This is the token returned by Google when "openid" scope is requested.
+    const { id_token, email, name, picture } = req.body;
 
     let user;
-    if (!token) {
+    if (!id_token) {
+      // CHANGE: Check for id_token here instead of token
       if (!email || !name || !picture) {
         return res.status(401).json({ error: "Missing user data" });
       }
@@ -71,8 +74,9 @@ export const signInWithGoogleController = async (req, res) => {
         logInfo(`New Web user created: ${user.email}`);
       }
     } else {
+      // CHANGE: Use id_token in verifyIdToken
       const ticket = await client.verifyIdToken({
-        idToken: token,
+        idToken: id_token, // CHANGE: Using id_token here
         audience: process.env.GOOGLE_CLIENT_ID_WEB,
       });
 

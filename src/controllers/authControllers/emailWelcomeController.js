@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
+import { __dirname } from "../../util/globals.js";
 import { createTransporter } from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
 import { logError, logInfo } from "../../util/logging.js";
@@ -34,7 +35,7 @@ export const sendWelcomeEmail = async (user) => {
 
     logInfo("Step 2: Reading email template...");
     const welcomeTemplatePath = resolvePath(
-      "../../templates/emailWelcomeTemplate.html",
+      "../templates/emailWelcomeTemplate.html",
     );
     const welcomeEmailTemplate = readTemplate(welcomeTemplatePath);
 
