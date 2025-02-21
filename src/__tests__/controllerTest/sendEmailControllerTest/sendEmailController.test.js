@@ -5,7 +5,6 @@ import { Resend } from "resend";
 
 jest.mock("fs");
 jest.mock("path");
-jest.mock("url");
 jest.mock("../../../util/emailUtils");
 jest.mock("resend");
 
@@ -39,11 +38,12 @@ describe("sendEmailController", () => {
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
-      error: "to, subject, and templateName are required",
+      success: false,
+      message: "to, subject, and templateName are required",
     });
   });
 
-  it("should return 500 if the template file does not exist", async () => {
+  it("should return 404 if the template file does not exist", async () => {
     req.body = {
       to: "test@example.com",
       subject: "Test Subject",
@@ -54,9 +54,10 @@ describe("sendEmailController", () => {
 
     await sendEmailController(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({
-      error: "Internal server error: Template not found",
+      success: false,
+      message: "Template not found",
     });
   });
 
@@ -76,7 +77,8 @@ describe("sendEmailController", () => {
 
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
-      error: "Internal server error",
+      success: false,
+      message: "Internal server error: Failed to read template",
     });
   });
 
