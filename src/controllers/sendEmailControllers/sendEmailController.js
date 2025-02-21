@@ -6,6 +6,8 @@ const resolvePath = (relativePath) => {
   return path.resolve(process.cwd(), relativePath);
 };
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export const sendEmailController = async (req, res) => {
   const { to, subject, templateName, templateData } = req.body;
 
@@ -16,13 +18,21 @@ export const sendEmailController = async (req, res) => {
     });
   }
 
+  if (!emailRegex.test(to)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid email format. Example of a valid email: example@domain.com",
+    });
+  }
+
   const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
   if (!fs.existsSync(templatePath)) {
     console.error(`Email template not found at: ${templatePath}`);
     return res.status(404).json({
       success: false,
-      message: "Template not found",
+      message: "Email Template not found",
     });
   }
 
