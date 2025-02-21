@@ -6,7 +6,7 @@ import { logError, logInfo } from "../../util/logging.js";
 import { sendWelcomeEmail } from "./emailWelcomeController.js";
 
 // OAuth2 client
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID_WEB);
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 const generateAndSetSession = (res, user) => {
   const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
@@ -77,7 +77,7 @@ export const signInWithGoogleController = async (req, res) => {
       // CHANGE: Use id_token in verifyIdToken
       const ticket = await client.verifyIdToken({
         idToken: id_token, // CHANGE: Using id_token here
-        audience: process.env.GOOGLE_CLIENT_ID_WEB,
+        audience: process.env.GOOGLE_CLIENT_ID
       });
 
       const payload = ticket.getPayload();
