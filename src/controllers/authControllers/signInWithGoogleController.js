@@ -77,7 +77,7 @@ export const signInWithGoogleController = async (req, res) => {
       // CHANGE: Use id_token in verifyIdToken
       const ticket = await client.verifyIdToken({
         idToken: id_token, // CHANGE: Using id_token here
-        audience: process.env.GOOGLE_CLIENT_ID
+        audience: process.env.GOOGLE_CLIENT_ID,
       });
 
       const payload = ticket.getPayload();
