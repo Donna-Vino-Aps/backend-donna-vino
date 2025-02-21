@@ -57,7 +57,7 @@ describe("sendEmailController", () => {
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      message: "Template not found",
+      message: "Email Template not found",
     });
   });
 
