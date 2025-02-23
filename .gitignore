@@ -128,3 +128,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+src/.DS_Store
+src/.DS_Store
+src/__tests__/.DS_Store
+src/vitest-tests/.DS_Store
+src/__tests__/controllerTest/.DS_Store
+src/__tests__/.DS_Store
