@@ -11,5 +11,6 @@ export default defineConfig({
       "**/__tests__/**",
       "**/jest.config.*",
     ],
+    setupFiles: "./vitest.setup.js",
   },
 });

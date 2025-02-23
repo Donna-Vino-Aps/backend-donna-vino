@@ -1,6 +1,7 @@
+import dotenv from "dotenv";
 import { describe, it, beforeEach, expect, vi } from "vitest";
 import { Resend } from "resend";
-import { sendEmail } from "../../util/emailUtils";
+import { sendEmail } from "../../util/emailUtils.js";
 
 vi.mock("resend");
 

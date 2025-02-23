@@ -1,12 +1,12 @@
 import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
 import { sendEmailController } from "../../controllers/sendEmailControllers/sendEmailController.js";
 import fs from "fs";
-import { sendEmail } from "../../util/emailUtils";
+import { sendEmail } from "../../util/emailUtils.js";
 import { Resend } from "resend";
 
 vi.mock("fs");
 vi.mock("path");
-vi.mock("../../util/emailUtils");
+vi.mock("../../util/emailUtils.js");
 vi.mock("resend");
 
 describe("sendEmailController", () => {
