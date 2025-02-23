@@ -12,6 +12,11 @@ vi.mock("../../util/logging.js", () => ({
   logInfo: vi.fn(),
 }));
 
+vi.mock("resend", () => ({
+  Resend: vi.fn().mockImplementation(() => ({
+    sendEmail: vi.fn().mockResolvedValue({}),
+  })),
+}));
 vi.mock("bcrypt", async (importOriginal) => {
   const actual = await importOriginal();
   return {

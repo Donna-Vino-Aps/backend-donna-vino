@@ -28,6 +28,11 @@ vi.mock(
     verifyEmail: vi.fn(),
   }),
 );
+vi.mock("resend", () => ({
+  Resend: vi.fn().mockImplementation(() => ({
+    sendEmail: vi.fn().mockResolvedValue({}),
+  })),
+}));
 
 beforeAll(async () => {
   await connectToMockDB();

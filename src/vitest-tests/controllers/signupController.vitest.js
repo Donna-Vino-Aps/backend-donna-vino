@@ -28,7 +28,11 @@ vi.mock(
 );
 
 vi.mock("../../util/logging.js");
-
+vi.mock("resend", () => ({
+  Resend: vi.fn().mockImplementation(() => ({
+    sendEmail: vi.fn().mockResolvedValue({}),
+  })),
+}));
 beforeAll(async () => {
   await connectToMockDB();
 });
