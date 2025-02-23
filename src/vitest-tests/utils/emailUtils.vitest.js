@@ -1,4 +1,5 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.test" });
 import { describe, it, beforeEach, expect, vi } from "vitest";
 import { Resend } from "resend";
 import { sendEmail } from "../../util/emailUtils.js";
