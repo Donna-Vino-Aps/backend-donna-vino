@@ -18,6 +18,12 @@ jest.mock(
   }),
 );
 
+jest.mock("resend", () => ({
+  Resend: jest.fn().mockImplementation(() => ({
+    sendEmail: jest.fn().mockResolvedValue({}),
+  })),
+}));
+
 jest.mock("../../../util/logging.js");
 
 beforeAll(async () => {
