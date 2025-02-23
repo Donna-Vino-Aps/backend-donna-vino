@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import { describe, it, beforeEach, expect, vi } from "vitest";
 import { Resend } from "resend";
 import { sendEmail } from "../../util/emailUtils.js";

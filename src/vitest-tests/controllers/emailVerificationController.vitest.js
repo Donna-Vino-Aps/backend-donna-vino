@@ -5,12 +5,10 @@ import fs from "fs";
 import path from "path";
 import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
-import User from "../../models/userModels.js";
+
 import {
   resolvePath,
   sendVerificationEmail,
-  resendVerificationLink,
-  verifyEmail,
 } from "../../controllers/authControllers/emailVerificationController.js";
 import { logError, logInfo } from "../../util/logging.js";
 

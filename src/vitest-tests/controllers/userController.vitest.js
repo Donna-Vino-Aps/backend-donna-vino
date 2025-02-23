@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 
 import supertest from "supertest";
 import { describe, test, beforeAll, afterEach, afterAll, expect } from "vitest";
@@ -10,15 +10,9 @@ import {
   closeMockDatabase,
   clearMockDatabase,
 } from "../../__testUtils__/dbMock.js";
-import { logInfo } from "../../util/logging.js";
 
 const request = supertest(app);
-describe("Environment Test", () => {
-  it("should log environment variable", () => {
-    console.log("🔍 RESEND_API_KEY in test:", process.env.RESEND_API_KEY);
-    expect(process.env.RESEND_API_KEY).toBeDefined();
-  });
-});
+
 beforeAll(async () => {
   await connectToMockDB();
 });

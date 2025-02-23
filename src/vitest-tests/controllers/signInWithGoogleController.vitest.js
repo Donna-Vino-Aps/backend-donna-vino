@@ -1,4 +1,4 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import {
   describe,
   it,
