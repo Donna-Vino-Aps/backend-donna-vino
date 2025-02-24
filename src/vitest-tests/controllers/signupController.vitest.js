@@ -1,12 +1,5 @@
 import supertest from "supertest";
 import {
-  connectToMockDB,
-  closeMockDatabase,
-  clearMockDatabase,
-} from "../../__testUtils__/dbMock.js";
-import app from "../../app.js";
-import { sendVerificationEmail } from "../../controllers/authControllers/emailVerificationController.js";
-import {
   describe,
   test,
   beforeAll,
@@ -15,6 +8,12 @@ import {
   expect,
   vi,
 } from "vitest";
+import {
+  connectToMockDB,
+  closeMockDatabase,
+  clearMockDatabase,
+} from "../../__testUtils__/dbMock.js";
+import app from "../../app.js";
 
 const request = supertest(app);
 
@@ -27,34 +26,32 @@ vi.mock(
   }),
 );
 
-vi.mock("../../util/logging.js");
-vi.mock("resend", () => ({
-  Resend: vi.fn().mockImplementation(() => ({
-    sendEmail: vi.fn().mockResolvedValue({}),
-  })),
-}));
-beforeAll(async () => {
-  await connectToMockDB();
-});
-
-afterEach(async () => {
-  await clearMockDatabase();
-  vi.clearAllMocks();
-});
-
-afterAll(async () => {
-  await closeMockDatabase();
-});
-
 describe("signupController", () => {
+  beforeAll(async () => {
+    await connectToMockDB();
+  });
+
+  afterEach(async () => {
+    await clearMockDatabase();
+    vi.clearAllMocks();
+  });
+
+  afterAll(async () => {
+    await closeMockDatabase();
+  });
+
   test("Should pass if the request contains all required fields and successfully creates a user", async () => {
     const newUser = {
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       email: "john.doe@example.com",
       password: "Password1234!",
       dateOfBirth: "1990-02-01",
     };
 
+    const { sendVerificationEmail } = await import(
+      "../../controllers/authControllers/emailVerificationController.js"
+    );
     sendVerificationEmail.mockResolvedValue(true);
 
     const response = await request
@@ -69,12 +66,16 @@ describe("signupController", () => {
 
   test("Should pass if user creation succeeds but email sending fails", async () => {
     const newUser = {
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       email: "john.doe@example.com",
       password: "Password1234!",
       dateOfBirth: "1990-02-01",
     };
 
+    const { sendVerificationEmail } = await import(
+      "../../controllers/authControllers/emailVerificationController.js"
+    );
     sendVerificationEmail.mockResolvedValue(false);
 
     const response = await request
@@ -95,7 +96,7 @@ describe("signupController", () => {
     expect(response.status).toBe(400);
     expect(response.body.success).toBe(false);
     expect(response.body.msg).toBe(
-      "BAD REQUEST: Email is not in a valid format, Password must be at least 8 characters long, Password must contain at least one uppercase letter, Password must contain at least one special character., Date Of Birth is a required field with valid format (YYYY-MM-DD, e.g., '2024-02-04').",
+      "BAD REQUEST: First name is a required field., Last name is a required field., Email is a required field., Password is a required field., Date Of Birth is a required field.",
     );
   });
 
@@ -134,7 +135,7 @@ describe("signupController", () => {
     expect(response.status).toBe(400);
     expect(response.body.success).toBe(false);
     expect(response.body.msg).toBe(
-      "BAD REQUEST: Name can only contain letters, numbers, and a single space between words.",
+      "Invalid request: The following properties are not allowed to be set: name",
     );
   });
 });

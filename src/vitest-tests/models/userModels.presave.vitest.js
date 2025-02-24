@@ -1,10 +1,11 @@
 import { describe, it, expect, vi } from "vitest";
-import User from "../../models/userModels";
+import User from "../../models/userModels.js";
 
 describe("User Model Middleware", () => {
-  it("should fail if the request is missing the name field", async () => {
+  it("should fail if the request is missing the name fields", async () => {
     const user = new User({
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "john@example.com",
       password: "Password123!",
       dateOfBirth: "1990-01-01",
@@ -14,12 +15,13 @@ describe("User Model Middleware", () => {
       await user.save();
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("user validation failed");
-      expect(error.errors).toHaveProperty("name");
-      expect(error.errors.name.kind).toBe("required");
+      expect(error.message).toContain("User validation failed");
+      expect(error.errors).toHaveProperty("firstName");
+      expect(error.errors.firstName.kind).toBe("required");
+      expect(error.errors).toHaveProperty("lastName");
+      expect(error.errors.lastName.kind).toBe("required");
       return;
     }
-
     throw new Error(
       "Expected the user save operation to fail, but it succeeded.",
     );
@@ -27,7 +29,8 @@ describe("User Model Middleware", () => {
 
   it("should fail if the request is missing the email field", async () => {
     const user = new User({
-      name: "Ana Laura",
+      firstName: "Ana",
+      lastName: "Laura",
       email: null,
       password: "Password123!",
       dateOfBirth: "1990-01-01",
@@ -37,12 +40,11 @@ describe("User Model Middleware", () => {
       await user.save();
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("user validation failed");
+      expect(error.message).toContain("User validation failed");
       expect(error.errors).toHaveProperty("email");
       expect(error.errors.email.kind).toBe("required");
       return;
     }
-
     throw new Error(
       "Expected the user save operation to fail, but it succeeded.",
     );
@@ -50,9 +52,9 @@ describe("User Model Middleware", () => {
 
   it("should save the user without errors", async () => {
     vi.spyOn(User.prototype, "save").mockResolvedValueOnce();
-
     const userData = {
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       email: "john@example.com",
       password: "Password123!",
       dateOfBirth: "1990-01-01",

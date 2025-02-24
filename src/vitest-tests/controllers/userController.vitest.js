@@ -1,16 +1,11 @@
-import dotenv from "dotenv";
-dotenv.config({ path: ".env.test" });
-
 import supertest from "supertest";
-import { describe, test, beforeAll, afterEach, afterAll, expect } from "vitest";
-import app from "../../app.js";
-import User from "../../models/userModels.js";
-
 import {
   connectToMockDB,
   closeMockDatabase,
   clearMockDatabase,
 } from "../../__testUtils__/dbMock.js";
+import app from "../../app.js";
+import User from "../../models/userModels.js";
 
 const request = supertest(app);
 
@@ -34,7 +29,8 @@ describe("getUsers Controller", () => {
   test("Should return list of users when getUsers is successful", async () => {
     const users = [
       {
-        name: "User 1",
+        firstName: "User",
+        lastName: "1",
         email: "user1@example.com",
         password: "Password1!",
         dateOfBirth: "1990-02-01",

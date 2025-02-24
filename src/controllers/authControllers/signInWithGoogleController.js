@@ -30,7 +30,6 @@ export const signInWithGoogleController = async (req, res) => {
       try {
         const decoded = jwt.verify(sessionToken, process.env.JWT_SECRET);
         const user = await User.findById(decoded.userId);
-
         if (user) {
           logInfo(`User already signed in: ${user.email}`);
           return res.status(200).json({
@@ -41,6 +40,7 @@ export const signInWithGoogleController = async (req, res) => {
               lastName: user.lastName,
               email: user.email,
               picture: user.picture,
+              name: `${user.firstName} ${user.lastName}`,
             },
           });
         }
@@ -49,59 +49,59 @@ export const signInWithGoogleController = async (req, res) => {
       }
     }
 
-    // Extract fields from the request body.
-    // For Google sign-in, id_token is expected, but we handle the fallback as Google as well.
-    const { id_token, email, name, picture } = req.body;
-
+    const { id_token, name, firstName, lastName, email, picture } = req.body;
+    let resolvedFirstName, resolvedLastName;
     let user;
+
     if (!id_token) {
-      // Fallback branch: if no id_token is provided,
-      // we assume it's a Google sign-in with the necessary fields.
-      if (!email || !name || !picture) {
+      if (!email || !picture) {
         return res.status(401).json({ error: "Missing user data" });
       }
-
-      // Extract firstName and lastName from the provided full name.
-      const names = name.trim().split(" ");
-      const firstName = names[0];
-      const lastName = names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+      if (name) {
+        const names = name.trim().split(" ");
+        resolvedFirstName = names[0];
+        resolvedLastName = names.length > 1 ? names.slice(1).join(" ") : "";
+      } else if (firstName && lastName) {
+        resolvedFirstName = firstName;
+        resolvedLastName = lastName;
+      } else {
+        return res.status(401).json({ error: "Missing user data" });
+      }
 
       user = await User.findOne({ email });
       if (!user) {
         user = new User({
-          firstName,
-          lastName,
+          firstName: resolvedFirstName,
+          lastName: resolvedLastName,
           email,
           picture,
-          authProvider: "google", // Using google as auth provider.
+          authProvider: "google",
         });
         await user.save();
 
         sendWelcomeEmail(user).catch((error) =>
           logError("Error sending welcome email: " + error.message),
         );
-
         logInfo(`New Google user created (fallback): ${user.email}`);
       }
     } else {
-      // Verify id_token using Google OAuth2Client.
       const ticket = await client.verifyIdToken({
         idToken: id_token,
         audience: process.env.GOOGLE_CLIENT_ID,
       });
 
       const payload = ticket.getPayload();
-
-      // Extract firstName and lastName from Google payload.
-      const names = payload.name ? payload.name.trim().split(" ") : [];
-      const firstName = names.length > 0 ? names[0] : "Unknown";
-      const lastName = names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+      const fullName = payload.name;
+      const names = fullName ? fullName.trim().split(" ") : [];
+      resolvedFirstName = names[0] || "Unknown";
+      resolvedLastName =
+        names.length > 1 ? names.slice(1).join(" ") : "Unknown";
 
       user = await User.findOne({ email: payload.email });
       if (!user) {
         user = new User({
-          firstName,
-          lastName,
+          firstName: resolvedFirstName,
+          lastName: resolvedLastName,
           email: payload.email,
           picture: payload.picture,
           authProvider: "google",
@@ -111,7 +111,6 @@ export const signInWithGoogleController = async (req, res) => {
         sendWelcomeEmail(user).catch((error) =>
           logError("Error sending welcome email: " + error.message),
         );
-
         logInfo(`New Google user created: ${user.email}`);
       }
     }
@@ -127,6 +126,7 @@ export const signInWithGoogleController = async (req, res) => {
         lastName: user.lastName,
         email: user.email,
         picture: user.picture,
+        name: `${user.firstName} ${user.lastName}`,
       },
     });
   } catch (error) {
