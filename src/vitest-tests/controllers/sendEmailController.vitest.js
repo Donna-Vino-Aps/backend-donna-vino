@@ -1,12 +1,13 @@
-import { sendEmailController } from "../../../controllers/sendEmailControllers/sendEmailController.js";
+import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
+import { sendEmailController } from "../../controllers/sendEmailControllers/sendEmailController.js";
 import fs from "fs";
-import { sendEmail } from "../../../util/emailUtils";
+import { sendEmail } from "../../util/emailUtils.js";
 import { Resend } from "resend";
 
-jest.mock("fs");
-jest.mock("path");
-jest.mock("../../../util/emailUtils");
-jest.mock("resend");
+vi.mock("fs");
+vi.mock("path");
+vi.mock("../../util/emailUtils.js");
+vi.mock("resend");
 
 describe("sendEmailController", () => {
   let req, res;
@@ -16,19 +17,19 @@ describe("sendEmailController", () => {
       body: {},
     };
     res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
     };
 
     Resend.mockImplementation(() => {
       return {
-        sendEmail: jest.fn().mockResolvedValue({ messageId: "12345" }),
+        sendEmail: vi.fn().mockResolvedValue({ messageId: "12345" }),
       };
     });
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("should return 400 if to, subject, or templateName is missing", async () => {
