@@ -1,9 +1,10 @@
-import User from "../../models/userModels";
+import User from "../../models/userModels.js";
 
 describe("User Model Middleware", () => {
-  test("should fail if the request is missing the name fields", async () => {
+  test("should fail if the request is missing the firstName and lastName fields", async () => {
     const user = new User({
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "john@example.com",
       password: "Password123!",
       dateOfBirth: "1990-01-01",
@@ -11,23 +12,23 @@ describe("User Model Middleware", () => {
 
     try {
       await user.save();
-      expect(User.prototype.save).toHaveBeenCalledTimes(1);
+      throw new Error(
+        "Expected the user save operation to fail, but it succeeded.",
+      );
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("user validation failed");
-      expect(error.errors).toHaveProperty("name");
-      expect(error.errors.name.kind).toBe("required");
-      return;
+      expect(error.message).toContain("User validation failed");
+      expect(error.errors).toHaveProperty("firstName");
+      expect(error.errors.firstName.kind).toBe("required");
+      expect(error.errors).toHaveProperty("lastName");
+      expect(error.errors.lastName.kind).toBe("required");
     }
-
-    throw new Error(
-      "Expected the user save operation to fail, but it succeeded.",
-    );
   });
 
-  test("should fail if the request is missing the email fields", async () => {
+  test("should fail if the request is missing the email field", async () => {
     const user = new User({
-      name: "Ana Laura",
+      firstName: "Ana",
+      lastName: "Laura",
       email: null,
       password: "Password123!",
       dateOfBirth: "1990-01-01",
@@ -35,18 +36,15 @@ describe("User Model Middleware", () => {
 
     try {
       await user.save();
-      expect(User.prototype.save).toHaveBeenCalledTimes(1);
+      throw new Error(
+        "Expected the user save operation to fail, but it succeeded.",
+      );
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("user validation failed");
+      expect(error.message).toContain("User validation failed");
       expect(error.errors).toHaveProperty("email");
       expect(error.errors.email.kind).toBe("required");
-      return;
     }
-
-    throw new Error(
-      "Expected the user save operation to fail, but it succeeded.",
-    );
   });
 
   test("should fail if the request is not an object", async () => {
@@ -54,31 +52,31 @@ describe("User Model Middleware", () => {
 
     try {
       await user.save();
-      expect(User.prototype.save).toHaveBeenCalledTimes(1);
+      throw new Error(
+        "Expected the user save operation to fail, but it succeeded.",
+      );
     } catch (error) {
       expect(error).toBeDefined();
-      expect(error.message).toContain("user validation failed");
+      expect(error.message).toContain("User validation failed");
       expect(error.errors).toBeDefined();
-      expect(Object.keys(error.errors).length).toBe(2);
+      // For a local sign-up, required fields are firstName, lastName, email, password, and dateOfBirth.
+      expect(Object.keys(error.errors).length).toBe(5);
       Object.values(error.errors).forEach((validationError) => {
         expect(validationError).toHaveProperty(
           "message",
           `Path \`${validationError.path}\` is required.`,
         );
       });
-      return;
     }
-
-    throw new Error(
-      "Expected the user save operation to fail, but it succeeded.",
-    );
   });
 
   it("should save the user without errors", async () => {
+    // Mock the save method to simulate a successful save operation.
     User.prototype.save = jest.fn().mockResolvedValueOnce();
 
     const userData = {
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       email: "john@example.com",
       password: "Password123!",
       dateOfBirth: "1990-01-01",

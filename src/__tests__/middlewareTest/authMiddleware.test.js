@@ -5,7 +5,6 @@ import {
   closeMockDatabase,
   clearMockDatabase,
 } from "../../__testUtils__/dbMock.js";
-
 import app from "../../app.js";
 
 const request = supertest(app);
@@ -28,7 +27,8 @@ describe("requireAuth Middleware Tests", () => {
 
   beforeEach(async () => {
     testUser = {
-      name: "Test User",
+      firstName: "Test",
+      lastName: "User",
       email: "testuser@example.com",
       password: "Test1234!",
       dateOfBirth: "1990-02-01",

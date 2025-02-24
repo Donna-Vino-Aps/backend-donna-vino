@@ -13,7 +13,7 @@ export const signup = async (req, res) => {
     "email",
     "password",
     "dateOfBirth",
-    "authProvider"
+    "authProvider",
   ];
 
   if (!(req.body.user instanceof Object)) {
@@ -29,7 +29,10 @@ export const signup = async (req, res) => {
     req.body.user.email = req.body.user.email.toLowerCase();
   }
 
-  const invalidFieldsError = validateAllowedFields(req.body.user, allowedFields);
+  const invalidFieldsError = validateAllowedFields(
+    req.body.user,
+    allowedFields,
+  );
   if (invalidFieldsError) {
     return res
       .status(400)

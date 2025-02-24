@@ -7,7 +7,6 @@ import {
 import app from "../../../app.js";
 import User from "../../../models/userModels.js";
 import { OAuth2Client } from "google-auth-library";
-// import { logInfo } from "../../../util/logging.js";
 import { sendWelcomeEmail } from "../../../controllers/authControllers/emailWelcomeController.js";
 import jwt from "jsonwebtoken";
 
@@ -35,6 +34,7 @@ afterAll(async () => {
 
 describe("signInWithGoogleController", () => {
   test("Should sign in successfully and create a new user if not exists", async () => {
+    // Input uses 'name' since the controller extracts firstName and lastName from it and then it split it in two.
     const userData = {
       name: "John Doe",
       email: "john@example.com",
@@ -53,7 +53,9 @@ describe("signInWithGoogleController", () => {
     expect(response.body.token).toBeDefined();
     expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 
-    expect(response.body.user.name).toBe(userData.name);
+    // Check that firstName and lastName are properly extracted from name
+    expect(response.body.user.firstName).toBe("John");
+    expect(response.body.user.lastName).toBe("Doe");
     expect(response.body.user.email).toBe(userData.email);
     expect(response.body.user.picture).toBe(userData.picture);
 
@@ -63,10 +65,12 @@ describe("signInWithGoogleController", () => {
 
   test("Should sign in an existing user without creating a new one", async () => {
     const existingUser = new User({
-      name: "Jane Doe",
+      firstName: "Jane",
+      lastName: "Doe",
       email: "jane@example.com",
       picture: "http://example.com/jane.jpg",
       password: "hashedpassword",
+      authProvider: "google",
     });
 
     await existingUser.save();
@@ -84,14 +88,19 @@ describe("signInWithGoogleController", () => {
     expect(response.body.msg).toBe("User signed in successfully");
     expect(response.body.token).toBeDefined();
     expect(sendWelcomeEmail).not.toHaveBeenCalled();
+    expect(response.body.user.firstName).toBe("Jane");
+    expect(response.body.user.lastName).toBe("Doe");
+    expect(response.body.user.email).toBe(existingUser.email);
   });
 
   test("Should verify an existing session and return user data", async () => {
     const user = new User({
-      name: "Alice Smith",
+      firstName: "Alice",
+      lastName: "Smith",
       email: "alice@example.com",
       picture: "http://example.com/alice.jpg",
       password: "hashedpassword",
+      authProvider: "google",
     });
 
     await user.save();
@@ -102,14 +111,15 @@ describe("signInWithGoogleController", () => {
 
     const response = await request
       .post("/api/auth/sign-in-with-google")
-      .set("Cookie", `session=${token}`) // Simula la cookie de sesión
+      .set("Cookie", `session=${token}`)
       .send({});
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.msg).toBe("User is already signed in");
     expect(response.body.user.email).toBe(user.email);
-    expect(response.body.user.name).toBe(user.name);
+    expect(response.body.user.firstName).toBe(user.firstName);
+    expect(response.body.user.lastName).toBe(user.lastName);
   });
 
   test("Should return error if token verification fails", async () => {
@@ -131,7 +141,7 @@ describe("signInWithGoogleController", () => {
       name: "Bob Brown",
       email: "bob@example.com",
       picture: "http://example.com/bob.jpg",
-      token: "mockGoogleIdToken",
+      id_token: "mockGoogleIdToken",
     };
 
     const mockPayload = {
@@ -154,6 +164,8 @@ describe("signInWithGoogleController", () => {
     expect(response.body.success).toBe(true);
     expect(response.body.token).toBeDefined();
     expect(response.body.user.email).toBe(userData.email);
+    expect(response.body.user.firstName).toBe("Bob");
+    expect(response.body.user.lastName).toBe("Brown");
     expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 
     const user = await User.findOne({ email: userData.email });

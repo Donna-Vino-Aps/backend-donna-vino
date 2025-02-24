@@ -6,7 +6,7 @@ import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
-import {__dirname, __filename} from "../../util/globals.js"
+import { __dirname } from "../../util/globals.js";
 
 export const resolvePath = (relativePath) => {
   const basePath = process.env.GITHUB_ACTIONS

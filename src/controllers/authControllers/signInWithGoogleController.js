@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import bcrypt from "bcrypt";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
 import { sendWelcomeEmail } from "./emailWelcomeController.js";
@@ -79,7 +78,7 @@ export const signInWithGoogleController = async (req, res) => {
         await user.save();
 
         sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message)
+          logError("Error sending welcome email: " + error.message),
         );
 
         logInfo(`New Google user created (fallback): ${user.email}`);
@@ -105,12 +104,12 @@ export const signInWithGoogleController = async (req, res) => {
           lastName,
           email: payload.email,
           picture: payload.picture,
-          authProvider: "google"
+          authProvider: "google",
         });
         await user.save();
 
         sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message)
+          logError("Error sending welcome email: " + error.message),
         );
 
         logInfo(`New Google user created: ${user.email}`);
