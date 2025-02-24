@@ -8,6 +8,7 @@ import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import emailRouter from "./routes/emailRoutes.js";
 import contactUsRouter from "./routes/contactUsRoutes.js";
+import { contactLimiter } from "./middleware/contactLimiter.js";
 
 dotenv.config();
 
@@ -51,6 +52,6 @@ app.use("/api/reviews", reviewRouter);
 app.use("/api/send-email", emailRouter);
 
 // web endpoints
-app.use("/api/contact-us", contactUsRouter);
+app.use("/api/contact-us", contactLimiter, contactUsRouter);
 
 export default app;
