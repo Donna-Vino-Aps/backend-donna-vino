@@ -50,11 +50,9 @@ describe("logoutController", () => {
   let testUser;
   let cookie;
 
-  // Before each test, create a test user, sign them up, and log them in to get the cookie
   beforeEach(async () => {
     testUser = {
-      firstName: "Test",
-      lastName: "User",
+      name: "Test User",
       email: "testuser@example.com",
       password: "Test1234!",
       dateOfBirth: "1990-02-01",
@@ -125,6 +123,7 @@ describe("logoutController", () => {
     errorApp.post("/api/user/log-out", (_req, _res) => {
       throw new Error("Simulated internal error");
     });
+
     errorApp.use((err, _req, res, _next) => {
       res.status(500).json({ success: false, message: err.message });
     });

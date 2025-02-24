@@ -3,8 +3,8 @@ import {
   it,
   expect,
   beforeAll,
-  afterEach,
   afterAll,
+  afterEach,
   beforeEach,
 } from "vitest";
 import supertest from "supertest";
@@ -36,8 +36,7 @@ describe("requireAuth Middleware Tests", () => {
 
   beforeEach(async () => {
     testUser = {
-      firstName: "Test",
-      lastName: "User",
+      name: "Test User",
       email: "testuser@example.com",
       password: "Test1234!",
       dateOfBirth: "1990-02-01",
@@ -49,9 +48,7 @@ describe("requireAuth Middleware Tests", () => {
       .post("/api/auth/log-in")
       .send({ user: { email: testUser.email, password: testUser.password } });
 
-    cookie = loginResponse.headers["set-cookie"]
-      ? loginResponse.headers["set-cookie"][0]
-      : "";
+    cookie = loginResponse.headers["set-cookie"];
   });
 
   it("should return 401 if session cookie is missing", async () => {

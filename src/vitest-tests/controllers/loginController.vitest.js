@@ -1,5 +1,11 @@
 import supertest from "supertest";
 import {
+  connectToMockDB,
+  closeMockDatabase,
+  clearMockDatabase,
+} from "../../__testUtils__/dbMock.js";
+import app from "../../app.js";
+import {
   describe,
   test,
   beforeAll,
@@ -8,12 +14,6 @@ import {
   beforeEach,
   expect,
 } from "vitest";
-import {
-  connectToMockDB,
-  closeMockDatabase,
-  clearMockDatabase,
-} from "../../__testUtils__/dbMock.js";
-import app from "../../app.js";
 
 const request = supertest(app);
 
@@ -34,8 +34,7 @@ describe("loginController", () => {
 
   beforeEach(async () => {
     testUser = {
-      firstName: "John",
-      lastName: "Doe",
+      name: "John Doe",
       email: "johndoe@example.com",
       password: "Password123!",
       dateOfBirth: "1990-02-01",
