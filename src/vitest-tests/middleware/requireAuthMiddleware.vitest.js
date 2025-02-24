@@ -3,8 +3,8 @@ import {
   it,
   expect,
   beforeAll,
-  afterAll,
   afterEach,
+  afterAll,
   beforeEach,
 } from "vitest";
 import supertest from "supertest";
@@ -13,8 +13,8 @@ import {
   connectToMockDB,
   closeMockDatabase,
   clearMockDatabase,
-} from "../../../__testUtils__/dbMock.js";
-import app from "../../../app.js";
+} from "../../__testUtils__/dbMock.js";
+import app from "../../app.js";
 
 const request = supertest(app);
 
@@ -36,7 +36,8 @@ describe("requireAuth Middleware Tests", () => {
 
   beforeEach(async () => {
     testUser = {
-      name: "Test User",
+      firstName: "Test",
+      lastName: "User",
       email: "testuser@example.com",
       password: "Test1234!",
       dateOfBirth: "1990-02-01",
@@ -48,7 +49,9 @@ describe("requireAuth Middleware Tests", () => {
       .post("/api/auth/log-in")
       .send({ user: { email: testUser.email, password: testUser.password } });
 
-    cookie = loginResponse.headers["set-cookie"];
+    cookie = loginResponse.headers["set-cookie"]
+      ? loginResponse.headers["set-cookie"][0]
+      : "";
   });
 
   it("should return 401 if session cookie is missing", async () => {
