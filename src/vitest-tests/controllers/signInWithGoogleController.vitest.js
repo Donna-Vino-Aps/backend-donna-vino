@@ -14,8 +14,8 @@ import {
   connectToMockDB,
   closeMockDatabase,
   clearMockDatabase,
-} from "../../../__testUtils__/dbMock.js";
-import app from "../../../app.js";
+} from "../../__testUtils__/dbMock.js";
+import app from "../../app.js";
 import User from "../../models/userModels.js";
 import { OAuth2Client } from "google-auth-library";
 import { sendWelcomeEmail } from "../../controllers/authControllers/emailWelcomeController.js";
@@ -43,7 +43,8 @@ afterAll(async () => {
 describe("signInWithGoogleController", () => {
   it("Should sign in successfully and create a new user if not exists", async () => {
     const userData = {
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       email: "john@example.com",
       picture: "http://example.com/john.jpg",
     };
@@ -60,7 +61,9 @@ describe("signInWithGoogleController", () => {
     expect(response.body.token).toBeDefined();
     expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 
-    expect(response.body.user.name).toBe(userData.name);
+    // Verify that the response contains the correct user details
+    expect(response.body.user.firstName).toBe(userData.firstName);
+    expect(response.body.user.lastName).toBe(userData.lastName);
     expect(response.body.user.email).toBe(userData.email);
     expect(response.body.user.picture).toBe(userData.picture);
 
@@ -70,10 +73,12 @@ describe("signInWithGoogleController", () => {
 
   it("Should sign in an existing user without creating a new one", async () => {
     const existingUser = new User({
-      name: "Jane Doe",
+      firstName: "Jane",
+      lastName: "Doe",
       email: "jane@example.com",
       picture: "http://example.com/jane.jpg",
       password: "hashedpassword",
+      authProvider: "google",
     });
 
     await existingUser.save();
@@ -81,7 +86,8 @@ describe("signInWithGoogleController", () => {
     sendWelcomeEmail.mockResolvedValue(true);
 
     const response = await request.post("/api/auth/sign-in-with-google").send({
-      name: "Jane Doe",
+      firstName: "Jane",
+      lastName: "Doe",
       email: "jane@example.com",
       picture: "http://example.com/jane.jpg",
     });
@@ -95,10 +101,12 @@ describe("signInWithGoogleController", () => {
 
   it("Should verify an existing session and return user data", async () => {
     const user = new User({
-      name: "Alice Smith",
+      firstName: "Alice",
+      lastName: "Smith",
       email: "alice@example.com",
       picture: "http://example.com/alice.jpg",
       password: "hashedpassword",
+      authProvider: "google",
     });
 
     await user.save();
@@ -116,7 +124,8 @@ describe("signInWithGoogleController", () => {
     expect(response.body.success).toBe(true);
     expect(response.body.msg).toBe("User is already signed in");
     expect(response.body.user.email).toBe(user.email);
-    expect(response.body.user.name).toBe(user.name);
+    expect(response.body.user.firstName).toBe(user.firstName);
+    expect(response.body.user.lastName).toBe(user.lastName);
   });
 
   it("Should return error if token verification fails", async () => {
@@ -135,7 +144,8 @@ describe("signInWithGoogleController", () => {
 
   it("Should sign in successfully with a valid Google token", async () => {
     const userData = {
-      name: "Bob Brown",
+      firstName: "Bob",
+      lastName: "Brown",
       email: "bob@example.com",
       picture: "http://example.com/bob.jpg",
       token: "mockGoogleIdToken",
@@ -161,6 +171,10 @@ describe("signInWithGoogleController", () => {
     expect(response.body.success).toBe(true);
     expect(response.body.token).toBeDefined();
     expect(response.body.user.email).toBe(userData.email);
+    // Since the controller splits the name from the Google payload,
+    // we expect firstName and lastName to be "Bob" and "Brown" respectively.
+    expect(response.body.user.firstName).toBe("Bob");
+    expect(response.body.user.lastName).toBe("Brown");
     expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 
     const user = await User.findOne({ email: userData.email });
