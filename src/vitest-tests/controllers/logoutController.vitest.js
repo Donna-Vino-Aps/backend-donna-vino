@@ -14,8 +14,8 @@ import {
   connectToMockDB,
   closeMockDatabase,
   clearMockDatabase,
-} from "../../__testUtils__/dbMock.js";
-import app from "../../app.js";
+} from "../../../__testUtils__/dbMock.js";
+import app from "../../../app.js";
 import { sendVerificationEmail } from "../../controllers/authControllers/emailVerificationController.js";
 
 const request = supertest(app);

@@ -14,8 +14,8 @@ import {
   connectToMockDB,
   closeMockDatabase,
   clearMockDatabase,
-} from "../../__testUtils__/dbMock.js";
-import app from "../../app.js";
+} from "../../../__testUtils__/dbMock.js";
+import app from "../../../app.js";
 import User from "../../models/userModels.js";
 import { OAuth2Client } from "google-auth-library";
 import { sendWelcomeEmail } from "../../controllers/authControllers/emailWelcomeController.js";
