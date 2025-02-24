@@ -73,7 +73,7 @@ export const signInWithGoogleController = async (req, res) => {
           lastName,
           email,
           picture,
-          authProvider: "google" // Using google as auth provider.
+          authProvider: "google", // Using google as auth provider.
         });
         await user.save();
 
