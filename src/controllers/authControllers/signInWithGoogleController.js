@@ -38,7 +38,8 @@ export const signInWithGoogleController = async (req, res) => {
             success: true,
             msg: "User is already signed in",
             user: {
-              name: user.name,
+              firstName: user.firstName,
+              lastName: user.lastName,
               email: user.email,
               picture: user.picture,
             },
@@ -49,50 +50,67 @@ export const signInWithGoogleController = async (req, res) => {
       }
     }
 
-    // CHANGE: Use id_token (JWT) instead of token.
-    // This is the token returned by Google when "openid" scope is requested.
+    // Extract fields from the request body.
+    // For Google sign-in, id_token is expected, but we handle the fallback as Google as well.
     const { id_token, email, name, picture } = req.body;
 
     let user;
     if (!id_token) {
-      // CHANGE: Check for id_token here instead of token
+      // Fallback branch: if no id_token is provided,
+      // we assume it's a Google sign-in with the necessary fields.
       if (!email || !name || !picture) {
         return res.status(401).json({ error: "Missing user data" });
       }
 
+      // Extract firstName and lastName from the provided full name.
+      const names = name.trim().split(" ");
+      const firstName = names[0];
+      const lastName = names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+
       user = await User.findOne({ email });
-
-      if (!user) {
-        const password = await bcrypt.hash("defaultPassword", 10);
-        user = new User({ name, email, picture, password });
-        await user.save();
-
-        sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message),
-        );
-
-        logInfo(`New Web user created: ${user.email}`);
-      }
-    } else {
-      // CHANGE: Use id_token in verifyIdToken
-      const ticket = await client.verifyIdToken({
-        idToken: id_token, // CHANGE: Using id_token here
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-
-      const payload = ticket.getPayload();
-      user = await User.findOne({ email: payload.email });
-
       if (!user) {
         user = new User({
-          name: payload.name,
-          email: payload.email,
-          picture: payload.picture,
+          firstName,
+          lastName,
+          email,
+          picture,
+          authProvider: "google" // Using google as auth provider.
         });
         await user.save();
 
         sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message),
+          logError("Error sending welcome email: " + error.message)
+        );
+
+        logInfo(`New Google user created (fallback): ${user.email}`);
+      }
+    } else {
+      // Verify id_token using Google OAuth2Client.
+      const ticket = await client.verifyIdToken({
+        idToken: id_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+
+      const payload = ticket.getPayload();
+
+      // Extract firstName and lastName from Google payload.
+      const names = payload.name ? payload.name.trim().split(" ") : [];
+      const firstName = names.length > 0 ? names[0] : "Unknown";
+      const lastName = names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+
+      user = await User.findOne({ email: payload.email });
+      if (!user) {
+        user = new User({
+          firstName,
+          lastName,
+          email: payload.email,
+          picture: payload.picture,
+          authProvider: "google"
+        });
+        await user.save();
+
+        sendWelcomeEmail(user).catch((error) =>
+          logError("Error sending welcome email: " + error.message)
         );
 
         logInfo(`New Google user created: ${user.email}`);
@@ -106,7 +124,8 @@ export const signInWithGoogleController = async (req, res) => {
       msg: "User signed in successfully",
       token: jwtToken,
       user: {
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         picture: user.picture,
       },

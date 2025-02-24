@@ -6,6 +6,7 @@ import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
+import {__dirname, __filename} from "../../util/globals.js"
 
 export const resolvePath = (relativePath) => {
   const basePath = process.env.GITHUB_ACTIONS
@@ -26,7 +27,7 @@ export const sendVerificationEmail = async (user) => {
   const uniqueString = uuidv4() + _id; // Generate a unique string using uuid and user ID
 
   // Read the HTML template
-  const templatePath = resolvePath("../../templates/verifyEmailTemplate.html");
+  const templatePath = resolvePath("../templates/verifyEmailTemplate.html");
   let emailTemplate;
 
   try {

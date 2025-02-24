@@ -6,7 +6,15 @@ import validateAllowedFields from "../../util/validateAllowedFields.js";
 import { sendVerificationEmail } from "./emailVerificationController.js";
 
 export const signup = async (req, res) => {
-  const allowedFields = ["name", "email", "password", "dateOfBirth"];
+  // Updated allowed fields based on the new user model
+  const allowedFields = [
+    "firstName",
+    "lastName",
+    "email",
+    "password",
+    "dateOfBirth",
+    "authProvider"
+  ];
 
   if (!(req.body.user instanceof Object)) {
     return res.status(400).json({
@@ -21,17 +29,15 @@ export const signup = async (req, res) => {
     req.body.user.email = req.body.user.email.toLowerCase();
   }
 
-  const invalidFieldsError = validateAllowedFields(
-    req.body.user,
-    allowedFields,
-  );
+  const invalidFieldsError = validateAllowedFields(req.body.user, allowedFields);
   if (invalidFieldsError) {
     return res
       .status(400)
       .json({ success: false, msg: `Invalid request: ${invalidFieldsError}` });
   }
 
-  const errorList = validateUser(req.body.user, true);
+  // Call validateUser with just the user object
+  const errorList = validateUser(req.body.user);
   if (errorList.length > 0) {
     return res
       .status(400)
@@ -40,7 +46,6 @@ export const signup = async (req, res) => {
 
   try {
     const { email } = req.body.user;
-
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
@@ -59,10 +64,21 @@ export const signup = async (req, res) => {
     }
 
     logInfo(`User created successfully: ${newUser.email}`);
+
+    // Prepare a response without sensitive data
+    const userResponse = {
+      id: newUser._id,
+      firstName: newUser.firstName,
+      lastName: newUser.lastName,
+      email: newUser.email,
+      authProvider: newUser.authProvider,
+      isVip: newUser.isVip,
+    };
+
     return res.status(201).json({
       success: true,
       msg: "User created successfully",
-      user: newUser,
+      user: userResponse,
     });
   } catch (error) {
     logError("Error in signup process: " + error.message);

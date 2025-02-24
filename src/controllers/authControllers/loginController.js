@@ -48,7 +48,7 @@ export const login = async (req, res) => {
     const token = jwt.sign(
       { userId: userFound._id.toString() },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "1h" }
     );
 
     // Save token in cookie
@@ -66,7 +66,8 @@ export const login = async (req, res) => {
       user: {
         id: userFound._id,
         email: userFound.email,
-        name: userFound.name,
+        firstName: userFound.firstName,
+        lastName: userFound.lastName,
       },
     });
   } catch (error) {
