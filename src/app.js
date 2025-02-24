@@ -49,4 +49,7 @@ app.use("/api/user", requireAuth, userRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/send-email", emailRouter);
 
+// web endpoints
+app.use("/api/contact-us");
+
 export default app;
