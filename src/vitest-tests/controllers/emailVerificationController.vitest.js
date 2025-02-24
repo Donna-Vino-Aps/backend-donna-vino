@@ -1,11 +1,10 @@
-import { describe, it, beforeEach, expect, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
 import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
-
 import {
   resolvePath,
   sendVerificationEmail,
@@ -34,22 +33,6 @@ vi.mock("../../models/userModels.js");
 vi.mock("../../util/logging.js");
 
 describe("Auth Controller Unit Tests", () => {
-  let req, res;
-
-  beforeEach(() => {
-    req = {
-      body: {},
-      params: {},
-    };
-    res = {
-      status: vi.fn().mockReturnThis(),
-      json: vi.fn(),
-      redirect: vi.fn(),
-      sendFile: vi.fn(),
-    };
-    vi.clearAllMocks();
-  });
-
   describe("resolvePath", () => {
     it("should resolve path correctly in GitHub Actions environment", () => {
       process.env.GITHUB_ACTIONS = "true";
