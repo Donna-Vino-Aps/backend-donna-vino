@@ -23,6 +23,8 @@ router.post("/pendingsignup", async (req, res) => {
 
 // Create a pending user
 export const createPendingUser = async (req, res) => {
+  logInfo(req.body); // Log the request body
+
   const { firstName, lastName, email, password, birthdate } = req.body;
 
   // Validate user data
@@ -78,6 +80,8 @@ export const createPendingUser = async (req, res) => {
       { expiresIn: "24h" },
     );
 
+    userData.birthdate = new Date(userData.birthdate);
+
     // Store pending user
     const pendingUser = new PendingUserModel({
       firstName,
@@ -112,8 +116,8 @@ export const createPendingUser = async (req, res) => {
       data: emailResponse,
     });
   } catch (error) {
-    logError("Error creating pending user:", error);
-    res.status(500).json({ message: "Server error" });
+    logError("Error creating pending user:", error.message, error.stack);
+    res.status(500).json({ message: "Server error 1", details: error.message });
   }
 };
 
@@ -161,7 +165,7 @@ export const verifyPendingUser = async (req, res) => {
     res.status(200).json({ message: "User verified successfully." });
   } catch (error) {
     logError("Error verifying pending user:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error 2" });
   }
 };
 
@@ -222,6 +226,6 @@ export const resendVerificationEmail = async (req, res) => {
     });
   } catch (error) {
     logError("Error resending verification email:", error);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error 3" });
   }
 };

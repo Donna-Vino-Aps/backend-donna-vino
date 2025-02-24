@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
-import User from "./userModels.js";
-import PendingUser from "./pendingUserModel.js";
-import { logInfo, logError } from "../util/logging.js";
 import bcrypt from "bcryptjs";
+import User from "./userModels.js";
+import { logInfo, logError } from "../util/logging.js";
 
 // Connecting to the MongoDB databaseconst
 const MONGO_URI = process.env.MONGODB_URI;
@@ -10,7 +9,7 @@ mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => logInfo("Connected to MongoDB"))
   .catch((error) => logError("MongoDB Connection Error:", error));
-mongoose.set("strictQuery", false);
+mongoose.set("strictQuery", true);
 
 // Defining the schema for the pending user
 const pendingUserSchema = new mongoose.Schema({
@@ -18,7 +17,7 @@ const pendingUserSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  dateOfBirth: { type: Date, required: true },
+  birthdate: { type: Date, required: true },
   verificationToken: { type: String, required: true },
   verificationTokenExpires: { type: Date, required: true },
 });
