@@ -24,6 +24,17 @@ const pendingUserSchema = new mongoose.Schema({
 
 async function signUpUser(userData) {
   try {
+    // Validate userData
+    if (
+      !userData.email ||
+      !userData.password ||
+      !userData.firstName ||
+      !userData.lastName ||
+      !userData.birthdate
+    ) {
+      throw new Error("Missing required fields.");
+    }
+
     const existingUser = await User.findOne({ email: userData.email });
 
     // Check if the user already exists
@@ -48,7 +59,7 @@ async function signUpUser(userData) {
     logInfo("Pending User Created:", newUser);
     return newUser;
   } catch (error) {
-    console.error("Signup Error:", error.message);
+    console.error("Signup Error:", error);
     throw error;
   }
 }

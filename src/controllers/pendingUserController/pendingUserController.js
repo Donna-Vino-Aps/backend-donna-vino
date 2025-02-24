@@ -1,4 +1,5 @@
 import express from "express"; // Import express
+const app = express();
 const router = express.Router(); // Create the router instance
 import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
 import { logInfo, logError } from "../../util/logging.js";
@@ -7,9 +8,12 @@ import User from "../../models/userModels.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+app.use(express.json());
+
 router.post("/pendingsignup", async (req, res) => {
   try {
     const userData = req.body; // Assuming the request body contains user data
+    logInfo("Received user data:", userData);
     const newUser = await signUpUser(userData);
     res.status(201).json({
       message:
