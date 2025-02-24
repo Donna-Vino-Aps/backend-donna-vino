@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const User = require("./userModel");
 const PendingUser = require("./models/pendingUser");
-const logInfo = require("../util/logging.js");
-const logError = require("../utils/logError");
+const { logInfo, logError } = require("../../utils/logging");
 
 // Connecting to the MongoDB databaseconst
 MONGO_URI =
@@ -19,6 +18,7 @@ const pendingUserSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
+  dateOfBirth: { type: Date, required: true },
   verificationToken: { type: String, required: true },
   verificationTokenExpires: { type: Date, required: true },
 });
