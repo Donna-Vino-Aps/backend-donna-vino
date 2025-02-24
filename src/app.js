@@ -7,6 +7,7 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import emailRouter from "./routes/emailRoutes.js";
+import contactUsRouter from "./routes/contactUsRoutes.js";
 
 dotenv.config();
 
@@ -50,6 +51,6 @@ app.use("/api/reviews", reviewRouter);
 app.use("/api/send-email", emailRouter);
 
 // web endpoints
-app.use("/api/contact-us");
+app.use("/api/contact-us", contactUsRouter);
 
 export default app;
