@@ -32,7 +32,7 @@ export const contactUsController = async (req, res) => {
     const subject = "New Contact Request";
     const to = process.env.CONTACT_RECEIVER_EMAIL;
 
-    const data = await sendEmail(to, subject, textMessage);
+    const data = await sendEmail(to, subject, textMessage, false);
 
     if (data.error) {
       console.error("Email sending error:", data.error);
