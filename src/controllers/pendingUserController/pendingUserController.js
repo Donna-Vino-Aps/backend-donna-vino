@@ -84,7 +84,7 @@ export const createPendingUser = async (req, res) => {
       email,
       password: hashedPassword,
       verificationToken,
-      verificationTokenExpires: new Date(Date.now() + 86400000),
+      verificationTokenExpires: new Date(Date.now() + 21600000),
     });
 
     await pendingUser.save();
@@ -193,7 +193,7 @@ export const resendVerificationEmail = async (req, res) => {
 
     // Update the pending user with new token and expiration time
     pendingUser.verificationToken = verificationToken;
-    pendingUser.verificationTokenExpires = new Date(Date.now() + 86400000);
+    pendingUser.verificationTokenExpires = new Date(Date.now() + 21600000);
 
     await pendingUser.save();
     logInfo("Verification email resent for:", pendingUser);
