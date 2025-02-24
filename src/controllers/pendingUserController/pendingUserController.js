@@ -1,8 +1,9 @@
-import { sendEmailController } from "../utils/sendEmailController";
-import { signUpUser } from "../../models/pendingUserModel";
-const { logInfo, logError } = require("../../utils/logging");
-import PendingUser from "../models/pendingUserModel";
-import User from "../models/userModels";
+import express from "express"; // Import express
+const router = express.Router(); // Create the router instance
+import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
+import { logInfo, logError } from "../../util/logging.js";
+import PendingUserModel, { signUpUser } from "../../models/pendingUserModel.js";
+import User from "../../models/userModels.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -37,7 +38,7 @@ export const createPendingUser = async (req, res) => {
     }
 
     // Check if email already exists in pending users-collection
-    const existingPendingUser = await PendingUser.findOne({ email });
+    const existingPendingUser = await PendingUserModel.findOne({ email });
     if (existingPendingUser) {
       return res
         .status(400)
@@ -78,7 +79,7 @@ export const createPendingUser = async (req, res) => {
     );
 
     // Store pending user
-    const pendingUser = new PendingUser({
+    const pendingUser = new PendingUserModel({
       firstName,
       lastName,
       email,
@@ -126,7 +127,9 @@ export const verifyPendingUser = async (req, res) => {
 
   try {
     // Find the pending user by verification token
-    const pendingUser = await PendingUser.findOne({ verificationToken: token });
+    const pendingUser = await PendingUserModel.findOne({
+      verificationToken: token,
+    });
 
     if (!pendingUser) {
       return res.status(400).json({ message: "Invalid or expired token." });
@@ -151,7 +154,7 @@ export const verifyPendingUser = async (req, res) => {
     await newUser.save();
 
     // Delete the user from the pending user collection
-    await PendingUser.findByIdAndDelete(pendingUser._id);
+    await PendingUserModel.findByIdAndDelete(pendingUser._id);
 
     logInfo("User verified and moved to main users:", newUser);
 
@@ -172,7 +175,7 @@ export const resendVerificationEmail = async (req, res) => {
 
   try {
     // check if email exists in pending users-collection
-    const pendingUser = await PendingUser.findOne({ email });
+    const pendingUser = await PendingUserModel.findOne({ email });
 
     if (!pendingUser) {
       return res

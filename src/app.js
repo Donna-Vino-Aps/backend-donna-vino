@@ -3,7 +3,9 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import { requireAuth } from "./middleware/authMiddleware.js";
+import bodyParser from "body-parser";
 import userRouter from "./routes/userRoutes.js";
+import pendingUserRouter from "./routes/pendingUserRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import emailRouter from "./routes/emailRoutes.js";
@@ -17,6 +19,8 @@ const app = express();
 app.use(express.json());
 
 app.use(cookieParser());
+
+app.use(bodyParser.json());
 
 const allowedOrigins = [
   "http://localhost:3000",
@@ -46,6 +50,7 @@ app.use(
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", requireAuth, userRouter);
+app.use("/api/pendinguser", pendingUserRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/send-email", emailRouter);
 

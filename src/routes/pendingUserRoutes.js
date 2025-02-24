@@ -3,7 +3,7 @@ import {
   createPendingUser,
   verifyPendingUser,
   resendVerificationEmail,
-} from "./controllers/pendingUserController";
+} from "../controllers/pendingUserController/pendingUserController.js";
 
 const router = express.Router();
 

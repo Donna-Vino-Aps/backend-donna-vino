@@ -1,16 +1,16 @@
-const mongoose = require("mongoose");
-const User = require("./userModel");
-const PendingUser = require("./models/pendingUser");
-const { logInfo, logError } = require("../../utils/logging");
+import mongoose from "mongoose";
+import User from "./userModels.js";
+import PendingUser from "./pendingUserModel.js";
+import { logInfo, logError } from "../util/logging.js";
+import bcrypt from "bcryptjs";
 
 // Connecting to the MongoDB databaseconst
-MONGO_URI =
-  "mongodb+srv://ldr-donna-vino:KUrvVGQV74ZojVoK@cluster0.y1wzc.mongodb.net/";
-
+const MONGO_URI = process.env.MONGODB_URI;
 mongoose
   .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => logInfo("Connected to MongoDB"))
   .catch((error) => logError("MongoDB Connection Error:", error));
+mongoose.set("strictQuery", false);
 
 // Defining the schema for the pending user
 const pendingUserSchema = new mongoose.Schema({
@@ -55,8 +55,6 @@ async function signUpUser(userData) {
 }
 
 // Hashing the password
-const bcrypt = require("bcryptjs");
-
 pendingUserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
@@ -73,7 +71,7 @@ pendingUserSchema.pre("save", async function (next) {
 const PendingUserModel = mongoose.model("PendingUser", pendingUserSchema);
 
 // Exporting the model
-module.exports = PendingUserModel;
+export default PendingUserModel;
 
 // Exporting the signUpUser function
-module.exports.signUpUser = signUpUser;
+export { signUpUser };
