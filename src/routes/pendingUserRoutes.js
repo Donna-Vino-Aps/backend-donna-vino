@@ -8,7 +8,7 @@ import {
 const router = express.Router();
 
 // Route for creating a pending user
-router.post("/pendingsignup", createPendingUser);
+router.post("/creatependinguser", createPendingUser);
 
 // Route for verifying a pending user
 router.post("/verifypending", verifyPendingUser);

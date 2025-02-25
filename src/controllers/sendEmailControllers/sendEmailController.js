@@ -55,6 +55,8 @@ export const sendEmailController = async (req, res) => {
 
   try {
     const data = await sendEmail(to, subject, emailTemplate);
+    logInfo("Data from sendEmail:", data);
+
     if (data.error) {
       console.error("Email validation error:", data.error);
       return res.status(data.error.statusCode || 500).json({

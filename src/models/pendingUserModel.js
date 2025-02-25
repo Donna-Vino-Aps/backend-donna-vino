@@ -1,15 +1,5 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-import User from "./userModels.js";
-import { logInfo, logError } from "../util/logging.js";
-
-// Connecting to the MongoDB databaseconst
-const MONGO_URI = process.env.MONGODB_URI;
-mongoose
-  .connect(MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => logInfo("Connected to MongoDB"))
-  .catch((error) => logError("MongoDB Connection Error:", error));
-mongoose.set("strictQuery", true);
 
 // Defining the schema for the pending user
 const pendingUserSchema = new mongoose.Schema({
@@ -21,48 +11,6 @@ const pendingUserSchema = new mongoose.Schema({
   verificationToken: { type: String, required: true },
   verificationTokenExpires: { type: Date, required: true },
 });
-
-async function signUpUser(userData) {
-  try {
-    // Validate userData
-    if (
-      !userData.email ||
-      !userData.password ||
-      !userData.firstName ||
-      !userData.lastName ||
-      !userData.birthdate
-    ) {
-      throw new Error("Missing required fields.");
-    }
-
-    const existingUser = await User.findOne({ email: userData.email });
-
-    // Check if the user already exists
-    if (existingUser) {
-      throw new Error("Email is already registered. Please log in instead.");
-    }
-
-    // check if the email is already in the pendingUser-collection
-    const existingPendingUser = await PendingUser.findOne({
-      email: userData.email,
-    });
-    if (existingPendingUser) {
-      throw new Error(
-        "A verification email was already sent. Please check your inbox.",
-      );
-    }
-
-    // creating a new pendingUser-document and saving a new pending user
-    const newUser = new PendingUser(userData);
-    await newUser.save();
-
-    logInfo("Pending User Created:", newUser);
-    return newUser;
-  } catch (error) {
-    console.error("Signup Error:", error);
-    throw error;
-  }
-}
 
 // Hashing the password
 pendingUserSchema.pre("save", async function (next) {
@@ -78,10 +26,7 @@ pendingUserSchema.pre("save", async function (next) {
 });
 
 // Creating the model for the pending user
-const PendingUserModel = mongoose.model("PendingUser", pendingUserSchema);
+const PendingUser = mongoose.model("PendingUser", pendingUserSchema);
 
 // Exporting the model
-export default PendingUserModel;
-
-// Exporting the signUpUser function
-export { signUpUser };
+export default PendingUser;

@@ -1,123 +1,27 @@
 import express from "express"; // Import express
 const app = express();
-const router = express.Router(); // Create the router instance
 import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
 import { logInfo, logError } from "../../util/logging.js";
-import PendingUserModel, { signUpUser } from "../../models/pendingUserModel.js";
+import PendingUserModel from "../../models/pendingUserModel.js";
+import { signUpUser } from "../../services/authService.js";
 import User from "../../models/userModels.js";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 app.use(express.json());
 
-router.post("/pendingsignup", async (req, res) => {
-  try {
-    const userData = req.body; // Assuming the request body contains user data
-    logInfo("Received user data:", userData);
-    const newUser = await signUpUser(userData);
-    res.status(201).json({
-      message:
-        "Pending user created successfully. Please check your email to verify your account.",
-      user: newUser,
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
-
 // Create a pending user
 export const createPendingUser = async (req, res) => {
-  logInfo(req.body); // Log the request body
-
-  const { firstName, lastName, email, password, birthdate } = req.body;
-
-  // Validate user data
-  if (!firstName || !lastName || !email || !password || !birthdate) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    // Check if the user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered." });
-    }
+    const userData = req.body;
+    logInfo("User Data received for sign-up:", userData);
 
-    // Check if email already exists in pending users-collection
-    const existingPendingUser = await PendingUserModel.findOne({ email });
-    if (existingPendingUser) {
-      return res
-        .status(400)
-        .json({ message: "Verification email was already sent." });
-    }
-
-    // Check if user is of right age
-    const birthdateObj = new Date(birthdate); // Assuming the birthdate is passed in the body
-    if (isNaN(birthdateObj.getTime())) {
-      return res.status(400).json({ message: "Invalid birthdate." });
-    }
-
-    const currentDate = new Date();
-    const age = currentDate.getFullYear() - birthdateObj.getFullYear();
-    const monthDiff = currentDate.getMonth() - birthdateObj.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && currentDate.getDate() < birthdateObj.getDate())
-    ) {
-      age--;
-    }
-
-    if (age < 18) {
-      return res
-        .status(400)
-        .json({ message: "You must be at least 18 years old to register." });
-    }
-
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    // Generate verification token with expiration time using JWT
-    const verificationToken = jwt.sign(
-      { email, firstName, lastName },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" },
-    );
-
-    userData.birthdate = new Date(userData.birthdate);
-
-    // Store pending user
-    const pendingUser = new PendingUserModel({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-      verificationToken,
-      verificationTokenExpires: new Date(Date.now() + 21600000),
-    });
-
-    await pendingUser.save();
-    logInfo("Pending user created:", pendingUser);
-
-    // Prepare email data for verification email
-    const emailData = {
-      to: email,
-      subject: "Please Verify  Your Email Address",
-      templateName: "verifyEmailTemplate",
-      templateData: {
-        firstName,
-        lastName,
-        verificationLink: `${process.env.API_URL_LOCAL}/verify?token=${verificationToken}`,
-      },
-    };
-
-    // Send verification mail
-    const emailResponse = await sendEmailController(emailData);
+    // Call the signUpUser function from the authService
+    const newUser = await signUpUser(req.body);
 
     res.status(201).json({
       message:
         "Pending user created successfully. Please check your email to verify your account.",
-      data: emailResponse,
+      data: newUser,
     });
   } catch (error) {
     logError("Error creating pending user:", error.message, error.stack);
