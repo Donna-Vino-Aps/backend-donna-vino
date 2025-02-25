@@ -34,6 +34,7 @@ vi.mock("../../models/userModels.js");
 vi.mock("../../util/logging.js");
 
 describe("Auth Controller Unit Tests", () => {
+  // eslint-disable-next-line no-unused-vars
   let req, res;
 
   beforeEach(() => {

@@ -15,16 +15,17 @@ jobs:
         node-version: [20.x]
 
     env:
-      AUTH_EMAIL: ${{ secrets.AUTH_EMAIL }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      NO_REPLY_EMAIL: ${{ secrets.NO_REPLY_EMAIL }}
+      INFO_EMAIL: ${{ secrets.AUTH_EMAIL }}
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
-      JWT_SECRET: ${{ secrets.JWT_SECRET }}
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
+      GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
       MAIL_HOST: ${{ secrets.MAIL_HOST}}
       MAIL_PORT: ${{secrets.MAIL_PORT}}
       MAIL_SECURE: ${{secrets.MAIL_SECURE}}
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-      GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
-      GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
       NODE_ENV: development
 
     steps:
