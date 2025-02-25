@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import bcrypt from "bcrypt";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
 import { sendWelcomeEmail } from "./emailWelcomeController.js";
@@ -31,16 +30,17 @@ export const signInWithGoogleController = async (req, res) => {
       try {
         const decoded = jwt.verify(sessionToken, process.env.JWT_SECRET);
         const user = await User.findById(decoded.userId);
-
         if (user) {
           logInfo(`User already signed in: ${user.email}`);
           return res.status(200).json({
             success: true,
             msg: "User is already signed in",
             user: {
-              name: user.name,
+              firstName: user.firstName,
+              lastName: user.lastName,
               email: user.email,
               picture: user.picture,
+              name: `${user.firstName} ${user.lastName}`,
             },
           });
         }
@@ -49,52 +49,68 @@ export const signInWithGoogleController = async (req, res) => {
       }
     }
 
-    // CHANGE: Use id_token (JWT) instead of token.
-    // This is the token returned by Google when "openid" scope is requested.
-    const { id_token, email, name, picture } = req.body;
-
+    const { id_token, name, firstName, lastName, email, picture } = req.body;
+    let resolvedFirstName, resolvedLastName;
     let user;
+
     if (!id_token) {
-      // CHANGE: Check for id_token here instead of token
-      if (!email || !name || !picture) {
+      if (!email || !picture) {
+        return res.status(401).json({ error: "Missing user data" });
+      }
+      if (name) {
+        const names = name.trim().split(" ");
+        resolvedFirstName = names[0];
+        resolvedLastName = names.length > 1 ? names.slice(1).join(" ") : "";
+      } else if (firstName && lastName) {
+        resolvedFirstName = firstName;
+        resolvedLastName = lastName;
+      } else {
         return res.status(401).json({ error: "Missing user data" });
       }
 
       user = await User.findOne({ email });
-
-      if (!user) {
-        const password = await bcrypt.hash("defaultPassword", 10);
-        user = new User({ name, email, picture, password });
-        await user.save();
-
-        sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message),
-        );
-
-        logInfo(`New Web user created: ${user.email}`);
-      }
-    } else {
-      // CHANGE: Use id_token in verifyIdToken
-      const ticket = await client.verifyIdToken({
-        idToken: id_token, // CHANGE: Using id_token here
-        audience: process.env.GOOGLE_CLIENT_ID,
-      });
-
-      const payload = ticket.getPayload();
-      user = await User.findOne({ email: payload.email });
-
       if (!user) {
         user = new User({
-          name: payload.name,
-          email: payload.email,
-          picture: payload.picture,
+          firstName: resolvedFirstName,
+          lastName: resolvedLastName,
+          email,
+          picture,
+          authProvider: "google",
         });
         await user.save();
 
         sendWelcomeEmail(user).catch((error) =>
           logError("Error sending welcome email: " + error.message),
         );
+        logInfo(`New Google user created (fallback): ${user.email}`);
+      }
+    } else {
+      const ticket = await client.verifyIdToken({
+        idToken: id_token,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
 
+      const payload = ticket.getPayload();
+      const fullName = payload.name;
+      const names = fullName ? fullName.trim().split(" ") : [];
+      resolvedFirstName = names[0] || "Unknown";
+      resolvedLastName =
+        names.length > 1 ? names.slice(1).join(" ") : "Unknown";
+
+      user = await User.findOne({ email: payload.email });
+      if (!user) {
+        user = new User({
+          firstName: resolvedFirstName,
+          lastName: resolvedLastName,
+          email: payload.email,
+          picture: payload.picture,
+          authProvider: "google",
+        });
+        await user.save();
+
+        sendWelcomeEmail(user).catch((error) =>
+          logError("Error sending welcome email: " + error.message),
+        );
         logInfo(`New Google user created: ${user.email}`);
       }
     }
@@ -106,9 +122,11 @@ export const signInWithGoogleController = async (req, res) => {
       msg: "User signed in successfully",
       token: jwtToken,
       user: {
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         email: user.email,
         picture: user.picture,
+        name: `${user.firstName} ${user.lastName}`,
       },
     });
   } catch (error) {
