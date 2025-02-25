@@ -59,6 +59,7 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
+    "escape-html": "^1.0.3",
     "express": "^4.17.1",
     "express-rate-limit": "^7.5.0",
     "google-auth-library": "^9.10.0",

@@ -1,7 +1,10 @@
 import { contactUsEmail } from "../../util/emailUtils.js";
 import { logError } from "../../util/logging.js";
+import xss from "xss";
+import escapeHtml from "escape-html";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const phoneRegex = /^[0-9]{10}$/;
 
 export const contactUsController = async (req, res) => {
   const { name, email, phone, message } = req.body;
@@ -20,13 +23,28 @@ export const contactUsController = async (req, res) => {
     });
   }
 
+  if (!phoneRegex.test(phone)) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid phone number format",
+    });
+  }
+
+  const sanitizedName = xss(name);
+  const sanitizedPhone = xss(phone);
+  const sanitizedMessage = xss(message);
+
+  const escapedName = escapeHtml(sanitizedName);
+  const escapedPhone = escapeHtml(sanitizedPhone);
+  const escapedMessage = escapeHtml(sanitizedMessage);
+
   const textMessage = `
     New Contact Request:
 
-    Name: ${name}
+    Name: ${escapedName}
     Email: ${email}
-    Phone: ${phone}
-    Message: ${message}
+    Phone: ${escapedPhone}
+    Message: ${escapedMessage}
   `;
 
   try {
