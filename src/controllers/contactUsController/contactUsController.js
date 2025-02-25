@@ -1,6 +1,6 @@
 import { contactUsEmail } from "../../util/emailUtils.js";
 import { logError } from "../../util/logging.js";
-import xss from "xss";
+import xss from "xss-clean";
 import escapeHtml from "escape-html";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
