@@ -89,7 +89,9 @@ export const sendEmailController = async (req, res) => {
           userId: user._id,
         });
         await newSubscribedUser.save();
-        logInfo(`User ${to} added to SubscribedUser collection with userId from eCommerce.`);
+        logInfo(
+          `User ${to} added to SubscribedUser collection with userId from eCommerce.`,
+        );
       }
     } else {
       // Step 5: If the user does not exist in eCommerce, add them to SubscribedUser without userId
