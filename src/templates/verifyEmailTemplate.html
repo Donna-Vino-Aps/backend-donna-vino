@@ -7,7 +7,7 @@
     <style>
       body {
         font-family: Arial, sans-serif;
-        background-color: #f4f4f4;
+        background-color: #ffffff;
         margin: 0;
         padding: 0;
         display: flex;
@@ -16,13 +16,8 @@
         height: 100vh;
       }
       .container {
-        background-color: #f9f7f3;
-        max-width: 600px;
+        background-color: #ffffff;
         margin: auto;
-        padding: 20px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         text-align: center;
       }
       h2 {
@@ -56,11 +51,25 @@
         font-size: 13px;
         color: #666;
         font-style: italic;
+        margin-top: 30px;
+        margin-bottom: 30px;
+      }
+
+      .thanks {
+        font-size: 14px;
+        color: #101010;
+        font-weight: 700;
+        line-height: 20px;
       }
 
       .footer {
-        font-size: 14px;
-        color: #444444;
+        margin-top: 50px;
+      }
+
+      .footer > p {
+        color: #6c6c6c;
+        font-size: 12px;
+        line-height: 16px;
       }
 
       img {
@@ -86,7 +95,7 @@
           font-size: 12px;
         }
 
-        .footer {
+        .thanks {
           font-size: 13px;
         }
       }
@@ -112,7 +121,7 @@
           font-size: 11px;
         }
 
-        .footer {
+        .thanks {
           font-size: 12px;
         }
 
@@ -142,7 +151,7 @@
           font-size: 11px;
         }
 
-        .footer {
+        .thanks {
           font-size: 11px;
         }
       }
@@ -160,7 +169,7 @@
           font-size: 8px;
         }
 
-        .footer {
+        .thanks {
           font-size: 10px;
         }
       }
@@ -168,6 +177,7 @@
   </head>
   <body>
     <div class="container">
+      <img class="logo" src="../public/img/donna-vino-logo-transparent.png" />
       <h2>You Are Almost There!</h2>
       <p>
         Verify your email address to complete the signup and log into your
@@ -182,8 +192,32 @@
       <p class="info">
         (If you did not sign up for this account, you can ignore this email)
       </p>
-      <p class="footer">Thank you,<br />The Donna Vino Team</p>
-      <img class="logo" src="../public/img/donna-vino-logo-transparent.png" />
+      <p class="thanks">Thank you,<br />The Donna Vino Team</p>
+      <div class="footer">
+        <p>Want updates through more platforms?</p>
+        <div>
+          <img
+            src="../public/icons/facebook-line.svg"
+            alt="facebook"
+            style="width: 50px"
+          />
+          <img
+            src="../public/icons/instagram-original.svg"
+            alt="instagram"
+            style="width: 30px"
+          />
+          <img
+            src="../public/icons/linkedin-alt.svg"
+            alt="linkedin"
+            style="width: 50px"
+          />
+        </div>
+        <p>Christianshavn Voldgade 54 - 1424 København</p>
+        <p>
+          <a href="#">Subscribe</a> | <a href="#">Privacy policy</a> |
+          <a href="#">Contact Us</a>
+        </p>
+      </div>
     </div>
   </body>
 </html>
