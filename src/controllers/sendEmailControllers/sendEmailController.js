@@ -8,8 +8,9 @@ const resolvePath = (relativePath) => {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const sendEmailController = async (req, res) => {
-  const { to, subject, templateName, templateData } = req.body;
+export const sendEmailController = async (emailData) => {
+  const { to, subject, templateName, templateData } = emailData;
+  // const { to, subject, templateName, templateData } = req.body;
 
   if (!to || !subject || !templateName) {
     return res.status(400).json({

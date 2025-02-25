@@ -2,7 +2,6 @@ import PendingUser from "../models/pendingUserModel.js";
 import User from "../models/userModels.js";
 import { validatePendingUserData } from "../util/validatePendingUserData.js";
 import { logInfo, logError } from "../util/logging.js";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { sendEmailController } from "../controllers/sendEmailControllers/sendEmailController.js";
 
@@ -15,15 +14,28 @@ export const signUpUser = async (userData) => {
 
     const existingUser = await User.exists({ email: userData.email });
 
+    logInfo("User email to check:", userData.email);
+    // check if the email is already in the pendingUser-collection
+    const trimmedEmail = userData.email.trim().toLowerCase();
+
+    const existingPendingUser = await PendingUser.findOne({
+      email: trimmedEmail,
+    });
+
+    logInfo(
+      "existingPendingUser:",
+      existingPendingUser ? existingPendingUser : "No pending user found",
+    );
+
     // Check if the user already exists
     if (existingUser) {
       throw new Error("Email is already registered. Please log in instead.");
     }
 
-    // check if the email is already in the pendingUser-collection
-    const existingPendingUser = await PendingUser.exists({
-      email: userData.email,
-    });
+    // Check if the result is valid and handle accordingly
+    if (existingPendingUser === undefined) {
+      throw new Error("Unexpected result from database query.");
+    }
     if (existingPendingUser) {
       throw new Error(
         "A verification email was already sent. Please check your inbox.",
@@ -51,15 +63,11 @@ export const signUpUser = async (userData) => {
       throw new Error("You must be at least 18 years old to register.");
     }
 
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     // Generate verification token with expiration time using JWT
     const verificationToken = jwt.sign(
       { email, firstName, lastName },
       process.env.JWT_SECRET,
-      { expiresIn: "24h" },
+      { expiresIn: "6h" },
     );
 
     // Prepare and store pending user
@@ -67,14 +75,19 @@ export const signUpUser = async (userData) => {
       firstName,
       lastName,
       email,
-      password: hashedPassword,
+      password,
       birthdate: userData.birthdate,
       verificationToken,
       verificationTokenExpires: new Date(Date.now() + 21600000), // 6 hours
     });
 
-    await newPendingUser.save();
-    logInfo("Pending user created:", newPendingUser);
+    try {
+      await newPendingUser.save();
+      logInfo("Pending user created:", newPendingUser);
+    } catch (error) {
+      logError("Error creating pending user:", error.message, error.stack);
+      throw new Error(`Error creating pending user: ${error.message}`);
+    }
 
     // Prepare email data for verification email
     const emailData = {
