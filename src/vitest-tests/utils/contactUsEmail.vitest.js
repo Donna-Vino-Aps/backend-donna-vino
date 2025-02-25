@@ -13,7 +13,7 @@ describe("contactUsEmail", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    process.env.CONTACT_US_EMAIL = mockContactEmail;
+    process.env.INFO_EMAIL = mockContactEmail;
     process.env.RESEND_API_KEY = mockApiKey;
   });
 
@@ -28,7 +28,7 @@ describe("contactUsEmail", () => {
     const result = await contactUsEmail(to, subject, html);
 
     expect(mockSend).toHaveBeenCalledWith({
-      from: `"Donna Vino" <${process.env.CONTACT_US_EMAIL}>`,
+      from: `"Donna Vino" <${process.env.INFO_EMAIL}>`,
       to,
       subject,
       html,
@@ -48,7 +48,7 @@ describe("contactUsEmail", () => {
     await expect(contactUsEmail(to, subject, html)).rejects.toThrow(mockError);
 
     expect(mockSend).toHaveBeenCalledWith({
-      from: `"Donna Vino" <${process.env.CONTACT_US_EMAIL}>`,
+      from: `"Donna Vino" <${process.env.INFO_EMAIL}>`,
       to,
       subject,
       html,
