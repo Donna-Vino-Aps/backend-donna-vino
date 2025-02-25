@@ -10,7 +10,7 @@ describe("sendEmail", () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    process.env.AUTH_EMAIL = mockFromEmail;
+    process.env.NO_REPLY_EMAIL = mockFromEmail;
     process.env.RESEND_API_KEY = mockApiKey;
   });
 
@@ -25,7 +25,7 @@ describe("sendEmail", () => {
     const result = await sendEmail(to, subject, html);
 
     expect(mockSend).toHaveBeenCalledWith({
-      from: `"Donna Vino" <${process.env.AUTH_EMAIL}>`,
+      from: `"Donna Vino" <${process.env.NO_REPLY_EMAIL}>`,
       to,
       subject,
       html,
@@ -45,7 +45,7 @@ describe("sendEmail", () => {
     await expect(sendEmail(to, subject, html)).rejects.toThrow(mockError);
 
     expect(mockSend).toHaveBeenCalledWith({
-      from: `"Donna Vino" <${process.env.AUTH_EMAIL}>`,
+      from: `"Donna Vino" <${process.env.NO_REPLY_EMAIL}>`,
       to,
       subject,
       html,

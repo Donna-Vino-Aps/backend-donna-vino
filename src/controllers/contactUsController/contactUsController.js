@@ -1,4 +1,5 @@
-import { sendEmail } from "../../util/emailUtils.js";
+import { contactUsEmail } from "../../util/emailUtils.js";
+import { logError } from "../../util/logging.js";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,12 +31,12 @@ export const contactUsController = async (req, res) => {
 
   try {
     const subject = "New Contact Request";
-    const to = process.env.CONTACT_RECEIVER_EMAIL;
+    const to = process.env.INFO_EMAIL;
 
-    const data = await sendEmail(to, subject, textMessage, false);
+    const data = await contactUsEmail(to, subject, textMessage, false);
 
     if (data.error) {
-      console.error("Email sending error:", data.error);
+      logError("Email sending error:", data.error);
       return res.status(data.error.statusCode || 500).json({
         success: false,
         message: "Failed to send contact message",
@@ -49,7 +50,7 @@ export const contactUsController = async (req, res) => {
       data,
     });
   } catch (error) {
-    console.error("Error in contactUsController:", error);
+    logError("Error in contactUsController:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error: Failed to send contact message",

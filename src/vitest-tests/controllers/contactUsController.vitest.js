@@ -1,11 +1,11 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { contactUsController } from "../../controllers/contactUsController/contactUsController";
-import { sendEmail } from "../../util/emailUtils";
+import { contactUsEmail } from "../../util/emailUtils";
 import express from "express";
 import request from "supertest";
 
 vi.mock("../../util/emailUtils", () => ({
-  sendEmail: vi.fn(),
+  contactUsEmail: vi.fn(),
 }));
 
 const app = express();
@@ -19,6 +19,11 @@ describe("contactUsController Tests", () => {
     phone: "1234567890",
     message: "I need help with my order.",
   };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    process.env.INFO_EMAIL = "info@donnavino.dk";
+  });
 
   it("should return 400 if any required field is missing", async () => {
     const { name, ...invalidBody } = validRequestBody;
@@ -42,8 +47,8 @@ describe("contactUsController Tests", () => {
     );
   });
 
-  it("should call sendEmail with correct parameters", async () => {
-    sendEmail.mockResolvedValueOnce({ messageId: "12345" });
+  it("should call contactUsEmail with correct parameters", async () => {
+    contactUsEmail.mockResolvedValueOnce({ messageId: "12345" });
 
     const response = await request(app)
       .post("/api/contact-us")
@@ -52,16 +57,16 @@ describe("contactUsController Tests", () => {
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Contact message sent successfully!");
 
-    expect(sendEmail).toHaveBeenCalledWith(
-      process.env.CONTACT_RECEIVER_EMAIL,
+    expect(contactUsEmail).toHaveBeenCalledWith(
+      process.env.INFO_EMAIL,
       "New Contact Request",
       expect.stringContaining("Name: John Doe"),
       false,
     );
   });
 
-  it("should return 500 if sendEmail throws an error", async () => {
-    sendEmail.mockRejectedValueOnce(new Error("Email service down"));
+  it("should return 500 if contactUsEmail throws an error", async () => {
+    contactUsEmail.mockRejectedValueOnce(new Error("Email service down"));
 
     const response = await request(app)
       .post("/api/contact-us")
@@ -74,8 +79,8 @@ describe("contactUsController Tests", () => {
     expect(response.body.error).toBe("Email service down");
   });
 
-  it("should return 500 if sendEmail responds with an error object", async () => {
-    sendEmail.mockResolvedValueOnce({
+  it("should return the correct error if contactUsEmail responds with an error object", async () => {
+    contactUsEmail.mockResolvedValueOnce({
       error: { statusCode: 502, message: "Bad Gateway" },
     });
 
