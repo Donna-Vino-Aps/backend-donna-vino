@@ -68,7 +68,6 @@ export const sendEmailController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Email sent successfully! Check your email for confirmation.",
-      data,
     });
   } catch (error) {
     logError("Error sending email:", error);
