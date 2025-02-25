@@ -26,7 +26,9 @@ describe("contactUsController Tests", () => {
   });
 
   it("should return 400 if any required field is missing", async () => {
-    const { name, ...invalidBody } = validRequestBody;
+    const invalidBody = { ...validRequestBody };
+    delete invalidBody.name;
+
     const response = await request(app)
       .post("/api/contact-us")
       .send(invalidBody);
