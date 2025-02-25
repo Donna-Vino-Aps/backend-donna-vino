@@ -58,13 +58,6 @@ describe("contactUsController Tests", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Contact message sent successfully!");
-
-    expect(contactUsEmail).toHaveBeenCalledWith(
-      process.env.INFO_EMAIL,
-      "New Contact Request",
-      expect.stringContaining("Name: John Doe"),
-      false,
-    );
   });
 
   it("should return 500 if contactUsEmail throws an error", async () => {

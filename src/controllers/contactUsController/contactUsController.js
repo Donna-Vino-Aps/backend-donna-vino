@@ -65,6 +65,7 @@ export const contactUsController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Contact message sent successfully!",
+      data,
     });
   } catch (error) {
     logError("Error in contactUsController:", error);
