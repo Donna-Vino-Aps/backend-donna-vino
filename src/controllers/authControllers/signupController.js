@@ -3,7 +3,6 @@ import validationErrorMessage from "../../util/validationErrorMessage.js";
 import { validateUser } from "../../models/userModels.js";
 import User from "../../models/userModels.js";
 import validateAllowedFields from "../../util/validateAllowedFields.js";
-import { sendVerificationEmail } from "./emailVerificationController.js";
 
 export const signup = async (req, res) => {
   // Updated allowed fields based on the new user model
@@ -58,13 +57,7 @@ export const signup = async (req, res) => {
 
     const newUser = await User.create(req.body.user);
 
-    // Send the verification email
-    try {
-      await sendVerificationEmail(newUser);
-      logInfo(`Verification email sent for user: ${newUser.email}`);
-    } catch (error) {
-      logError("Error sending verification email: " + error.message);
-    }
+
 
     logInfo(`User created successfully: ${newUser.email}`);
 
