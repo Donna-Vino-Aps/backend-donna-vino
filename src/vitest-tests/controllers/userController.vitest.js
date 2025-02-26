@@ -44,7 +44,6 @@ describe("getUsers Controller", () => {
       },
     ];
 
-    // Register the users using the updated payload.
     await Promise.all(
       users.map(async (user) => {
         await request.post("/api/auth/sign-up").send({ user });
@@ -56,15 +55,14 @@ describe("getUsers Controller", () => {
       password: "Password1!",
     };
 
-    // Log in the first user and get the session cookie.
     const loginResponse = await request
       .post("/api/auth/log-in")
       .send({ user: loginUser });
+
     expect(loginResponse.status).toBe(200);
 
     const sessionCookie = loginResponse.headers["set-cookie"][0];
 
-    // Request the list of users with the valid session cookie.
     const response = await request
       .get("/api/user/")
       .set("Cookie", sessionCookie);
@@ -101,7 +99,6 @@ describe("getUsers Controller", () => {
       },
     ];
 
-    // Register the users.
     await Promise.all(
       users.map(async (user) => {
         await request.post("/api/auth/sign-up").send({ user });
@@ -113,15 +110,14 @@ describe("getUsers Controller", () => {
       password: "Password1!",
     };
 
-    // Log in the first user and get the valid session cookie.
     const loginResponse = await request
       .post("/api/auth/log-in")
       .send({ user: loginUser });
+
     expect(loginResponse.status).toBe(200);
 
     const validSessionCookie = loginResponse.headers["set-cookie"][0];
 
-    // Modify the session cookie to simulate a token mismatch.
     const modifiedSessionCookie = validSessionCookie.replace(
       /session=[^;]*/,
       "session=invalid_session_token",
@@ -168,11 +164,11 @@ describe("getUsers Controller", () => {
     const loginResponse = await request
       .post("/api/auth/log-in")
       .send({ user: loginUser });
+
     expect(loginResponse.status).toBe(200);
 
     const validSessionCookie = loginResponse.headers["set-cookie"][0];
 
-    // Modify the session cookie to simulate missing/invalid userId.
     const modifiedSessionCookie = validSessionCookie.replace(
       /session=[^;]*/,
       "session=invalid_userId_token",
