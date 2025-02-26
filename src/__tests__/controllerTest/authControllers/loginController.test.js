@@ -25,7 +25,8 @@ describe("loginController", () => {
 
   beforeEach(async () => {
     testUser = {
-      name: "John Doe",
+      firstName: "John",
+      lastName: "Doe",
       email: "johndoe@example.com",
       password: "Password123!",
       dateOfBirth: "1990-02-01",

@@ -1,11 +1,10 @@
-import { describe, it, beforeEach, expect, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
 import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
-
 import {
   resolvePath,
   sendVerificationEmail,
@@ -34,6 +33,7 @@ vi.mock("../../models/userModels.js");
 vi.mock("../../util/logging.js");
 
 describe("Auth Controller Unit Tests", () => {
+  // eslint-disable-next-line no-unused-vars
   let req, res;
 
   beforeEach(() => {

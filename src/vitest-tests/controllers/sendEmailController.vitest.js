@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.test" });
 import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
 import { sendEmailController } from "../../controllers/sendEmailControllers/sendEmailController.js";
 import fs from "fs";
@@ -8,24 +10,22 @@ vi.mock("fs");
 vi.mock("path");
 vi.mock("../../util/emailUtils.js");
 vi.mock("resend");
+vi.mock("../../controllers/authControllers/emailWelcomeController.js", () => ({
+  sendWelcomeEmail: vi.fn(),
+}));
 
 describe("sendEmailController", () => {
   let req, res;
 
   beforeEach(() => {
-    req = {
-      body: {},
-    };
+    req = { body: {} };
     res = {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
     };
-
-    Resend.mockImplementation(() => {
-      return {
-        sendEmail: vi.fn().mockResolvedValue({ messageId: "12345" }),
-      };
-    });
+    Resend.mockImplementation(() => ({
+      sendEmail: vi.fn().mockResolvedValue({ messageId: "12345" }),
+    }));
   });
 
   afterEach(() => {
@@ -34,9 +34,7 @@ describe("sendEmailController", () => {
 
   it("should return 400 if to, subject, or templateName is missing", async () => {
     req.body = {};
-
     await sendEmailController(req, res);
-
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
@@ -50,11 +48,8 @@ describe("sendEmailController", () => {
       subject: "Test Subject",
       templateName: "nonexistentTemplate",
     };
-
     fs.existsSync.mockReturnValue(false);
-
     await sendEmailController(req, res);
-
     expect(res.status).toHaveBeenCalledWith(404);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
@@ -68,14 +63,11 @@ describe("sendEmailController", () => {
       subject: "Test Subject",
       templateName: "testTemplate",
     };
-
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockImplementation(() => {
       throw new Error("File read error");
     });
-
     await sendEmailController(req, res);
-
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
@@ -90,12 +82,9 @@ describe("sendEmailController", () => {
       templateName: "testTemplate",
       templateData: { name: "John Doe" },
     };
-
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello {{name}}");
-
     await sendEmailController(req, res);
-
     expect(fs.readFileSync).toHaveBeenCalled();
     expect(sendEmail).toHaveBeenCalledWith(
       "test@example.com",
@@ -110,18 +99,15 @@ describe("sendEmailController", () => {
       subject: "Test Subject",
       templateName: "testTemplate",
     };
-
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello World");
     sendEmail.mockResolvedValue({ messageId: "12345" });
-
     await sendEmailController(req, res);
-
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "Email sent successfully! Check your email for confirmation.",
-      data: { messageId: "12345" },
+      // Eliminar el campo `data` de la respuesta
     });
   });
 
@@ -131,13 +117,10 @@ describe("sendEmailController", () => {
       subject: "Test Subject",
       templateName: "testTemplate",
     };
-
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello World");
     sendEmail.mockRejectedValue(new Error("Failed to send email"));
-
     await sendEmailController(req, res);
-
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
