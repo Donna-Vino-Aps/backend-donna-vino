@@ -57,8 +57,6 @@ export const signup = async (req, res) => {
 
     const newUser = await User.create(req.body.user);
 
-
-
     logInfo(`User created successfully: ${newUser.email}`);
 
     // Prepare a response without sensitive data

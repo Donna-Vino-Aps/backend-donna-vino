@@ -17,9 +17,7 @@ import {
 } from "../../__testUtils__/dbMock.js";
 import app from "../../app.js";
 
-
 const request = supertest(app);
-
 
 vi.mock("resend", () => ({
   Resend: vi.fn().mockImplementation(() => ({

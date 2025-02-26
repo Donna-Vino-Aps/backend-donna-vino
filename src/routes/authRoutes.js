@@ -9,5 +9,4 @@ authRouter.post("/sign-up", signup);
 authRouter.post("/sign-in-with-google", signInWithGoogleController);
 authRouter.post("/log-in", login);
 
-
 export default authRouter;
