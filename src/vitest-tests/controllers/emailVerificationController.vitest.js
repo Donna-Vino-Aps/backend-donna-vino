@@ -1,11 +1,10 @@
-import { describe, it, beforeEach, expect, vi } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import bcrypt from "bcrypt";
 import { v4 as uuidv4 } from "uuid";
 import fs from "fs";
 import path from "path";
 import transporter from "../../config/emailConfig.js";
 import UserVerification from "../../models/userVerification.js";
-
 import {
   resolvePath,
   sendVerificationEmail,
