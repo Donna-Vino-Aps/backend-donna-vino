@@ -8,8 +8,8 @@ const pendingUserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   birthdate: { type: Date, required: true },
+  isSubscribed: { type: Boolean, default: false },
   verificationToken: { type: String, required: true },
-  verificationTokenExpires: { type: Date, required: true },
 });
 
 // Hashing the password

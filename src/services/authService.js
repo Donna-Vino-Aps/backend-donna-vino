@@ -9,7 +9,14 @@ export const signUpUser = async (userData) => {
   try {
     validatePendingUserData(userData);
 
-    const { firstName, lastName, email, password, birthdate } = userData;
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      birthdate,
+      isSubscribed = false,
+    } = userData;
     const userDataCopy = { ...userData };
 
     const existingUser = await User.exists({ email: userData.email });
@@ -77,8 +84,8 @@ export const signUpUser = async (userData) => {
       email,
       password,
       birthdate: userData.birthdate,
+      isSubscribed,
       verificationToken,
-      verificationTokenExpires: new Date(Date.now() + 21600000), // 6 hours
     });
 
     try {

@@ -1,10 +1,11 @@
 import express from "express"; // Import express
 const app = express();
 import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
+import { signup } from "../authControllers/signupController.js";
 import { logInfo, logError } from "../../util/logging.js";
 import PendingUserModel from "../../models/pendingUserModel.js";
 import { signUpUser } from "../../services/authService.js";
-import User from "../../models/userModels.js";
+// import User from "../../models/userModels.js";
 import jwt from "jsonwebtoken";
 
 app.use(express.json());
@@ -38,42 +39,60 @@ export const verifyPendingUser = async (req, res) => {
   }
 
   try {
-    // Find the pending user by verification token
+    // Verify JWT token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    // Find the pending user by email
     const pendingUser = await PendingUserModel.findOne({
-      verificationToken: token,
+      email: decoded.email,
     });
 
     if (!pendingUser) {
       return res.status(400).json({ message: "Invalid or expired token." });
     }
 
-    // Check if the verification-token has expired
-    if (pendingUser.verificationTokenExpires < Date.now()) {
-      return res
-        .status(400)
-        .json({ message: "Verification token has expired." });
+    // // Transfer to main users collection OLD
+    // const { firstName, lastName, email, password, isSubscribed } = pendingUser;
+    // const newUser = new User({
+    //   firstName,
+    //   lastName,
+    //   email,
+    //   password,
+    //   isSubscribed,
+    // });
+    // await newUser.save();
+
+    // Call signup from signUpController
+    const signupRequest = {
+      body: {
+        user: {
+          firstName: pendingUser.firstName,
+          lastName: pendingUser.lastName,
+          email: pendingUser.email,
+          password: pendingUser.password,
+          dateOfBirth: pendingUser.dateOfBirth,
+          isSubscribed: pendingUser.isSubscribed ?? false,
+        },
+      },
+    };
+
+    // Call the signup function
+    await signup(signupRequest, res);
+
+    // If signup succeeds, delete the pending user
+    await PendingUserModel.findByIdAndDelete(pendingUser._id);
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({
+        message: "Verification token has expired. Please request a new one.",
+      });
+    } else if (error.name === "JsonWebTokenError") {
+      return res.status(400).json({ message: "Invalid token." });
     }
 
-    // Transfer to main users collection
-    const { firstName, lastName, email, password } = pendingUser;
-    const newUser = new User({
-      firstName,
-      lastName,
-      email,
-      password,
-    });
-
-    await newUser.save();
-
-    // Delete the user from the pending user collection
-    await PendingUserModel.findByIdAndDelete(pendingUser._id);
-
-    logInfo("User verified and moved to main users:", newUser);
-
-    res.status(200).json({ message: "User verified successfully." });
-  } catch (error) {
-    logError("Error verifying pending user:", error);
-    res.status(500).json({ message: "Server error 2" });
+    return res
+      .status(500)
+      .json({ message: "Server error 2", details: error.message });
   }
 };
 
