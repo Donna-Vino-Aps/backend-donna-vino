@@ -61,7 +61,6 @@ describe("signInWithGoogleController", () => {
       getPayload: () => mockPayload,
     });
 
-
     const response = await request
       .post("/api/auth/sign-in-with-google")
       .send(userData);
