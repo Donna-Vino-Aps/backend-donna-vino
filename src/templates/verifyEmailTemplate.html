@@ -3,10 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
     <title>Email Verification</title>
     <style>
       body {
-        font-family: Arial, sans-serif;
+        font-family: Barlow, sans-serif;
         background-color: #ffffff;
         margin: 0;
         padding: 0;
@@ -20,17 +26,25 @@
         margin: auto;
         text-align: center;
       }
+
+      .logo {
+        width: 124px;
+        margin-bottom: 30px;
+      }
+
       h2 {
         text-align: center;
         color: #333;
+        margin-bottom: 22px;
+        font-weight: 700;
       }
       p {
-        font-size: 16px;
-        color: #333;
+        font-size: 14px;
+        color: #101010;
       }
       .button-container {
         text-align: center;
-        margin: 20px 0;
+        margin: 25px 0;
       }
       .button {
         background-color: #183f27;
@@ -48,10 +62,10 @@
       }
 
       .info {
-        font-size: 13px;
+        font-size: 12px;
         color: #666;
         font-style: italic;
-        margin-top: 30px;
+        margin-top: 27px;
         margin-bottom: 30px;
       }
 
@@ -60,6 +74,7 @@
         color: #101010;
         font-weight: 700;
         line-height: 20px;
+        letter-spacing: 0.035px;
       }
 
       .footer {
@@ -72,10 +87,28 @@
         line-height: 16px;
       }
 
+      .socials {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        margin-bottom: 15px;
+      }
+
+      .social-p {
+        font-size: 12px;
+        color: #6c6c6c;
+        margin-bottom: 15px;
+      }
+
       img {
-        width: 85px;
+        width: 45px;
         position: relative;
         bottom: 3px;
+      }
+
+      a {
+        color: #007aff;
       }
 
       @media (max-width: 768px) {
@@ -178,7 +211,7 @@
   <body>
     <div class="container">
       <img class="logo" src="../public/img/donna-vino-logo-transparent.png" />
-      <h2>You Are Almost There!</h2>
+      <h2>You are almost there!</h2>
       <p>
         Verify your email address to complete the signup and log into your
         account.
@@ -192,27 +225,33 @@
       <p class="info">
         (If you did not sign up for this account, you can ignore this email)
       </p>
-      <p class="thanks">Thank you,<br />The Donna Vino Team</p>
+      <p class="thanks">Thank you,<br />Donna Vino Team</p>
       <div class="footer">
-        <p>Want updates through more platforms?</p>
-        <div>
-          <img
-            src="../public/icons/facebook-line.svg"
-            alt="facebook"
-            style="width: 50px"
-          />
-          <img
-            src="../public/icons/instagram-original.svg"
-            alt="instagram"
-            style="width: 30px"
-          />
-          <img
-            src="../public/icons/linkedin-alt.svg"
-            alt="linkedin"
-            style="width: 50px"
-          />
+        <p class="social-p">Want updates through more platforms?</p>
+        <div class="socials">
+          <a>
+            <img
+              src="../public/icons/facebook-line-black.svg"
+              alt="facebook"
+              style="height: 22px"
+            />
+          </a>
+          <a>
+            <img
+              src="../public/icons/instagram-original-black.svg"
+              alt="instagram"
+              style="height: 22px"
+            />
+          </a>
+          <a>
+            <img
+              src="../public/icons/linkedin-alt-black.svg"
+              alt="linkedin"
+              style="height: 22px"
+            />
+          </a>
         </div>
-        <p>Christianshavn Voldgade 54 - 1424 København</p>
+        <p class="social-p">Christianshavn Voldgade 54 - 1424 København</p>
         <p>
           <a href="#">Subscribe</a> | <a href="#">Privacy policy</a> |
           <a href="#">Contact Us</a>
