@@ -10,7 +10,7 @@ import jwt from "jsonwebtoken";
 
 app.use(express.json());
 
-// Create a pending user
+// Create a pending user function
 export const createPendingUser = async (req, res) => {
   try {
     const userData = req.body;
