@@ -23,9 +23,9 @@ import jwt from "jsonwebtoken";
 
 const request = supertest(app);
 
-vi.mock("../../controllers/authControllers/emailWelcomeController.js", () => ({
-  sendWelcomeEmail: vi.fn(),
-}));
+// vi.mock("../../controllers/authControllers/emailWelcomeController.js", () => ({
+//   sendWelcomeEmail: vi.fn(),
+// }));
 
 vi.mock("../../util/logging.js", () => ({
   logError: vi.fn(),
