@@ -2,9 +2,8 @@ import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
 import SubscribedUser from "../../models/subscribedUser.js";
-import { logInfo } from "../../util/logging.js";
+import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/userModels.js";
-import { logError } from "../../util/logging.js";
 
 const resolvePath = (relativePath) => {
   return path.resolve(process.cwd(), relativePath);
@@ -53,7 +52,8 @@ export const sendEmailController = async (req, res) => {
 
   if (templateData && typeof templateData === "object") {
     Object.keys(templateData).forEach((key) => {
-      emailTemplate = emailTemplate.replace(`{{${key}}}`, templateData[key]);
+      const regex = new RegExp(`{{${key}}}`, "g");
+      emailTemplate = emailTemplate.replace(regex, templateData[key]);
     });
   }
 
@@ -74,42 +74,30 @@ export const sendEmailController = async (req, res) => {
 
     if (user) {
       // Step 3: If the user exists in eCommerce, update isSubscribed to true
-      user.isSubscribed = true;
-      await user.save();
-      logInfo(`User ${to} isSubscribed updated to true.`);
+      if (!user.isSubscribed) {
+        user.isSubscribed = true;
+        await user.save();
+        logInfo(`User ${to} isSubscribed updated to true.`);
+      } else {
+        logInfo(`User ${to} was already subscribed.`);
+      }
 
-      // Step 4: Add the user to the SubscribedUser collection with userId from eCommerce
-      const existingSubscribedUser = await SubscribedUser.findOne({
-        email: to,
+      //Don't add this email to the SubscribedUser collection
+      return res.status(200).json({
+        success: true,
+        message: "User is subscribed successfully.",
       });
-      if (existingSubscribedUser) {
-        logInfo(`User ${to} is already in the SubscribedUser collection.`);
-      } else {
-        const newSubscribedUser = new SubscribedUser({
-          email: to,
-          userId: user._id,
-        });
-        await newSubscribedUser.save();
-        logInfo(
-          `User ${to} added to SubscribedUser collection with userId from eCommerce.`,
-        );
-      }
+    }
+
+    // Step 4: If the user does not exist in eCommerce, add them to SubscribedUser
+    const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
+
+    if (!existingSubscribedUser) {
+      const newSubscribedUser = new SubscribedUser({ email: to });
+      await newSubscribedUser.save();
+      logInfo(`User ${to} added to SubscribedUser collection.`);
     } else {
-      // Step 5: If the user does not exist in eCommerce, add them to SubscribedUser without userId
-      const existingSubscribedUser = await SubscribedUser.findOne({
-        email: to,
-      });
-      if (existingSubscribedUser) {
-        console.warn(`User ${to} is already in the SubscribedUser collection.`);
-      } else {
-        const newSubscribedUser = new SubscribedUser({
-          email: to,
-        });
-        await newSubscribedUser.save();
-        logInfo(
-          `User ${to} added to SubscribedUser collection without userId in eCommerce.`,
-        );
-      }
+      logInfo(`User ${to} is already in the SubscribedUser collection.`);
     }
 
     return res.status(200).json({
