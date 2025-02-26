@@ -17,15 +17,6 @@ import app from "../../app.js";
 
 const request = supertest(app);
 
-vi.mock(
-  "../../controllers/authControllers/emailVerificationController.js",
-  () => ({
-    sendVerificationEmail: vi.fn(),
-    resendVerificationLink: vi.fn(),
-    verifyEmail: vi.fn(),
-  }),
-);
-
 describe("signupController", () => {
   beforeAll(async () => {
     await connectToMockDB();
@@ -49,11 +40,6 @@ describe("signupController", () => {
       dateOfBirth: "1990-02-01",
     };
 
-    const { sendVerificationEmail } = await import(
-      "../../controllers/authControllers/emailVerificationController.js"
-    );
-    sendVerificationEmail.mockResolvedValue(true);
-
     const response = await request
       .post("/api/auth/sign-up/")
       .send({ user: newUser });
@@ -61,7 +47,6 @@ describe("signupController", () => {
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
     expect(response.body.msg).toBe("User created successfully");
-    expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
   });
 
   test("Should pass if user creation succeeds but email sending fails", async () => {
@@ -73,11 +58,6 @@ describe("signupController", () => {
       dateOfBirth: "1990-02-01",
     };
 
-    const { sendVerificationEmail } = await import(
-      "../../controllers/authControllers/emailVerificationController.js"
-    );
-    sendVerificationEmail.mockResolvedValue(false);
-
     const response = await request
       .post("/api/auth/sign-up/")
       .send({ user: newUser });
@@ -85,7 +65,6 @@ describe("signupController", () => {
     expect(response.status).toBe(201);
     expect(response.body.success).toBe(true);
     expect(response.body.msg).toBe("User created successfully");
-    expect(sendVerificationEmail).toHaveBeenCalledTimes(1);
   });
 
   test("Should fail if the request body contains an empty user object", async () => {

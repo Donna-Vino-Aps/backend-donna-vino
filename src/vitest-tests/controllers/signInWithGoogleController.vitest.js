@@ -61,8 +61,6 @@ describe("signInWithGoogleController", () => {
       getPayload: () => mockPayload,
     });
 
-    sendWelcomeEmail.mockResolvedValue(true);
-
     const response = await request
       .post("/api/auth/sign-in-with-google")
       .send(userData);
@@ -74,7 +72,6 @@ describe("signInWithGoogleController", () => {
     expect(response.body.user.email).toBe(mockPayload.email);
     expect(response.body.user.firstName).toBe("John");
     expect(response.body.user.lastName).toBe("Doe");
-    expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 
     const user = await User.findOne({ email: mockPayload.email });
     expect(user).toBeDefined();

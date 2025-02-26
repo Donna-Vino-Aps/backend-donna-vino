@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
     },
   },
   isVip: { type: Boolean, default: false },
+  isSubscribed: { type: Boolean, default: false },
   authProvider: {
     type: String,
     enum: ["local", "google"],
