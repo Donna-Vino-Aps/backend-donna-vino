@@ -2,7 +2,9 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
-// import { sendWelcomeEmail } from "./emailWelcomeController.js";
+import path from "path";
+import fs from "fs";
+import { sendEmail } from "../../util/emailUtils.js";
 
 // OAuth2 client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -52,6 +54,7 @@ export const signInWithGoogleController = async (req, res) => {
     const { id_token, name, firstName, lastName, email, picture } = req.body;
     let resolvedFirstName, resolvedLastName;
     let user;
+    let isNewUser = false; // Flag to indicate if a new user was created
 
     if (!id_token) {
       if (!email || !picture) {
@@ -78,10 +81,7 @@ export const signInWithGoogleController = async (req, res) => {
           authProvider: "google",
         });
         await user.save();
-
-        // sendWelcomeEmail(user).catch((error) =>
-        //   logError("Error sending welcome email: " + error.message),
-        // );
+        isNewUser = true; //This is added in order to not sent the welcomeEmail everyTime that the user sign in with Google
         logInfo(`New Google user created (fallback): ${user.email}`);
       }
     } else {
@@ -107,11 +107,23 @@ export const signInWithGoogleController = async (req, res) => {
           authProvider: "google",
         });
         await user.save();
-
-        // sendWelcomeEmail(user).catch((error) =>
-        //   logError("Error sending welcome email: " + error.message),
-        // );
+        isNewUser = true;
         logInfo(`New Google user created: ${user.email}`);
+      }
+    }
+
+    if (isNewUser) {
+      try {
+        const templatePath = path.resolve(
+          process.cwd(),
+          "src/templates/emailWelcomeTemplate.html",
+        );
+        const templateContent = fs.readFileSync(templatePath, "utf-8");
+        const welcomeSubject = "Welcome to Donna Vino!";
+        await sendEmail(user.email, welcomeSubject, templateContent);
+        logInfo(`Welcome email sent to ${user.email}`);
+      } catch (emailError) {
+        logError("Error sending welcome email: " + emailError.message);
       }
     }
 

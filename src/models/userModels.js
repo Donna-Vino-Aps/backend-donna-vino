@@ -62,10 +62,18 @@ export const validateUser = (userObject) => {
     "password",
     "dateOfBirth",
     "authProvider",
+    "isSubscribed",
   ];
   const validatedKeysMessage = validateAllowedFields(userObject, allowedKeys);
   if (validatedKeysMessage.length > 0) {
     errorList.push(validatedKeysMessage);
+  }
+
+  if (
+    userObject.isSubscribed !== undefined &&
+    typeof userObject.isSubscribed !== "boolean"
+  ) {
+    errorList.push("isSubscribed must be a boolean value (true/false).");
   }
 
   // Validate firstName
