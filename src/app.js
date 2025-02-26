@@ -7,6 +7,11 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import emailRouter from "./routes/emailRoutes.js";
+import contactUsRouter from "./routes/contactUsRoutes.js";
+import {
+  contactLimiter,
+  contactHourlyLimiter,
+} from "./middleware/rateLimitMiddleware.js";
 
 dotenv.config();
 
@@ -48,5 +53,13 @@ app.use("/api/auth", authRouter);
 app.use("/api/user", requireAuth, userRouter);
 app.use("/api/reviews", reviewRouter);
 app.use("/api/send-email", emailRouter);
+
+// web endpoints
+app.use(
+  "/api/contact-us",
+  contactLimiter,
+  contactHourlyLimiter,
+  contactUsRouter,
+);
 
 export default app;
