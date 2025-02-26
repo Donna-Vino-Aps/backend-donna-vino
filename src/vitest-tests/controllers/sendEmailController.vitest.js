@@ -107,7 +107,7 @@ describe("sendEmailController", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "Email sent successfully! Check your email for confirmation.",
-      data: { messageId: "12345" },
+      // Eliminar el campo `data` de la respuesta
     });
   });
 

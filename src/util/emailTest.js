@@ -1,13 +1,13 @@
 import transporter from "../config/emailConfig.js";
 import dotenv from "dotenv";
-import { logInfo } from "./logging.js";
+import { logInfo, logError } from "./logging.js";
 
 dotenv.config();
 
 async function sendTestEmail() {
   try {
     const info = await transporter.sendMail({
-      from: process.env.AUTH_EMAIL,
+      from: process.env.NO_REPLY_EMAIL,
       to: "jenssimonberglund@gmail.com",
       subject: "SMPT Test Email",
       text: "Hello, this is a test email using Simply.com SMTP settings.",
@@ -15,7 +15,7 @@ async function sendTestEmail() {
 
     logInfo("Email sent successfully:", info);
   } catch (error) {
-    console.error("Error sending email:", error);
+    logError("Error sending email:", error);
   }
 }
 

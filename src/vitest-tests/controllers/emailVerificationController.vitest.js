@@ -33,6 +33,23 @@ vi.mock("../../models/userModels.js");
 vi.mock("../../util/logging.js");
 
 describe("Auth Controller Unit Tests", () => {
+  // eslint-disable-next-line no-unused-vars
+  let req, res;
+
+  beforeEach(() => {
+    req = {
+      body: {},
+      params: {},
+    };
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+      redirect: vi.fn(),
+      sendFile: vi.fn(),
+    };
+    vi.clearAllMocks();
+  });
+
   describe("resolvePath", () => {
     it("should resolve path correctly in GitHub Actions environment", () => {
       process.env.GITHUB_ACTIONS = "true";
