@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
-import SubscribedUser from "../../models/SubscribedUser.js";
+import SubscribedUser from "../../models/subscribedUser.js";
 import { logInfo } from "../../util/logging.js";
 import User from "../../models/userModels.js";
 
