@@ -3,16 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="http://fonts.googleapis.com/css?family=Roboto"
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&display=swap"
       rel="stylesheet"
-      type="text/css"
     />
-
     <title>Donna Vino Aps</title>
     <style>
       body {
-        font-family: "Roboto", sans-serif;
+        font-family: "Barlow", sans-serif;
         background-color: #f4f4f4;
       }
 
@@ -27,19 +27,23 @@
       }
 
       .header img {
-        max-width: 20%;
-        height: 60px;
-        margin-bottom: 10px;
+        width: 124px;
+        margin-bottom: 30px;
       }
 
       .header video {
         max-width: 50%;
       }
 
+      .heading {
+        margin-bottom: 10px;
+      }
+
       .content p {
         text-align: center;
         font-size: 16px;
         line-height: 1.5;
+        margin: 0 250px;
         padding: 20px;
       }
 
@@ -47,7 +51,24 @@
         text-align: center;
         font-size: 12px;
         color: #888;
-        padding: 20px;
+        padding: 15px;
+      }
+
+      .glass {
+        font-size: 12px;
+        letter-spacing: 0.035px;
+        line-height: 16px;
+        position: relative;
+        top: 5px;
+      }
+
+      .content > .thanks {
+        font-size: 14px;
+        color: #101010;
+        font-weight: 700;
+        line-height: 20px;
+        letter-spacing: 0.035px;
+        margin-top: 10px;
       }
 
       .footer img {
@@ -65,7 +86,7 @@
         text-decoration: none;
         display: inline-block;
         font-size: 16px;
-        margin-top: 20px;
+        margin-top: 5px;
         margin-bottom: 20px;
       }
 
@@ -79,24 +100,38 @@
           padding: 0px;
         }
       }
+
+      @media (max-width: 1024px) {
+        .content p {
+          margin: 0 25px;
+        }
+      }
+
+      @media (max-width: 864px) {
+        .content p {
+          margin: 0 15px;
+        }
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <div class="header">
         <img
+          class="logo"
           src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
-          alt="Avatar"
+          alt="Donna Vino Logo"
         />
 
-        <h2>Welcome to our family!</h2>
+        <h2 class="heading">Welcome to our family!</h2>
       </div>
 
       <div class="content">
         <p>
           Get ready to embark on a thrilling journey of discovery as you explore
           a world of exquisite wines. We're excited to have you join our
-          community.
+          community and can't wait to share exclusive insights, special offers,
+          and unforgettable tasting experiences with you.
         </p>
       </div>
 
@@ -105,30 +140,31 @@
       </div>
 
       <div class="content">
-        <spam>Let's raise a glass to new beginnings!</spam>
-        <img
-          class="wine-glasses"
-          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/wine-glasses.png"
-        />
-
-        <p>Thank you,<br />The Donna Vino Team</p>
+        <spam class="glass">Let's raise a glass to new beginnings! 🥂</spam>
+        <p class="thanks">Thank you,<br />Donna Vino Team</p>
       </div>
 
       <div class="footer">
         <p>Want updates through more platforms?</p>
-        <img
-          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/facebook-line.png"
-          alt="facebook"
-        />
-        <img
-          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/instagram-original.png"
-          alt="instagram"
-        />
-        <img
-          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/linkedin-alt.png"
-          alt="linkedin"
-        />
-        <p>Wildersgade 23, 1408 København K</p>
+        <a href="https://www.facebook.com/donnavino.dk/">
+          <img
+            src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/facebook-line.png"
+            alt="facebook"
+        /></a>
+        <a
+          href="https://www.instagram.com/donna_vino_winetastings/?api=postMessage%2F"
+        >
+          <img
+            src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/instagram-original.png"
+            alt="instagram"
+          />
+        </a>
+        <a href="https://www.linkedin.com/company/donna-vino-aps/">
+          <img
+            src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/linkedin-alt.png"
+            alt="linkedin"
+        /></a>
+        <p>Christianshavns Voldgade 54 - 1424 København</p>
         <p>
           <a href="#">Unsubscribe</a> | <a href="#">Privacy policy</a> |
           <a href="#">Contact us</a>
