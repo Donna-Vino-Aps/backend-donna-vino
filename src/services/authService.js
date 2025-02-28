@@ -19,6 +19,8 @@ export const signUpUser = async (userData) => {
     } = userData;
     const userDataCopy = { ...userData };
 
+    const trimmedEmail = userData.email.trim().toLowerCase();
+
     const existingUser = await User.exists({ email: userData.email });
 
     const existingPendingUser = await PendingUser.findOne({
@@ -26,8 +28,6 @@ export const signUpUser = async (userData) => {
     });
 
     logInfo("User email to check:", userData.email);
-    // check if the email is already in the pendingUser-collection
-    const trimmedEmail = userData.email.trim().toLowerCase();
 
       // Check if the result is valid and handle accordingly
       if (existingPendingUser === undefined) {
