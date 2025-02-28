@@ -1,23 +1,20 @@
-import express from "express"; // Import express
+import express from "express";
 const app = express();
 import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
 import { signup } from "../authControllers/signupController.js";
 import { logInfo, logError } from "../../util/logging.js";
 import PendingUserModel from "../../models/pendingUserModel.js";
 import { signUpUser } from "../../services/authService.js";
-// import User from "../../models/userModels.js";
 import jwt from "jsonwebtoken";
 
 app.use(express.json());
 
-// Create a pending user function
 export const createPendingUser = async (req, res) => {
   try {
     const userData = req.body;
     logInfo("User Data received for sign-up:", userData);
 
-    // Call the signUpUser function from the authService
-    const newUser = await signUpUser(req.body);
+    const newUser = await signUpUser(userData);
 
     res.status(201).json({
       message:
@@ -26,11 +23,10 @@ export const createPendingUser = async (req, res) => {
     });
   } catch (error) {
     logError("Error creating pending user:", error.message, error.stack);
-    res.status(500).json({ message: "Server error 1", details: error.message });
+    res.status(500).json({ message: "Server error", details: error.message });
   }
 };
 
-// verify a pending user
 export const verifyPendingUser = async (req, res) => {
   const { token } = req.body;
 
@@ -39,10 +35,8 @@ export const verifyPendingUser = async (req, res) => {
   }
 
   try {
-    // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // Find the pending user by email
     const pendingUser = await PendingUserModel.findOne({
       email: decoded.email,
     });
@@ -51,18 +45,6 @@ export const verifyPendingUser = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired token." });
     }
 
-    // // Transfer to main users collection OLD
-    // const { firstName, lastName, email, password, isSubscribed } = pendingUser;
-    // const newUser = new User({
-    //   firstName,
-    //   lastName,
-    //   email,
-    //   password,
-    //   isSubscribed,
-    // });
-    // await newUser.save();
-
-    // Call signup from signUpController
     const signupRequest = {
       body: {
         user: {
@@ -76,10 +58,8 @@ export const verifyPendingUser = async (req, res) => {
       },
     };
 
-    // Call the signup function
     await signup(signupRequest, res);
 
-    // If signup succeeds, delete the pending user
     await PendingUserModel.findByIdAndDelete(pendingUser._id);
   } catch (error) {
     if (error.name === "TokenExpiredError") {
@@ -92,11 +72,10 @@ export const verifyPendingUser = async (req, res) => {
 
     return res
       .status(500)
-      .json({ message: "Server error 2", details: error.message });
+      .json({ message: "Server error", details: error.message });
   }
 };
 
-// resending the verification mail if token is expired, or user requests a new one
 export const resendVerificationEmail = async (req, res) => {
   const { email } = req.body;
 
@@ -105,7 +84,6 @@ export const resendVerificationEmail = async (req, res) => {
   }
 
   try {
-    // check if email exists in pending users-collection
     const pendingUser = await PendingUserModel.findOne({ email });
 
     if (!pendingUser) {
@@ -114,7 +92,6 @@ export const resendVerificationEmail = async (req, res) => {
         .json({ message: "No pending user found with this email." });
     }
 
-    // Generate new verification token with expiration time using JWT
     const verificationToken = jwt.sign(
       {
         email,
@@ -125,14 +102,12 @@ export const resendVerificationEmail = async (req, res) => {
       { expiresIn: "24h" },
     );
 
-    // Update the pending user with new token and expiration time
     pendingUser.verificationToken = verificationToken;
     pendingUser.verificationTokenExpires = new Date(Date.now() + 21600000);
 
     await pendingUser.save();
     logInfo("Verification email resent for:", pendingUser);
 
-    // Prepare email data for verification email
     const emailData = {
       to: email,
       subject: "Please Verify Your Email Address",
@@ -144,7 +119,6 @@ export const resendVerificationEmail = async (req, res) => {
       },
     };
 
-    // Send verification mail
     const emailResponse = await sendEmailController(emailData);
 
     res.status(200).json({
@@ -153,6 +127,6 @@ export const resendVerificationEmail = async (req, res) => {
     });
   } catch (error) {
     logError("Error resending verification email:", error);
-    res.status(500).json({ message: "Server error 3" });
+    res.status(500).json({ message: "Server error" });
   }
 };

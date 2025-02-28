@@ -14,7 +14,6 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export const sendEmailController = async (req, res) => {
   const { to, subject, templateName, templateData } = req.body;
-  // const { to, subject, templateName, templateData } = emailData;
 
   if (!to || !subject || !templateName) {
     return res.status(400).json({
@@ -61,8 +60,6 @@ export const sendEmailController = async (req, res) => {
   try {
     // Step 1: Send the email
     const data = await sendEmail(to, subject, emailTemplate);
-    logInfo("Data from sendEmail:", data);
-
     if (data.error) {
       logError("Email validation error:", data.error);
       return res.status(data.error.statusCode || 500).json({

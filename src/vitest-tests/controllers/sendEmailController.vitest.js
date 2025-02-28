@@ -25,9 +25,6 @@ describe("sendEmailController", () => {
       status: vi.fn().mockReturnThis(),
       json: vi.fn(),
     };
-    // Mocking the sendEmail function from emailUtils
-    sendEmail.mockResolvedValue({ messageId: "12345" });
-
     Resend.mockImplementation(() => ({
       sendEmail: vi.fn().mockResolvedValue({ messageId: "12345" }),
     }));

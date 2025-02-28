@@ -1,164 +1,120 @@
-import { describe, it, beforeEach, expect, vi } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import jwt from "jsonwebtoken";
 import { signUpUser } from "../../services/authService.js";
 import PendingUser from "../../models/pendingUserModel.js";
 import User from "../../models/userModels.js";
 import { sendEmailController } from "../../controllers/sendEmailControllers/sendEmailController.js";
-import { logError } from "../../util/logging.js";
+import { validatePendingUserData } from "../../util/validatePendingUserData.js";
 
-// Mock dependencies
-vi.mock("../../models/pendingUserModel.js", () => {
-  return {
-    default: {
-      findOne: vi.fn(),
-      exists: vi.fn(),
-      create: vi.fn(),
-    },
-    PendingUser: class {
-      constructor(data) {
-        Object.assign(this, data);
-      }
-      save = vi.fn().mockResolvedValue();
-    },
+vi.mock("../../models/pendingUserModel.js");
+vi.mock("../../models/userModels.js");
+vi.mock("../../controllers/sendEmailControllers/sendEmailController.js");
+vi.mock("../../util/validatePendingUserData.js");
+vi.mock("jsonwebtoken");
+
+describe("signUpUser", () => {
+  const mockUserData = {
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    password: "SecurePassword123",
+    birthdate: "1990-01-01",
+    isSubscribed: true,
   };
-});
 
-vi.mock("../../models/userModels.js", () => ({
-  default: {
-    exists: vi.fn(),
-  },
-}));
+  const mockUserData2 = {
+    firstName: "John",
+    lastName: "Doe",
+    email: "john.doe@example.com",
+    password: "SecurePassword123",
+    birthdate: "2010-01-01",
+    isSubscribed: true,
+  };
 
-vi.mock("jsonwebtoken", () => ({
-  default: {
-    sign: vi.fn(() => "mockedToken"),
-  },
-}));
-
-
-vi.mock("@/controllers/sendEmailControllers/sendEmailController.js", () => ({
-  sendEmailController: vi.fn(),
-}));
-
-vi.mock("@/util/logging.js", () => ({
-  logInfo: vi.fn(),
-  logError: vi.fn(),
-}));
-
-describe("AuthService - signUpUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    sendEmailController.mockResolvedValue(Promise.resolve()); // Ensures sendEmailController always returns a resolved promise
+    process.env.JWT_SECRET = "test-secret";
+    process.env.API_URL_LOCAL = "http://localhost:3000";
   });
 
-  it("should successfully create a pending user", async () => {
-    PendingUser.findOne.mockResolvedValue(null); // No existing pending user
-    User.exists.mockResolvedValue(false); // No existing user
+  beforeEach(async () => {
+    vi.restoreAllMocks();
+    await PendingUser.deleteMany();
+  });
+
+  it("should create a pending user and send a verification email", async () => {
+    User.exists.mockResolvedValue(false);
+    PendingUser.findOne.mockResolvedValue(null);
+    PendingUser.prototype.save = vi.fn().mockResolvedValue();
+    jwt.sign.mockReturnValue("test-verification-token");
     sendEmailController.mockResolvedValue();
 
-    const userData = {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john@example.com",
-      password: "securepassword",
-      birthdate: "2000-01-01",
-    };
+    const result = await signUpUser(mockUserData);
 
-    const result = await signUpUser(userData);
+    expect(validatePendingUserData).toHaveBeenCalledWith(mockUserData);
+    expect(User.exists).toHaveBeenCalledWith({ email: mockUserData.email });
+    expect(PendingUser.findOne).toHaveBeenCalledWith({
+      email: mockUserData.email,
+    });
+    expect(PendingUser.prototype.save).toHaveBeenCalled();
+    expect(jwt.sign).toHaveBeenCalledWith(
+      { email: mockUserData.email, firstName: "John", lastName: "Doe" },
+      "test-secret",
+      { expiresIn: "6h" },
+    );
+    expect(sendEmailController).toHaveBeenCalledWith({
+      body: {
+        to: mockUserData.email,
+        subject: "Please Verify Your Email Address",
+        templateName: "verifyEmailTemplate",
+        templateData: {
+          firstName: "John",
+          lastName: "Doe",
+          verificationLink:
+            "http://localhost:3000/verify?token=test-verification-token",
+        },
+      },
+    });
 
     expect(result.message).toBe(
-      "Pending user created successfully. Please check your email to verify your account."
-    );
-    expect(PendingUser.findOne).toHaveBeenCalledWith({
-      email: "john@example.com",
-    });
-    expect(User.exists).toHaveBeenCalledWith({ email: "john@example.com" });
-    expect(PendingUser.prototype.save).toHaveBeenCalled();
-    expect(sendEmailController).toHaveBeenCalled();
-  });
-
-  it("should throw an error if email is already registered", async () => {
-    User.exists.mockResolvedValue(true); // Simulate existing user
-
-    const userData = {
-      firstName: "Jane",
-      lastName: "Doe",
-      email: "jane@example.com",
-      password: "securepassword",
-      birthdate: "2000-05-10",
-    };
-
-    await expect(signUpUser(userData)).rejects.toThrowError(
-      "Email is already registered. Please log in instead."
-    );
-
-    expect(User.exists).toHaveBeenCalledWith({ email: "jane@example.com" });
-  });
-
-  it("should throw an error if email is already in pending list", async () => {
-    PendingUser.findOne.mockResolvedValue({ email: "pending@example.com" });
-
-    const userData = {
-      firstName: "Alex",
-      lastName: "Smith",
-      email: "pending@example.com",
-      password: "securepassword",
-      birthdate: "1995-03-15",
-    };
-
-    await expect(signUpUser(userData)).rejects.toThrowError(
-      "A verification email was already sent. Please check your inbox."
-    );
-
-    expect(PendingUser.findOne).toHaveBeenCalledWith({
-      email: "pending@example.com",
-    });
-  });
-
-  it("should throw an error if birthdate is invalid", async () => {
-    const userData = {
-      firstName: "Invalid",
-      lastName: "User",
-      email: "invalid@example.com",
-      password: "securepassword",
-      birthdate: "not-a-date",
-    };
-
-    await expect(signUpUser(userData)).rejects.toThrowError("Invalid birthdate.");
-  });
-
-  it("should throw an error if user is under 18", async () => {
-    const userData = {
-      firstName: "Young",
-      lastName: "User",
-      email: "young@example.com",
-      password: "securepassword",
-      birthdate: "2010-06-15",
-    };
-
-    await expect(signUpUser(userData)).rejects.toThrowError(
-      "You must be at least 18 years old to register."
+      "Pending user created successfully. Please check your email to verify your account.",
     );
   });
 
-  it("should handle database save errors", async () => {
-    PendingUser.findOne.mockResolvedValue(null);
+  it("should throw an error if the user already exists", async () => {
+    User.exists.mockResolvedValue(true);
+
+    await expect(signUpUser(mockUserData)).rejects.toThrow(
+      "Email is already registered. Please log in instead.",
+    );
+  });
+
+  it("should throw an error if a pending user already exists", async () => {
     User.exists.mockResolvedValue(false);
-    PendingUser.prototype.save = vi
-      .fn()
-      .mockRejectedValue(new Error("DB save error"));
+    PendingUser.findOne.mockResolvedValue(mockUserData);
 
-    const userData = {
-      firstName: "Error",
-      lastName: "Case",
-      email: "error@example.com",
-      password: "securepassword",
-      birthdate: "1990-07-07",
-    };
-
-    await expect(signUpUser(userData)).rejects.toThrowError(
-      "SignUpUser failed: DB save error"
+    await expect(signUpUser(mockUserData)).rejects.toThrow(
+      "A verification email was already sent. Please check your inbox.",
     );
+  });
 
-    expect(logError).toHaveBeenCalled();
+  it("should throw an error if the user is under 18", async () => {
+    const underageUser = { ...mockUserData2, birthdate: "2010-01-01" };
+
+    await expect(signUpUser(underageUser)).rejects.toThrow(
+      "User must be at least 18 years old.",
+    );
+  });
+
+  it("should throw an error if email sending fails", async () => {
+    User.exists.mockResolvedValue(false);
+    PendingUser.findOne.mockResolvedValue(null);
+    PendingUser.prototype.save = vi.fn().mockResolvedValue();
+    jwt.sign.mockReturnValue("test-verification-token");
+    sendEmailController.mockRejectedValue(new Error("Email sending failed"));
+
+    await expect(signUpUser(mockUserData)).rejects.toThrow(
+      "SignUpUser failed: Email sending failed",
+    );
   });
 });
