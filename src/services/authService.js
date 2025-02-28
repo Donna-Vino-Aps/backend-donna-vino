@@ -36,7 +36,7 @@ export const signUpUser = async (userData) => {
 
     // Check if the user already exists
     if (existingUser) {
-      throw new Error("A verification email was already sent. Please check your inbox.");
+      throw new Error("Email is already registered. Please log in instead.");
     }
 
     // Check if the result is valid and handle accordingly
@@ -67,7 +67,7 @@ export const signUpUser = async (userData) => {
     }
 
     if (age < 18) {
-      throw new Error("You must be at least 18 years old to register.");
+      throw new Error("Invalid birthdate.");
     }
 
     // Generate verification token with expiration time using JWT
