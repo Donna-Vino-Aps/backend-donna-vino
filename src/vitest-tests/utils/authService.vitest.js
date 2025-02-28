@@ -1,9 +1,9 @@
 import { describe, it, beforeEach, expect, vi } from "vitest";
-import { signUpUser } from "@/services/authService.js";
-import PendingUser from "@/models/pendingUserModel.js";
-import User from "@/models/userModels.js";
-import { sendEmailController } from "@/controllers/sendEmailControllers/sendEmailController.js";
-import { logError } from "@/util/logging.js";
+import { signUpUser } from "../../services/authService.js";
+import PendingUser from "../../models/pendingUserModel.js";
+import User from "../../models/userModels.js";
+import { sendEmailController } from "../../controllers/sendEmailControllers/sendEmailController.js";
+import { logError } from "../../util/logging.js";
 
 // Mock dependencies
 vi.mock("@/models/pendingUserModel.js", () => ({
