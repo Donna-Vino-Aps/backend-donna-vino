@@ -50,7 +50,6 @@ describe("AuthService - signUpUser", () => {
   it("should successfully create a pending user", async () => {
     PendingUser.findOne.mockResolvedValue(null); // No existing pending user
     User.exists.mockResolvedValue(false); // No existing user
-    PendingUser.prototype.save = vi.fn().mockResolvedValue(); // Mock save function
     sendEmailController.mockResolvedValue();
 
     const userData = {
