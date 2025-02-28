@@ -29,8 +29,11 @@ vi.mock("../../models/userModels.js", () => ({
 }));
 
 vi.mock("jsonwebtoken", () => ({
-  sign: vi.fn(() => "mockedToken"),
+  default: {
+    sign: vi.fn(() => "mockedToken"),
+  },
 }));
+
 
 vi.mock("@/controllers/sendEmailControllers/sendEmailController.js", () => ({
   sendEmailController: vi.fn(),

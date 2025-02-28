@@ -25,6 +25,16 @@ export const signUpUser = async (userData) => {
     // check if the email is already in the pendingUser-collection
     const trimmedEmail = userData.email.trim().toLowerCase();
 
+      // Check if the result is valid and handle accordingly
+      if (existingPendingUser === undefined) {
+        throw new Error("Unexpected result from database query.");
+      }
+      if (existingPendingUser) {
+        throw new Error(
+          "A verification email was already sent. Please check your inbox.",
+        );
+      }
+
     const existingPendingUser = await PendingUser.findOne({
       email: trimmedEmail,
     });
@@ -39,15 +49,6 @@ export const signUpUser = async (userData) => {
       throw new Error("Email is already registered. Please log in instead.");
     }
 
-    // Check if the result is valid and handle accordingly
-    if (existingPendingUser === undefined) {
-      throw new Error("Unexpected result from database query.");
-    }
-    if (existingPendingUser) {
-      throw new Error(
-        "A verification email was already sent. Please check your inbox.",
-      );
-    }
 
     // Check if user is of right age
     const birthdateObj = new Date(userDataCopy.birthdate); // Assuming the birthdate is passed in the body
