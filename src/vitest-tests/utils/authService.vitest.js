@@ -17,7 +17,7 @@ vi.mock("../../models/pendingUserModel.js", () => {
       constructor(data) {
         Object.assign(this, data);
       }
-      save = vi.fn();
+      save = vi.fn().mockResolvedValue();
     },
   };
 });
