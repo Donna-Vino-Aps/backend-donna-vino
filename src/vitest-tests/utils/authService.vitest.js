@@ -6,16 +6,23 @@ import { sendEmailController } from "../../controllers/sendEmailControllers/send
 import { logError } from "../../util/logging.js";
 
 // Mock dependencies
-vi.mock("@/models/pendingUserModel.js", () => ({
-  default: {
-    findOne: vi.fn(),
-    create: vi.fn(),
-    exists: vi.fn(),
-    save: vi.fn(),
-  },
-}));
+vi.mock("../../models/pendingUserModel.js", () => {
+  return {
+    default: {
+      findOne: vi.fn(),
+      exists: vi.fn(),
+      create: vi.fn(),
+    },
+    PendingUser: class {
+      constructor(data) {
+        Object.assign(this, data);
+      }
+      save = vi.fn();
+    },
+  };
+});
 
-vi.mock("@/models/userModels.js", () => ({
+vi.mock("../../models/userModels.js", () => ({
   default: {
     exists: vi.fn(),
   },
@@ -37,6 +44,7 @@ vi.mock("@/util/logging.js", () => ({
 describe("AuthService - signUpUser", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    sendEmailController.mockResolvedValue(Promise.resolve()); // Ensures sendEmailController always returns a resolved promise
   });
 
   it("should successfully create a pending user", async () => {
