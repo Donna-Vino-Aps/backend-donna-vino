@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
-import { logError } from "../../util/logging.js";
+import { logError, logInfo } from "../../util/logging.js";
 
 const resolvePath = (relativePath) => {
   return path.resolve(process.cwd(), relativePath);
@@ -9,9 +9,9 @@ const resolvePath = (relativePath) => {
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const sendEmailController = async (emailData) => {
-  const { to, subject, templateName, templateData } = emailData;
-  // const { to, subject, templateName, templateData } = req.body;
+export const sendEmailController = async (req, res) => {
+  const { to, subject, templateName, templateData } = req.body;
+  // const { to, subject, templateName, templateData } = emailData;
 
   if (!to || !subject || !templateName) {
     return res.status(400).json({
