@@ -3,10 +3,10 @@ import { signUpUser } from "../../services/authService.js";
 import PendingUser from "../../models/pendingUserModel.js";
 import User from "../../models/userModels.js";
 import { sendEmailController } from "../../controllers/sendEmailControllers/sendEmailController.js";
-import { logError } from "../util/logging.js";
+import { logError } from "../../util/logging.js";
 
 // Mock dependencies
-vi.mock("../models/pendingUserModel.js", () => ({
+vi.mock("../../models/pendingUserModel.js", () => ({
   default: {
     findOne: vi.fn(),
     create: vi.fn(),
@@ -15,7 +15,7 @@ vi.mock("../models/pendingUserModel.js", () => ({
   },
 }));
 
-vi.mock("../models/userModels.js", () => ({
+vi.mock("../../models/userModels.js", () => ({
   default: {
     exists: vi.fn(),
   },
@@ -25,11 +25,11 @@ vi.mock("jsonwebtoken", () => ({
   sign: vi.fn(() => "mockedToken"),
 }));
 
-vi.mock("../controllers/sendEmailControllers/sendEmailController.js", () => ({
+vi.mock("../../controllers/sendEmailControllers/sendEmailController.js", () => ({
   sendEmailController: vi.fn(),
 }));
 
-vi.mock("../util/logging.js", () => ({
+vi.mock("../../util/logging.js", () => ({
   logInfo: vi.fn(),
   logError: vi.fn(),
 }));
