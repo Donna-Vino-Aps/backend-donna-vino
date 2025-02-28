@@ -18,14 +18,14 @@ import {
 import app from "../../app.js";
 import User from "../../models/userModels.js";
 import { OAuth2Client } from "google-auth-library";
-import { sendWelcomeEmail } from "../../controllers/authControllers/emailWelcomeController.js";
+// import { sendWelcomeEmail } from "../../controllers/authControllers/emailWelcomeController.js";
 import jwt from "jsonwebtoken";
 
 const request = supertest(app);
 
-vi.mock("../../controllers/authControllers/emailWelcomeController.js", () => ({
-  sendWelcomeEmail: vi.fn(),
-}));
+// vi.mock("../../controllers/authControllers/emailWelcomeController.js", () => ({
+//   sendWelcomeEmail: vi.fn(),
+// }));
 
 vi.mock("../../util/logging.js", () => ({
   logError: vi.fn(),
@@ -61,8 +61,6 @@ describe("signInWithGoogleController", () => {
       getPayload: () => mockPayload,
     });
 
-    sendWelcomeEmail.mockResolvedValue(true);
-
     const response = await request
       .post("/api/auth/sign-in-with-google")
       .send(userData);
@@ -74,7 +72,6 @@ describe("signInWithGoogleController", () => {
     expect(response.body.user.email).toBe(mockPayload.email);
     expect(response.body.user.firstName).toBe("John");
     expect(response.body.user.lastName).toBe("Doe");
-    expect(sendWelcomeEmail).toHaveBeenCalledTimes(1);
 
     const user = await User.findOne({ email: mockPayload.email });
     expect(user).toBeDefined();
@@ -108,7 +105,7 @@ describe("signInWithGoogleController", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.user.email).toBe(existingUser.email);
-    expect(sendWelcomeEmail).not.toHaveBeenCalled();
+    // expect(sendWelcomeEmail).not.toHaveBeenCalled();
   });
 
   it("should return current session user if session is valid", async () => {

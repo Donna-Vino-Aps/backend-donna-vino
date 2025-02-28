@@ -16,18 +16,9 @@ import {
   clearMockDatabase,
 } from "../../__testUtils__/dbMock.js";
 import app from "../../app.js";
-import { sendVerificationEmail } from "../../controllers/authControllers/emailVerificationController.js";
 
 const request = supertest(app);
 
-vi.mock(
-  "../../controllers/authControllers/emailVerificationController.js",
-  () => ({
-    sendVerificationEmail: vi.fn(),
-    resendVerificationLink: vi.fn(),
-    verifyEmail: vi.fn(),
-  }),
-);
 vi.mock("resend", () => ({
   Resend: vi.fn().mockImplementation(() => ({
     sendEmail: vi.fn().mockResolvedValue({}),
@@ -59,8 +50,6 @@ describe("logoutController", () => {
       password: "Test1234!",
       dateOfBirth: "1990-02-01",
     };
-
-    sendVerificationEmail.mockResolvedValue(true);
 
     // User sign-up
     await request.post("/api/auth/sign-up").send({ user: testUser });

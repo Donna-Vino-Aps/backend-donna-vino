@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
 import User from "../../models/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
-import { sendWelcomeEmail } from "./emailWelcomeController.js";
+// import { sendWelcomeEmail } from "./emailWelcomeController.js";
 
 // OAuth2 client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
@@ -79,9 +79,9 @@ export const signInWithGoogleController = async (req, res) => {
         });
         await user.save();
 
-        sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message),
-        );
+        // sendWelcomeEmail(user).catch((error) =>
+        //   logError("Error sending welcome email: " + error.message),
+        // );
         logInfo(`New Google user created (fallback): ${user.email}`);
       }
     } else {
@@ -108,9 +108,9 @@ export const signInWithGoogleController = async (req, res) => {
         });
         await user.save();
 
-        sendWelcomeEmail(user).catch((error) =>
-          logError("Error sending welcome email: " + error.message),
-        );
+        // sendWelcomeEmail(user).catch((error) =>
+        //   logError("Error sending welcome email: " + error.message),
+        // );
         logInfo(`New Google user created: ${user.email}`);
       }
     }
