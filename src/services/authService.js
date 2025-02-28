@@ -36,7 +36,7 @@ export const signUpUser = async (userData) => {
 
     // Check if the user already exists
     if (existingUser) {
-      throw new Error("Email is already registered. Please log in instead.");
+      throw new Error("A verification email was already sent. Please check your inbox.");
     }
 
     // Check if the result is valid and handle accordingly

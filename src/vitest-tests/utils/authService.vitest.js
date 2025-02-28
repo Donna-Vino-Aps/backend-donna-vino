@@ -64,7 +64,7 @@ describe("AuthService - signUpUser", () => {
     const result = await signUpUser(userData);
 
     expect(result.message).toBe(
-      "Pending user created successfully. Please check your email to verify your account.",
+      "Pending user created successfully. Please check your email to verify your account."
     );
     expect(PendingUser.findOne).toHaveBeenCalledWith({
       email: "john@example.com",
@@ -85,8 +85,8 @@ describe("AuthService - signUpUser", () => {
       birthdate: "2000-05-10",
     };
 
-    await expect(signUpUser(userData)).rejects.toThrow(
-      "Email is already registered. Please log in instead.",
+    await expect(signUpUser(userData)).rejects.toThrowError(
+      "Email is already registered. Please log in instead."
     );
 
     expect(User.exists).toHaveBeenCalledWith({ email: "jane@example.com" });
@@ -103,8 +103,8 @@ describe("AuthService - signUpUser", () => {
       birthdate: "1995-03-15",
     };
 
-    await expect(signUpUser(userData)).rejects.toThrow(
-      "A verification email was already sent. Please check your inbox.",
+    await expect(signUpUser(userData)).rejects.toThrowError(
+      "A verification email was already sent. Please check your inbox."
     );
 
     expect(PendingUser.findOne).toHaveBeenCalledWith({
@@ -121,7 +121,7 @@ describe("AuthService - signUpUser", () => {
       birthdate: "not-a-date",
     };
 
-    await expect(signUpUser(userData)).rejects.toThrow("Invalid birthdate.");
+    await expect(signUpUser(userData)).rejects.toThrowError("Invalid birthdate.");
   });
 
   it("should throw an error if user is under 18", async () => {
@@ -133,8 +133,8 @@ describe("AuthService - signUpUser", () => {
       birthdate: "2010-06-15",
     };
 
-    await expect(signUpUser(userData)).rejects.toThrow(
-      "You must be at least 18 years old to register.",
+    await expect(signUpUser(userData)).rejects.toThrowError(
+      "You must be at least 18 years old to register."
     );
   });
 
@@ -153,8 +153,8 @@ describe("AuthService - signUpUser", () => {
       birthdate: "1990-07-07",
     };
 
-    await expect(signUpUser(userData)).rejects.toThrow(
-      "SignUpUser failed: DB save error",
+    await expect(signUpUser(userData)).rejects.toThrowError(
+      "SignUpUser failed: DB save error"
     );
 
     expect(logError).toHaveBeenCalled();
