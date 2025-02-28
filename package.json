@@ -70,6 +70,7 @@
     "nodemailer": "^6.9.13",
     "resend": "^4.1.2",
     "semver": "^7.6.3",
-    "uuid": "^9.0.1"
+    "uuid": "^9.0.1",
+    "vite-tsconfig-paths": "^5.1.4"
   }
 }
