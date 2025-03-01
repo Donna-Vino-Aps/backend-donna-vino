@@ -49,7 +49,7 @@ jobs:
           fi
 
       - name: Run Vitest Tests
-        run: npm run tests
+        run: npm run test
 
       - name: Run Code Style Checks
         run: npm run code-style-check
