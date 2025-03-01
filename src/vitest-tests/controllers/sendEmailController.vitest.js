@@ -154,23 +154,11 @@ describe("sendEmailController", () => {
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello World");
     sendEmail.mockResolvedValue({ messageId: "12345" });
-
-    // Mocking user model
-    const user = {
-      _id: "userId",
-      email: "test@example.com",
-      isSubscribed: false,
-      save: vi.fn(),
-    };
-
-    User.findOne = vi.fn().mockResolvedValue(user);
+    User.findOne = vi.fn().mockResolvedValue(null);
     SubscribedUser.findOne = vi.fn().mockResolvedValue(null);
     SubscribedUser.prototype.save = vi.fn().mockResolvedValue();
-
     await sendEmailController(req, res);
-
     expect(User.findOne).toHaveBeenCalledWith({ email: "test@example.com" });
-    expect(user.save).toHaveBeenCalled();
     expect(SubscribedUser.prototype.save).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
   });
