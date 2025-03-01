@@ -1,12 +1,12 @@
 import { logError, logInfo } from "../../util/logging.js";
 import validationErrorMessage from "../../util/validationErrorMessage.js";
-import { validateUser } from "../../models/userModels.js";
-import User from "../../models/userModels.js";
+import { validateUser } from "../../models/users/userModels.js";
+import User from "../../models/users/userModels.js";
 import validateAllowedFields from "../../util/validateAllowedFields.js";
 import path from "path";
 import fs from "fs";
 import { sendEmail } from "../../util/emailUtils.js";
-import SubscribedUser from "../../models/subscribedUser.js";
+import SubscribedUser from "../../models/users/subscribedUser.js";
 
 export const signup = async (req, res) => {
   // Allowed fields in the user model

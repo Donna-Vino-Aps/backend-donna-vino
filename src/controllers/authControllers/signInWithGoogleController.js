@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { OAuth2Client } from "google-auth-library";
-import User from "../../models/userModels.js";
+import User from "../../models/users/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
 import path from "path";
 import fs from "fs";

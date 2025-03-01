@@ -55,9 +55,7 @@ app.use(
 
 app.use("/api/auth", authRouter);
 app.use("/api/user", requireAuth, userRouter);
-app.use("/api/pendinguser", pendingUserRouter);
 app.use("/api/reviews", reviewRouter);
-app.use("/api/send-email", emailRouter);
 
 // web endpoints
 app.use(
