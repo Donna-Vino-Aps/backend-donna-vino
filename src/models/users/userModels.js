@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import validateAllowedFields from "../util/validateAllowedFields.js";
-import { logInfo } from "../util/logging.js";
+import validateAllowedFields from "../../util/validateAllowedFields.js";
+import { logInfo } from "../../util/logging.js";
 
 // Updated user schema
 const userSchema = new mongoose.Schema({

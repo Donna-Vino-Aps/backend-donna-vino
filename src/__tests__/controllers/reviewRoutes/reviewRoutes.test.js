@@ -10,14 +10,14 @@ import {
 } from "vitest";
 import supertest from "supertest";
 import mongoose from "mongoose";
-import app from "../../app.js";
-import Review from "../../models/reviewModel.js";
+import app from "../../../app.js";
+import Review from "../../../models/review/reviewModel.js";
 import {
   connectToMockDB,
   closeMockDatabase,
   clearMockDatabase,
-} from "../../__testUtils__/dbMock.js";
-import { addMockReviewsToDB } from "../../__testUtils__/reviewMock.js";
+} from "../../../__testUtils__/dbMock.js";
+import { addMockReviewsToDB } from "../../../__testUtils__/reviewMock.js";
 
 const request = supertest(app);
 

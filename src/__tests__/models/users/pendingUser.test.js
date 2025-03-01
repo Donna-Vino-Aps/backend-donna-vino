@@ -1,7 +1,7 @@
 import { describe, it, beforeAll, afterAll, expect } from "vitest";
 import mongoose from "mongoose";
 import { MongoMemoryServer } from "mongodb-memory-server";
-import PendingUser from "../../models/pendingUserModel";
+import PendingUser from "../../../models/users/pendingUserModel.js";
 import bcrypt from "bcryptjs";
 
 let mongoServer;

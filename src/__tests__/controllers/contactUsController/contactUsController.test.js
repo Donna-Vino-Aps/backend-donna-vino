@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { contactUsController } from "../../controllers/contactUsController/contactUsController";
-import { contactUsEmail } from "../../util/emailUtils";
+import { contactUsController } from "../../../controllers/contactUsController/contactUsController";
+import { contactUsEmail } from "../../../util/emailUtils";
 import express from "express";
 import request from "supertest";
 
-vi.mock("../../util/emailUtils", () => ({
+vi.mock("../../../util/emailUtils", () => ({
   contactUsEmail: vi.fn(),
 }));
 

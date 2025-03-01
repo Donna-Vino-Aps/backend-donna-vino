@@ -1,5 +1,5 @@
 import validationErrorMessage from "../../util/validationErrorMessage.js";
-import User from "../../models/userModels.js";
+import User from "../../models/users/userModels.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 

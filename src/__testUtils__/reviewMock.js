@@ -1,4 +1,4 @@
-import Review from "../models/reviewModel.js";
+import Review from "../models/review/reviewModel.js";
 
 export const addReviewToMockDB = async (newReview) => {
   if (!newReview.userId || !newReview.rating || !newReview.reviewText) {
