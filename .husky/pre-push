@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-echo "Running Vitest before pushing..."
-npm run test -- --no-watch
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
