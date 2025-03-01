@@ -1,2 +1,2 @@
 # .husky/pre-push
-npm run test
+npm run test -- --no-watch
