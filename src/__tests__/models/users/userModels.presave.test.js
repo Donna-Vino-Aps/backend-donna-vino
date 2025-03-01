@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import User from "../../models/users/userModels.js";
+import User from "../../../models/users/userModels.js";
 
 describe("User Model Middleware", () => {
   it("should fail if the request is missing the name fields", async () => {
