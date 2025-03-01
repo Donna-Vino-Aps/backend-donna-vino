@@ -5,10 +5,8 @@ import cookieParser from "cookie-parser";
 import { requireAuth } from "./middleware/authMiddleware.js";
 import bodyParser from "body-parser";
 import userRouter from "./routes/userRoutes.js";
-import pendingUserRouter from "./routes/pendingUserRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
-import emailRouter from "./routes/emailRoutes.js";
 import contactUsRouter from "./routes/contactUsRoutes.js";
 import {
   contactLimiter,
