@@ -1,5 +1,2 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-echo "Running Vitest before pushing..."
-npm run test:vitest -- --no-watch
+# .husky/pre-push
+npm run test -- --no-watch

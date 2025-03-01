@@ -45,12 +45,6 @@ To start the server, run:
 npm run start
 ```
 
-For development with live reloading, use:
-
-```bash
-npm run dev
-```
-
 ---
 
 ## Testing
@@ -59,14 +53,10 @@ This project uses **Jest** for testing. Here’s how you can run the tests:
 
 - Run all tests:
 
-  ```bash
-  npm run test
-  ```
-
 - Run tests in watch mode:
 
   ```bash
-  npm run test:watch
+  npm run test
   ```
 
 - Run a specific test file in watch mode:
