@@ -1,13 +1,10 @@
 {
-  "name": "Donna-vino-aps",
+  "name": "donna-vino-aps",
   "version": "1.0.0",
   "description": "Backend for Donna Vino Aps",
   "main": "server.js",
   "type": "module",
   "scripts": {
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
     "setup": "npm install",
     "start": "node ./server",
     "dev": "nodemon ./server",
@@ -18,9 +15,9 @@
     "lint:fix": "eslint ./ --fix",
     "prettier": "prettier ./ --check",
     "prettier:fix": "prettier ./ --write",
-    "test:vitest": "vitest",
-    "test:vitest:watch": "vitest --watch",
-    "test:vitest:coverage": "vitest --coverage"
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest --coverage"
   },
   "repository": {
     "type": "git",
