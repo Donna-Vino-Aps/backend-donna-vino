@@ -65,4 +65,6 @@ app.use(
   contactUsRouter,
 );
 
+app.use("/api/pre-subscribe");
+
 export default app;
