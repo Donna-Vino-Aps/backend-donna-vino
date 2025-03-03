@@ -9,7 +9,7 @@ import validator from "validator";
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
 export const preSubscribeController = async (req, res) => {
-  const { to, subject, templateName, templateData } = req.body;
+  const { to, subject, templateData } = req.body;
 
   // Validate required fields
   if (!to || !subject || !templateName) {
@@ -27,6 +27,7 @@ export const preSubscribeController = async (req, res) => {
     });
   }
 
+  const templateName = "confirmSubscriptionTemplate";
   const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
   // Check if the email template exists
@@ -58,21 +59,17 @@ export const preSubscribeController = async (req, res) => {
   }
 
   try {
-    // Check if the user already exists in the main User collection
+    // Check if the user already exists in the User collection
     const user = await User.findOne({ email: to });
 
     if (user) {
-      if (!user.isSubscribed) {
-        user.isSubscribed = true;
-        await user.save();
-        logInfo(`User ${to} isSubscribed updated to true.`);
-      } else {
-        logInfo(`User ${to} was already subscribed.`);
-      }
+      logInfo(`User ${to} exists in the User collection.`);
 
+      // Send confirmation email to the user
+      await sendEmail(to, subject, emailTemplate);
       return res.status(200).json({
         success: true,
-        message: "User is subscribed successfully.",
+        message: "User exists, a confirmation email has been sent.",
         user: { id: user._id, email: user.email },
       });
     }
@@ -84,6 +81,7 @@ export const preSubscribeController = async (req, res) => {
 
     if (existingPreSubscribedUser) {
       logInfo(`User ${to} is already in the PreSubscribedUser collection.`);
+
       return res.status(200).json({
         success: true,
         message: "A verification email has already been sent to your account.",
@@ -94,22 +92,13 @@ export const preSubscribeController = async (req, res) => {
       });
     }
 
-    // Send verification email only if the user doesn't exist
-    const data = await sendEmail(to, subject, emailTemplate);
-
-    if (data.error) {
-      logError("Email sending error:", data.error);
-      return res.status(data.error.statusCode || 500).json({
-        success: false,
-        message: "Failed to send email",
-        error: data.error.message || "Failed to send email",
-      });
-    }
-
-    // Add new user to PreSubscribedUser collection
+    // If the user doesn't exist in either collection, add to PreSubscribedUser collection
     const newPreSubscribedUser = new PreSubscribedUser({ email: to });
     await newPreSubscribedUser.save();
     logInfo(`User ${to} added to PreSubscribedUser collection.`);
+
+    // Send verification email to the user
+    await sendEmail(to, subject, emailTemplate);
 
     return res.status(200).json({
       success: true,
