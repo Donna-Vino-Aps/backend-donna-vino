@@ -5,6 +5,7 @@ import { login } from "../controllers/authControllers/loginController.js";
 
 const authRouter = express.Router();
 
+authRouter.post("/pre-sign-up");
 authRouter.post("/sign-up", signup);
 authRouter.post("/sign-in-with-google", signInWithGoogleController);
 authRouter.post("/log-in", login);
