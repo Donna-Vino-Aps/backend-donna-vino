@@ -2,10 +2,11 @@ import express from "express";
 import { signup } from "../controllers/authControllers/signupController.js";
 import { signInWithGoogleController } from "../controllers/authControllers/signInWithGoogleController.js";
 import { login } from "../controllers/authControllers/loginController.js";
+import { createPendingUser } from "../controllers/userController/pendingUserController.js";
 
 const authRouter = express.Router();
 
-authRouter.post("/pre-sign-up");
+authRouter.post("/pre-sign-up", createPendingUser);
 authRouter.post("/sign-up", signup);
 authRouter.post("/sign-in-with-google", signInWithGoogleController);
 authRouter.post("/log-in", login);
