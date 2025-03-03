@@ -8,6 +8,7 @@ import userRouter from "./routes/userRoutes.js";
 import authRouter from "./routes/authRoutes.js";
 import reviewRouter from "./routes/reviewRoutes.js";
 import contactUsRouter from "./routes/contactUsRoutes.js";
+import subscribeRouter from "./routes/subscribeRoutes.js";
 import {
   contactLimiter,
   contactHourlyLimiter,
@@ -65,6 +66,6 @@ app.use(
   contactUsRouter,
 );
 
-app.use("/api/pre-subscribe");
+app.use("/api/subscribe", subscribeRouter);
 
 export default app;
