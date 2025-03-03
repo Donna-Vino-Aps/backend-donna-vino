@@ -58,41 +58,7 @@ export const preSubscribeController = async (req, res) => {
   }
 
   try {
-    // Check if the user already exists in the User collection
-    const user = await User.findOne({ email: to });
-
-    if (user) {
-      logInfo(`User ${to} exists in the User collection.`);
-
-      // If the user is already subscribed, inform the user
-      if (user.isSubscribed) {
-        logInfo(`User ${to} is already subscribed.`);
-        return res.status(200).json({
-          success: true,
-          message: "You are already subscribed.",
-          user: { id: user._id, email: user.email },
-        });
-      }
-
-      // If the user is not subscribed, move to PreSubscribedUser collection
-      logInfo(
-        `User ${to} is not subscribed, moving to PreSubscribedUser collection.`,
-      );
-
-      // Save the user in the PreSubscribedUser collection
-      const newPreSubscribedUser = new PreSubscribedUser({ email: to });
-      await newPreSubscribedUser.save();
-      logInfo(`User ${to} added to PreSubscribedUser collection.`);
-
-      // Return the message
-      return res.status(200).json({
-        success: true,
-        message: "A confirmation email has been sent.",
-        user: { id: user._id, email: user.email },
-      });
-    }
-
-    // Check if the user already exists in the PreSubscribedUser collection
+    // Step 1: Check if the user is already in the PreSubscribedUser collection
     const existingPreSubscribedUser = await PreSubscribedUser.findOne({
       email: to,
     });
@@ -100,8 +66,6 @@ export const preSubscribeController = async (req, res) => {
     if (existingPreSubscribedUser) {
       logInfo(`User ${to} is already in the PreSubscribedUser collection.`);
 
-      // Send confirmation email to the user
-      await sendEmail(to, subject, emailTemplate);
       return res.status(200).json({
         success: true,
         message: "A verification email has already been sent to your account.",
@@ -112,12 +76,54 @@ export const preSubscribeController = async (req, res) => {
       });
     }
 
-    // If the user doesn't exist in either collection, add to PreSubscribedUser collection
-    const newPreSubscribedUser = new PreSubscribedUser({ email: to });
-    await newPreSubscribedUser.save();
+    // Step 2: Check if the user exists in the User collection and is already subscribed
+    const user = await User.findOne({ email: to });
+
+    if (user) {
+      logInfo(`User ${to} exists in the User collection.`);
+
+      // If the user is already subscribed
+      if (user.isSubscribed) {
+        logInfo(`User ${to} is already subscribed.`);
+        return res.status(200).json({
+          success: true,
+          message: "You are already subscribed.",
+          user: { id: user._id, email: user.email },
+        });
+      }
+
+      // If the user exists in User collection but is not subscribed, move them to PreSubscribedUser
+      logInfo(
+        `User ${to} is not subscribed, adding to PreSubscribedUser collection.`,
+      );
+
+      const newPreSubscribedUser = await PreSubscribedUser.findOneAndUpdate({
+        email: to,
+      });
+
+      logInfo(`User ${to} added to PreSubscribedUser collection.`);
+
+      // Send the verification email
+      await sendEmail(to, subject, emailTemplate);
+
+      return res.status(200).json({
+        success: true,
+        message: "A verification email has been sent to your account.",
+        user: {
+          id: newPreSubscribedUser._id,
+          email: newPreSubscribedUser.email,
+        },
+      });
+    }
+
+    // Step 3: If the user doesn't exist in either collection, add them to PreSubscribedUser
+    const newPreSubscribedUser = await PreSubscribedUser.findOneAndUpdate({
+      email: to,
+    });
+
     logInfo(`User ${to} added to PreSubscribedUser collection.`);
 
-    // Send verification email to the user
+    // Send the verification email
     await sendEmail(to, subject, emailTemplate);
 
     return res.status(200).json({
