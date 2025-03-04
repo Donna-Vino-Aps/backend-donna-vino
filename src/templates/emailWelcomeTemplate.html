@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,13 +12,27 @@
     <title>Donna Vino Aps</title>
     <style>
       body {
-        font-family: "Barlow", sans-serif;
-        background-color: #f4f4f4;
+        font-family: Barlow, sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        padding-left: 13rem;
+        padding-right: 13rem;
+        padding-top: 208px;
+        padding-bottom: 208px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        flex-direction: column;
+        gap: 56px;
       }
 
       .container {
         text-align: center;
         max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
       }
 
       .header {
@@ -28,6 +42,7 @@
 
       .header img {
         width: 124px;
+        height: 86px;
         margin-bottom: 30px;
       }
 
@@ -52,6 +67,8 @@
         font-size: 12px;
         color: #888;
         padding: 15px;
+        margin-top: auto;
+        gap: 16px;
       }
 
       .glass {
@@ -95,21 +112,47 @@
         padding-left: 10px;
       }
 
-      @media (max-width: 600px) {
-        .container {
-          padding: 0px;
-        }
-      }
-
+      /* Responsiveness */
       @media (max-width: 1024px) {
-        .content p {
-          margin: 0 25px;
+        body {
+          padding-left: 10%;
+          padding-right: 10%;
+          padding-top: 100px;
+          padding-bottom: 100px;
         }
-      }
 
-      @media (max-width: 864px) {
+        .container {
+          padding: 0 20px;
+        }
+
         .content p {
           margin: 0 15px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        body {
+          padding-left: 5%;
+          padding-right: 5%;
+          padding-top: 50px;
+          padding-bottom: 50px;
+        }
+
+        .container {
+          padding: 0 10px;
+        }
+
+        .content p {
+          margin: 0 10px;
+        }
+
+        .header img {
+          width: 100px;
+          height: 70px;
+        }
+
+        .button a {
+          padding: 12px 25px;
         }
       }
     </style>
@@ -122,7 +165,6 @@
           src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
           alt="Donna Vino Logo"
         />
-
         <h2 class="heading">Welcome to our family!</h2>
       </div>
 
