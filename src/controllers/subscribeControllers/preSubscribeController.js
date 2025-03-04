@@ -109,7 +109,8 @@ export const preSubscribeController = async (req, res) => {
       const token = generateToken(to);
 
       // Replace the token URL in the template
-      const confirmUrl = `${baseApiUrl}/confirm-subscription?token=${token}`;
+      const confirmUrl = `${baseApiUrl}/api/subscribe/confirm-subscription?token=${token}`;
+      logInfo(`Generated confirmation URL: ${confirmUrl}`);
 
       emailTemplate = emailTemplate.replace(
         "{{CONFIRM_SUBSCRIPTION_URL}}",
