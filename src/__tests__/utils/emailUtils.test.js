@@ -1,33 +1,57 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
-
 import { describe, it, beforeEach, expect, vi } from "vitest";
-import jwt from "jsonwebtoken";
-import { generateToken } from "../../util/tokenUtils.js";
+import { Resend } from "resend";
+import { sendEmail } from "../../util/emailUtils.js";
 
-describe("generateToken", () => {
-  it("should generate a valid token with an email", () => {
-    const email = "test@example.com";
-    const token = generateToken(email);
+vi.mock("resend");
 
-    expect(token).toBeDefined();
-    expect(typeof token).toBe("string");
+describe("sendEmail", () => {
+  const mockFromEmail = "mock@example.com";
+  const mockApiKey = "test-api-key";
 
-    // Decode the token using the correct secret
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-    expect(decoded).toHaveProperty("email", email);
-    expect(decoded).toHaveProperty("exp");
+    process.env.NO_REPLY_EMAIL = mockFromEmail;
+    process.env.RESEND_API_KEY = mockApiKey;
   });
 
-  it("should generate a token that expires in 6 hours", () => {
-    const email = "test@example.com";
-    const token = generateToken(email);
+  it("should send an email successfully", async () => {
+    const mockSend = vi.fn().mockResolvedValue({ id: "123", status: "sent" });
+    Resend.prototype.emails = { send: mockSend };
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const expiresInSeconds = 6 * 60 * 60;
+    const to = "test@example.com";
+    const subject = "Test Subject";
+    const html = "<p>Test HTML content</p>";
 
-    const timeDiff = decoded.exp - Math.floor(Date.now() / 1000);
-    expect(timeDiff).toBeLessThanOrEqual(expiresInSeconds);
+    const result = await sendEmail(to, subject, html);
+
+    expect(mockSend).toHaveBeenCalledWith({
+      from: `"Donna Vino" <${process.env.NO_REPLY_EMAIL}>`,
+      to,
+      subject,
+      html,
+    });
+    expect(result).toEqual({ id: "123", status: "sent" });
+  });
+
+  it("should throw an error if email sending fails", async () => {
+    const mockError = new Error("Failed to send email");
+    const mockSend = vi.fn().mockRejectedValue(mockError);
+    Resend.prototype.emails = { send: mockSend };
+
+    const to = "test@example.com";
+    const subject = "Test Subject";
+    const html = "<p>Test HTML content</p>";
+
+    await expect(sendEmail(to, subject, html)).rejects.toThrow(mockError);
+
+    expect(mockSend).toHaveBeenCalledWith({
+      from: `"Donna Vino" <${process.env.NO_REPLY_EMAIL}>`,
+      to,
+      subject,
+      html,
+    });
   });
 });

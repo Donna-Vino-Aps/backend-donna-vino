@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 
-import { describe, it, beforeEach, expect, vi } from "vitest";
+import { describe, it, expect } from "vitest";
 import jwt from "jsonwebtoken";
 import { generateToken } from "../../util/tokenUtils.js";
 

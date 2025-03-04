@@ -7,12 +7,16 @@ import { sendEmail } from "../../../util/emailUtils.js";
 import PreSubscribedUser from "../../../models/subscribe/preSubscribe.js";
 import User from "../../../models/users/userModels.js";
 import validator from "validator";
+import { generateToken } from "../../../util/tokenUtils.js";
 
 vi.mock("fs");
 vi.mock("../../../util/emailUtils.js");
 vi.mock("../../../models/subscribe/preSubscribe.js");
 vi.mock("../../../models/users/userModels.js");
 vi.mock("validator");
+vi.mock("../../../util/tokenUtils.js", () => ({
+  generateToken: vi.fn(),
+}));
 
 describe("preSubscribeController", () => {
   let req, res;
@@ -256,6 +260,54 @@ describe("preSubscribeController", () => {
       success: false,
       message: "Failed to process subscription",
       error: "Email sending failed",
+    });
+  });
+
+  it("should call generateToken when user exists but is not subscribed", async () => {
+    req.body = {
+      to: "notsubscribed@example.com",
+      subject: "Welcome!",
+      templateName: "welcomeTemplate",
+      templateData: { name: "John" },
+    };
+
+    User.findOne.mockResolvedValue({
+      _id: "user123",
+      email: req.body.to,
+      isSubscribed: false,
+    });
+
+    const newPreSubscribedUser = { _id: "preSub123", email: req.body.to };
+    PreSubscribedUser.findOneAndUpdate.mockResolvedValue(newPreSubscribedUser);
+
+    fs.existsSync.mockReturnValue(true);
+    fs.readFileSync.mockReturnValue("Hello {{name}}!");
+
+    await preSubscribeController(req, res);
+
+    expect(generateToken).toHaveBeenCalledWith("notsubscribed@example.com");
+
+    expect(User.findOne).toHaveBeenCalledWith({
+      email: "notsubscribed@example.com",
+    });
+    expect(PreSubscribedUser.findOneAndUpdate).toHaveBeenCalledWith({
+      email: "notsubscribed@example.com",
+    });
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      "notsubscribed@example.com",
+      "Welcome!",
+      "Hello John!",
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "A verification email has been sent to your account.",
+      user: {
+        id: "preSub123",
+        email: "notsubscribed@example.com",
+      },
     });
   });
 });
