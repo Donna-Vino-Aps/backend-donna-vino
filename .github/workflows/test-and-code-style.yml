@@ -52,7 +52,7 @@ jobs:
         run: rm -rf ~/.cache/mongodb-binaries/*.lock
 
       - name: Run Vitest Tests
-        run: npm run test -- --no-watch --threads false --timeout 60000
+        run: npm run test -- --no-watch --maxWorkers=4 --timeout 60000
 
       - name: Run Code Style Checks
         run: npm run code-style-check
