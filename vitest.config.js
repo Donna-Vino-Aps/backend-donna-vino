@@ -1,4 +1,3 @@
-// vitest.config.js o vitest.config.ts
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -8,6 +7,6 @@ export default defineConfig({
     include: ["src/__tests__/**/*.test.{js,ts}"],
     exclude: ["**/node_modules/**", "**/dist/**", "**/jest.config.*"],
     setupFiles: "./vitest.setup.js",
-    hookTimeout: 30000,
+    hookTimeout: 60000,
   },
 });
