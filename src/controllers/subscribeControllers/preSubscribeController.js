@@ -5,6 +5,7 @@ import PreSubscribedUser from "../../models/subscribe/preSubscribe.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
+import { generateToken } from "../../util/tokenUtils.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
@@ -102,6 +103,16 @@ export const preSubscribeController = async (req, res) => {
       });
 
       logInfo(`User ${to} added to PreSubscribedUser collection.`);
+
+      // Generate the token with expiration
+      const token = generateToken(to);
+
+      // Replace the token URL in the template
+      const confirmUrl = `${process.env.APP_URL}/confirm-subscription?token=${token}`;
+      emailTemplate = emailTemplate.replace(
+        "{{CONFIRM_SUBSCRIPTION_URL}}",
+        confirmUrl,
+      );
 
       // Send the verification email
       await sendEmail(to, subject, emailTemplate);

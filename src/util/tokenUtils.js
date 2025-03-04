@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key"; // Cambia por una clave secreta
+const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
 
 export const generateToken = (email) => {
   const expiresIn = "6h";
