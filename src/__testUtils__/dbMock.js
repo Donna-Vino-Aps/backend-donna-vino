@@ -25,7 +25,7 @@ export const connectToMockDB = async () => {
     binary: {
       version: "6.0.13", // Specify MongoDB version
     },
-    timeoutMS: 20000, // Set a timeout to avoid long waits
+    timeoutMS: 60000, // Set a timeout to avoid long waits
   });
 
   const uri = mongoMemServer.getUri();

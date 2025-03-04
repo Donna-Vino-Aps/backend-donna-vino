@@ -15,7 +15,10 @@ module.exports = defineConfig([
     },
     rules: {
       "no-console": ["error", { allow: ["warn", "error"] }],
-      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^req|res$" },
+      ],
       eqeqeq: ["error", "always"],
       "no-debugger": "error",
       "prefer-const": "error",

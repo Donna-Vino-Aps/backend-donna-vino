@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&display=swap"
+      rel="stylesheet"
+    />
+    <title>Confirm Your Subscription</title>
+    <style>
+      body {
+        font-family: "Barlow", sans-serif;
+        background-color: #f4f4f4;
+      }
+
+      .container {
+        text-align: center;
+        max-width: 100%;
+      }
+
+      .header {
+        padding-top: 40px;
+        text-align: center;
+      }
+
+      .header img {
+        width: 124px;
+        margin-bottom: 30px;
+      }
+
+      .header video {
+        max-width: 50%;
+      }
+
+      .heading {
+        margin-bottom: 10px;
+      }
+
+      .content p {
+        text-align: center;
+        font-size: 16px;
+        line-height: 1.5;
+        margin: 0 250px;
+        padding: 20px;
+      }
+
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #888;
+        padding: 15px;
+      }
+
+      .glass {
+        font-size: 12px;
+        letter-spacing: 0.035px;
+        line-height: 16px;
+        position: relative;
+        top: 5px;
+      }
+
+      .content > .thanks {
+        font-size: 14px;
+        color: #101010;
+        font-weight: 700;
+        line-height: 20px;
+        letter-spacing: 0.035px;
+        margin-top: 10px;
+      }
+
+      .footer img {
+        filter: brightness(40%);
+        margin: 10px;
+        width: 20px;
+      }
+
+      .button a {
+        background-color: #183f27;
+        border-radius: 6px;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 5px;
+        margin-bottom: 20px;
+      }
+
+      .wine-glasses {
+        max-width: 24px;
+        padding-left: 10px;
+      }
+
+      .socials img {
+        max-width: 30px;
+        height: auto;
+        margin: 0 10px;
+      }
+
+      @media (max-width: 600px) {
+        .container {
+          padding: 0px;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .content p {
+          margin: 0 25px;
+        }
+      }
+
+      @media (max-width: 864px) {
+        .content p {
+          margin: 0 15px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          class="logo"
+          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
+          alt="Donna Vino Logo"
+        />
+
+        <h2 class="heading">Confirm Your Subscription</h2>
+        <div class="content">
+          <p>
+            Please confirm your subscription to complete the process and enjoy
+            exclusive offers and updates from us.
+          </p>
+        </div>
+        <div class="button">
+          <a href="{{CONFIRM_SUBSCRIPTION_URL}}">Confirm Subscription</a>
+        </div>
+
+        <p>The link <b>expires in 6 hours</b>.</p>
+
+        <p class="info">
+          (If you did not subscribe to this service, please ignore this email)
+        </p>
+        <p class="content">Thank you,<br />Donna Vino Team</p>
+
+        <p>Want updates through more platforms?</p>
+        <div class="socials">
+          <a href="https://www.facebook.com/donnavino.dk/">
+            <img
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/facebook-line.png"
+              alt="facebook"
+            />
+          </a>
+          <a
+            href="https://www.instagram.com/donna_vino_winetastings/?api=postMessage%2F"
+          >
+            <img
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/instagram-original.png"
+              alt="instagram"
+            />
+          </a>
+          <a href="https://www.linkedin.com/company/donna-vino-aps/">
+            <img
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/linkedin-alt.png"
+              alt="linkedin"
+            />
+          </a>
+        </div>
+
+        <p class="social-p">Christianshavn Voldgade 54 - 1424 København</p>
+        <p>
+          <a
+            href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/contact"
+            >Contact Us</a
+          >
+          |
+          <a
+            href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
+            >Privacy Policy</a
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

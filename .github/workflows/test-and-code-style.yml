@@ -21,11 +21,11 @@ jobs:
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
-      GOOGLE_CLIENT_ID: ${{secrets.GOOGLE_CLIENT_ID}}
-      GOOGLE_CLIENT_SECRET: ${{secrets.GOOGLE_CLIENT_SECRET}}
-      MAIL_HOST: ${{ secrets.MAIL_HOST}}
-      MAIL_PORT: ${{secrets.MAIL_PORT}}
-      MAIL_SECURE: ${{secrets.MAIL_SECURE}}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+      MAIL_HOST: ${{ secrets.MAIL_HOST }}
+      MAIL_PORT: ${{ secrets.MAIL_PORT }}
+      MAIL_SECURE: ${{ secrets.MAIL_SECURE }}
       NODE_ENV: development
 
     steps:
@@ -47,6 +47,9 @@ jobs:
           else
             echo "No build step required. Skipping..."
           fi
+
+      - name: Clean MongoDB lock
+        run: rm -rf ~/.cache/mongodb-binaries/*.lock
 
       - name: Run Vitest Tests
         run: npm run test -- --no-watch
