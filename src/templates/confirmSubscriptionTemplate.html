@@ -12,250 +12,166 @@
     <title>Confirm Your Subscription</title>
     <style>
       body {
-        font-family: Barlow, sans-serif;
-        background-color: #ffffff;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
+        font-family: "Barlow", sans-serif;
+        background-color: #f4f4f4;
       }
+
       .container {
-        background-color: #ffffff;
-        margin: auto;
+        text-align: center;
+        max-width: 100%;
+      }
+
+      .header {
+        padding-top: 40px;
         text-align: center;
       }
 
-      .logo {
+      .header img {
         width: 124px;
         margin-bottom: 30px;
       }
 
-      h2 {
-        text-align: center;
-        color: #333;
-        margin-bottom: 22px;
-        font-weight: 700;
+      .header video {
+        max-width: 50%;
       }
-      p {
-        font-size: 14px;
-        color: #101010;
+
+      .heading {
+        margin-bottom: 10px;
       }
-      .button-container {
+
+      .content p {
         text-align: center;
-        margin: 25px 0;
-      }
-      .button {
-        background-color: #183f27;
-        color: white;
-        padding: 14px 25px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        border-radius: 5px;
         font-size: 16px;
-      }
-      .button a {
-        color: white;
-        text-decoration: none;
+        line-height: 1.5;
+        margin: 0 250px;
+        padding: 20px;
       }
 
-      .info {
+      .footer {
+        text-align: center;
         font-size: 12px;
-        color: #666;
-        font-style: italic;
-        margin-top: 27px;
-        margin-bottom: 30px;
+        color: #888;
+        padding: 15px;
       }
 
-      .thanks {
+      .glass {
+        font-size: 12px;
+        letter-spacing: 0.035px;
+        line-height: 16px;
+        position: relative;
+        top: 5px;
+      }
+
+      .content > .thanks {
         font-size: 14px;
         color: #101010;
         font-weight: 700;
         line-height: 20px;
         letter-spacing: 0.035px;
+        margin-top: 10px;
       }
 
-      .footer {
-        margin-top: 50px;
+      .footer img {
+        filter: brightness(40%);
+        margin: 10px;
+        width: 20px;
       }
 
-      .footer > p {
-        color: #6c6c6c;
-        font-size: 12px;
-        line-height: 16px;
+      .button a {
+        background-color: #183127;
+        border-radius: 6px;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 5px;
+        margin-bottom: 20px;
       }
 
-      .socials {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        margin-top: 20px;
-        margin-bottom: 15px;
+      .wine-glasses {
+        max-width: 24px;
+        padding-left: 10px;
       }
 
-      .social-p {
-        font-size: 12px;
-        color: #6c6c6c;
-        margin-bottom: 15px;
+      /* Aseguramos que los iconos mantengan su tamaño */
+      .socials img {
+        max-width: 30px; /* Ajusta el tamaño máximo según sea necesario */
+        height: auto; /* Mantiene la proporción original */
+        margin: 0 10px;
       }
 
-      img {
-        width: 45px;
-        position: relative;
-        bottom: 3px;
-      }
-
-      a {
-        color: #007aff;
-      }
-
-      @media (max-width: 768px) {
-        h2 {
-          font-size: 22px;
-        }
-
-        p {
-          font-size: 13px;
-        }
-
-        .button {
-          font-size: 14px;
-        }
-
-        .info {
-          font-size: 12px;
-        }
-
-        .thanks {
-          font-size: 13px;
+      @media (max-width: 600px) {
+        .container {
+          padding: 0px;
         }
       }
 
-      @media (max-width: 576px) {
-        h2 {
-          font-size: 20px;
-        }
-
-        p {
-          font-size: 11px;
-        }
-
-        .button-container {
-          margin: 15px 0;
-        }
-
-        .button {
-          font-size: 12px;
-        }
-
-        .info {
-          font-size: 11px;
-        }
-
-        .thanks {
-          font-size: 12px;
-        }
-
-        .logo {
-          margin: 5px 0;
+      @media (max-width: 1024px) {
+        .content p {
+          margin: 0 25px;
         }
       }
 
-      @media (max-width: 456px) {
-        h2 {
-          font-size: 18px;
-        }
-
-        p {
-          font-size: 10px;
-        }
-
-        .info {
-          font-size: 10px;
-        }
-
-        .button-container {
-          margin: 10px 0;
-        }
-
-        .button {
-          font-size: 11px;
-        }
-
-        .thanks {
-          font-size: 11px;
-        }
-      }
-
-      @media (max-width: 382px) {
-        p {
-          font-size: 8px;
-        }
-
-        .button {
-          font-size: 9px;
-        }
-
-        .info {
-          font-size: 8px;
-        }
-
-        .thanks {
-          font-size: 10px;
+      @media (max-width: 864px) {
+        .content p {
+          margin: 0 15px;
         }
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <img class="logo" src="../public/img/donna-vino-logo-transparent.png" />
-      <h2>Confirm Your Subscription</h2>
-      <p>
-        Please confirm your subscription to complete the process and enjoy
-        exclusive offers and updates from us.
-      </p>
-      <p>The link <b>expires in 6 hours</b>.</p>
-      <div class="button-container">
-        <a
-          href="{{CONFIRM_SUBSCRIPTION_URL}}"
-          class="button"
-          style="color: white !important"
-          >Confirm Subscription</a
-        >
-      </div>
-      <p class="info">
-        (If you did not subscribe to this service, please ignore this email)
-      </p>
-      <p class="thanks">Thank you,<br />Donna Vino Team</p>
-      <div class="footer">
-        <p class="social-p">Want updates through more platforms?</p>
+      <div class="header">
+        <img
+          class="logo"
+          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
+          alt="Donna Vino Logo"
+        />
+
+        <h2 class="heading">Confirm Your Subscription</h2>
+        <div class="content">
+          <p>
+            Please confirm your subscription to complete the process and enjoy
+            exclusive offers and updates from us.
+          </p>
+        </div>
+        <div class="button">
+          <a href="{{CONFIRM_SUBSCRIPTION_URL}}">Confirm Subscription</a>
+        </div>
+
+        <p>The link <b>expires in 6 hours</b>.</p>
+
+        <p class="info">
+          (If you did not subscribe to this service, please ignore this email)
+        </p>
+        <p class="content">Thank you,<br />Donna Vino Team</p>
+
+        <p>Want updates through more platforms?</p>
         <div class="socials">
           <a href="https://www.facebook.com/donnavino.dk/">
             <img
-              src="../public/icons/facebook-line-black.svg"
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/facebook-line.png"
               alt="facebook"
-              style="height: 22px"
             />
           </a>
           <a
             href="https://www.instagram.com/donna_vino_winetastings/?api=postMessage%2F"
           >
             <img
-              src="../public/icons/instagram-original-black.svg"
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/instagram-original.png"
               alt="instagram"
-              style="height: 22px"
             />
           </a>
           <a href="https://www.linkedin.com/company/donna-vino-aps/">
             <img
-              src="../public/icons/linkedin-alt-black.svg"
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/linkedin-alt.png"
               alt="linkedin"
-              style="height: 22px"
             />
           </a>
         </div>
+
         <p class="social-p">Christianshavn Voldgade 54 - 1424 København</p>
         <p>
           <a
