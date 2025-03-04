@@ -6,6 +6,7 @@ import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
 import { generateToken } from "../../util/tokenUtils.js";
+import { baseApiUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
@@ -108,7 +109,8 @@ export const preSubscribeController = async (req, res) => {
       const token = generateToken(to);
 
       // Replace the token URL in the template
-      const confirmUrl = `${process.env.APP_URL}/confirm-subscription?token=${token}`;
+      const confirmUrl = `${baseApiUrl}/confirm-subscription?token=${token}`;
+
       emailTemplate = emailTemplate.replace(
         "{{CONFIRM_SUBSCRIPTION_URL}}",
         confirmUrl,
