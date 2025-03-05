@@ -6,7 +6,7 @@ import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
 import { generateToken } from "../../util/tokenUtils.js";
-import { baseApiUrl } from "../../config/environment.js";
+import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
@@ -71,10 +71,6 @@ export const preSubscribeController = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "A verification email has already been sent to your account.",
-        user: {
-          id: existingPreSubscribedUser._id,
-          email: existingPreSubscribedUser.email,
-        },
       });
     }
 
@@ -90,7 +86,6 @@ export const preSubscribeController = async (req, res) => {
         return res.status(200).json({
           success: true,
           message: "You are already subscribed.",
-          user: { id: user._id, email: user.email },
         });
       }
 
@@ -99,17 +94,18 @@ export const preSubscribeController = async (req, res) => {
         `User ${to} is not subscribed, adding to PreSubscribedUser collection.`,
       );
 
-      const newPreSubscribedUser = await PreSubscribedUser.findOneAndUpdate({
-        email: to,
-      });
+      await PreSubscribedUser.findOneAndUpdate(
+        { email: to },
+        { $setOnInsert: { email: to } },
+        { upsert: true },
+      );
 
       logInfo(`User ${to} added to PreSubscribedUser collection.`);
 
       // Generate the token with expiration
       const token = generateToken(to);
-
       // Replace the token URL in the template
-      const confirmUrl = `${baseApiUrl}/api/subscribe/confirm-subscription?token=${token}`;
+      const confirmUrl = `${baseDonnaVinoWebUrl}/?token=${token}`;
       logInfo(`Generated confirmation URL: ${confirmUrl}`);
 
       emailTemplate = emailTemplate.replace(
@@ -123,17 +119,15 @@ export const preSubscribeController = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "A verification email has been sent to your account.",
-        user: {
-          id: newPreSubscribedUser._id,
-          email: newPreSubscribedUser.email,
-        },
       });
     }
 
     // Step 3: If the user doesn't exist in either collection, add them to PreSubscribedUser
-    const newPreSubscribedUser = await PreSubscribedUser.findOneAndUpdate({
-      email: to,
-    });
+    await PreSubscribedUser.findOneAndUpdate(
+      { email: to },
+      { $setOnInsert: { email: to } },
+      { upsert: true },
+    );
 
     logInfo(`User ${to} added to PreSubscribedUser collection.`);
 
@@ -143,7 +137,6 @@ export const preSubscribeController = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "A verification email has been sent to your account.",
-      user: { id: newPreSubscribedUser._id, email: newPreSubscribedUser.email },
     });
   } catch (error) {
     logError("Error processing subscription:", error);
