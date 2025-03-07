@@ -165,7 +165,6 @@ describe("preSubscribeController", () => {
       isSubscribed: false,
     });
 
-    const newPreSubscribedUser = { _id: "preSub123", email: req.body.to };
     PreSubscribedUser.findOne.mockResolvedValue(null); // Simulate not existing
     PreSubscribedUser.create.mockResolvedValue({
       _id: "preSub123",
@@ -214,8 +213,10 @@ describe("preSubscribeController", () => {
     PreSubscribedUser.findOne.mockResolvedValue(null);
 
     // Mock the creation of the PreSubscribedUser
-    const newPreSubscribedUser = { _id: "newUser123", email: req.body.to };
-    PreSubscribedUser.create.mockResolvedValue(newPreSubscribedUser); // Use create instead of findOneAndUpdate
+    PreSubscribedUser.create.mockResolvedValue({
+      _id: "newUser123",
+      email: req.body.to,
+    });
 
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello {{name}}!");
