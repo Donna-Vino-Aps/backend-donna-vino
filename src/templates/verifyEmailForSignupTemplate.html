@@ -23,10 +23,15 @@
       }
 
       .container {
+        max-width: 946px;
         margin: auto;
         text-align: center;
-        margin-top: 48px;
         color: #101010;
+      }
+
+      .header {
+        margin-top: 48px;
+        margin-bottom: 20px;
       }
 
       .logo {
@@ -41,6 +46,14 @@
         font-size: 22px;
         line-height: 28px;
         font-weight: 700;
+      }
+
+      .main {
+        margin-bottom: 56px;
+      }
+
+      .content {
+        margin-bottom: 24px;
       }
 
       .content-text {
@@ -78,12 +91,6 @@
         background-color: #102a1a;
       }
 
-      .social-icon {
-        filter: brightness(40%);
-        margin: 10px;
-        width: 20px;
-      }
-
       .info {
         font-size: 12px;
         line-height: 16px;
@@ -95,11 +102,9 @@
         font-size: 14px;
         font-weight: 700;
         line-height: 20px;
-        margin-bottom: 0;
       }
 
       .footer {
-        margin-top: 56px;
         margin-bottom: 48px;
         color: #6c6c6c;
       }
@@ -113,19 +118,23 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        margin-top: 20px;
         margin-bottom: 6px;
       }
 
       .social-heading {
         font-size: 12px;
-        margin-bottom: 16px;
+        margin-bottom: 6px;
       }
 
-      img {
-        width: 45px;
-        position: relative;
-        bottom: 3px;
+      img.social-icon {
+        width: 20px;
+        height: 20px;
+        margin: 10px;
+      }
+
+      .address {
+        margin: 0;
+        margin-bottom: 16px;
       }
 
       .footer-link {
@@ -244,20 +253,23 @@
         <h2 class="heading">You are almost there!</h2>
       </div>
 
-      <div class="content">
-        <p class="content-text">
-          Verify your email address to complete the subscription to our
-          newsletter.
+      <div class="main">
+        <div class="content">
+          <p class="content-text">
+            Verify your email address to complete the signup and log into your
+            account.
+          </p>
+          <p class="content-text">The link expires in <b>6 hours</b>.</p>
+        </div>
+        <div class="button-container">
+          <a href="{{VERIFY_URL}}" class="button">Verify email</a>
+        </div>
+        <p class="info">
+          (If you did not sign up for this account, you can ignore this email)
         </p>
-        <p class="content-text">The link expires in <b>6 hours</b>.</p>
+        <p class="thanks">Thank you,<br />Donna Vino Team</p>
       </div>
-      <div class="button-container">
-        <a href="{{VERIFY_URL}}" class="button">Verify email</a>
-      </div>
-      <p class="info">
-        (If you did not subscribe for our newsletter, you can ignore this email)
-      </p>
-      <p class="thanks">Thank you,<br />Donna Vino Team</p>
+
       <div class="footer">
         <p class="social-heading">Want updates through more platforms?</p>
         <div class="socials">
