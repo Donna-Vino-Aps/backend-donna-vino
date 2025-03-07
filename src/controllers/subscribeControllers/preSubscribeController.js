@@ -12,10 +12,10 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
 // Function to ensure the user is in the PreSubscribedUser collection
 const ensurePreSubscribedUser = async (email) => {
-  let preSubscribedUser = await PreSubscribedUser.findOne({ email });
+  await PreSubscribedUser.findOne({ email });
 
   if (!preSubscribedUser) {
-    preSubscribedUser = await PreSubscribedUser.create({ email });
+    await PreSubscribedUser.create({ email });
     logInfo(`User ${email} added to PreSubscribedUser collection.`);
   } else {
     logInfo(`User ${email} was already in PreSubscribedUser collection.`);
