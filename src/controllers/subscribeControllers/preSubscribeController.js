@@ -12,7 +12,7 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
 // Function to ensure the user is in the PreSubscribedUser collection
 const ensurePreSubscribedUser = async (email) => {
-  await PreSubscribedUser.findOne({ email });
+  const preSubscribedUser = await PreSubscribedUser.findOne({ email });
 
   if (!preSubscribedUser) {
     await PreSubscribedUser.create({ email });
@@ -112,12 +112,10 @@ export const preSubscribeController = async (req, res) => {
       logInfo(
         `User ${to} is not subscribed, adding to PreSubscribedUser collection.`,
       );
-
-      // If the user is no in PreSubscribe Collection we add it
+      // Add user to PreSubscribedUser if not already
       await ensurePreSubscribedUser(to);
 
       await sendEmail(to, subject, emailTemplate);
-
       logInfo(`Sending email ${to}`);
 
       return res.status(200).json({
@@ -126,9 +124,8 @@ export const preSubscribeController = async (req, res) => {
       });
     }
 
-    // Step 3: If not in any collection, add to PreSubscribedUser
+    // Step 3: If the user is not found in any collection, add to PreSubscribedUser
     await ensurePreSubscribedUser(to);
-
     await sendEmail(to, subject, emailTemplate);
     logInfo(`Sending email ${to}`);
 
