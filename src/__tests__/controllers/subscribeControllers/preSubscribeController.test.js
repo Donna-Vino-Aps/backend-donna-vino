@@ -28,6 +28,7 @@ describe("preSubscribeController", () => {
       json: vi.fn(),
     };
 
+    // Mock function responses for the test cases
     sendEmail.mockResolvedValue({ messageId: "12345" });
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello {{name}}!");
@@ -42,7 +43,8 @@ describe("preSubscribeController", () => {
     vi.clearAllMocks();
   });
 
-  it("should return 400 if to, subject, or templateName is missing", async () => {
+  it("should return 400 if 'to', 'subject', or 'templateName' is missing", async () => {
+    // No fields provided
     await preSubscribeController(req, res);
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
@@ -52,6 +54,7 @@ describe("preSubscribeController", () => {
   });
 
   it("should return 400 if email format is invalid", async () => {
+    // Invalid email format
     req.body = {
       to: "invalid-email",
       subject: "Test Subject",
@@ -69,6 +72,7 @@ describe("preSubscribeController", () => {
   });
 
   it("should return 404 if the template file does not exist", async () => {
+    // Template does not exist
     req.body = {
       to: "test@example.com",
       subject: "Test Subject",
@@ -86,7 +90,8 @@ describe("preSubscribeController", () => {
     });
   });
 
-  it("should not send email if user is already subscribed in User collection", async () => {
+  it("should not send email if user is already subscribed in the User collection", async () => {
+    // User already subscribed
     req.body = {
       to: "subscribed@example.com",
       subject: "Welcome!",
@@ -117,14 +122,11 @@ describe("preSubscribeController", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "You are already subscribed.",
-      user: {
-        id: "user123",
-        email: "subscribed@example.com",
-      },
     });
   });
 
   it("should NOT send email if user is already in PreSubscribedUser", async () => {
+    // User already exists in PreSubscribedUser
     req.body = {
       to: "test@example.com",
       subject: "Test Subject",
@@ -145,11 +147,11 @@ describe("preSubscribeController", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "A verification email has already been sent to your account.",
-      user: { id: "123", email: "test@example.com" },
     });
   });
 
   it("should send email if user exists in User collection but is not subscribed", async () => {
+    // User exists but is not subscribed
     req.body = {
       to: "notsubscribed@example.com",
       subject: "Welcome!",
@@ -164,18 +166,22 @@ describe("preSubscribeController", () => {
     });
 
     const newPreSubscribedUser = { _id: "preSub123", email: req.body.to };
-    PreSubscribedUser.findOneAndUpdate.mockResolvedValue(newPreSubscribedUser);
+    PreSubscribedUser.findOne.mockResolvedValue(null); // Simulate not existing
+    PreSubscribedUser.create.mockResolvedValue({
+      _id: "preSub123",
+      email: req.body.to,
+    });
 
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello {{name}}!");
 
     await preSubscribeController(req, res);
 
-    expect(User.findOne).toHaveBeenCalledWith({
+    expect(PreSubscribedUser.findOne).toHaveBeenCalledWith({
       email: "notsubscribed@example.com",
     });
 
-    expect(PreSubscribedUser.findOneAndUpdate).toHaveBeenCalledWith({
+    expect(PreSubscribedUser.create).toHaveBeenCalledWith({
       email: "notsubscribed@example.com",
     });
 
@@ -189,14 +195,11 @@ describe("preSubscribeController", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "A verification email has been sent to your account.",
-      user: {
-        id: "preSub123",
-        email: "notsubscribed@example.com",
-      },
     });
   });
 
-  it("should add new user to PreSubscribedUser and send verification email if user doesn't exist in any collection", async () => {
+  it("should add a new user to PreSubscribedUser and send a verification email if the user doesn't exist in any collection", async () => {
+    // User doesn't exist in either collection
     req.body = {
       to: "newuser@example.com",
       subject: "Welcome!",
@@ -242,6 +245,7 @@ describe("preSubscribeController", () => {
   });
 
   it("should return 500 if sending email fails", async () => {
+    // Simulate email sending failure
     req.body = {
       to: "test@example.com",
       subject: "Test Subject",
@@ -264,6 +268,7 @@ describe("preSubscribeController", () => {
   });
 
   it("should call generateToken when user exists but is not subscribed", async () => {
+    // Simulate that the user exists but is not subscribed
     req.body = {
       to: "notsubscribed@example.com",
       subject: "Welcome!",
