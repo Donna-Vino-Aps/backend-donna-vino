@@ -19,18 +19,13 @@ import app from "../../../app.js";
 import User from "../../../models/users/userModels.js";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import { sendEmail } from "../../util/emailUtils.js";
+import { sendEmail } from "../../../util/emailUtils.js";
 
 const request = supertest(app);
 
 // Mocking the sendEmail function to prevent actual email sending
-vi.mock("../../util/emailUtils.js", () => ({
+vi.mock("../../../util/emailUtils.js", () => ({
   sendEmail: vi.fn(),
-}));
-
-vi.mock("../../util/logging.js", () => ({
-  logError: vi.fn(),
-  logInfo: vi.fn(),
 }));
 
 beforeAll(async () => {
@@ -81,7 +76,7 @@ describe("signInWithGoogleController", () => {
     expect(sendEmail).toHaveBeenCalledWith(
       mockPayload.email,
       "Welcome to Donna Vino!",
-      expect.any(String), // Since the template content is being passed, expect any string content
+      expect.any(String),
     );
   });
 
