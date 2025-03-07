@@ -177,6 +177,8 @@ describe("preSubscribeController", () => {
 
     await preSubscribeController(req, res);
 
+    expect(generateToken).toHaveBeenCalledWith("notsubscribed@example.com"); // Check if token is generated
+
     expect(PreSubscribedUser.findOne).toHaveBeenCalledWith({
       email: "notsubscribed@example.com",
     });
@@ -207,40 +209,46 @@ describe("preSubscribeController", () => {
       templateData: { name: "John" },
     };
 
+    // Mock the response when finding users and pre-subscribed users
     User.findOne.mockResolvedValue(null);
     PreSubscribedUser.findOne.mockResolvedValue(null);
 
+    // Mock the creation of the PreSubscribedUser
     const newPreSubscribedUser = { _id: "newUser123", email: req.body.to };
-    PreSubscribedUser.findOneAndUpdate.mockResolvedValue(newPreSubscribedUser);
+    PreSubscribedUser.create.mockResolvedValue(newPreSubscribedUser); // Use create instead of findOneAndUpdate
 
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello {{name}}!");
 
+    // Call the controller
     await preSubscribeController(req, res);
 
+    // Check that token generation was called
+    expect(generateToken).toHaveBeenCalledWith("newuser@example.com");
+
+    // Check that the necessary functions were called
     expect(User.findOne).toHaveBeenCalledWith({ email: "newuser@example.com" });
     expect(PreSubscribedUser.findOne).toHaveBeenCalledWith({
       email: "newuser@example.com",
     });
 
-    expect(PreSubscribedUser.findOneAndUpdate).toHaveBeenCalledWith({
+    // Now expect the new user to be created, not updated
+    expect(PreSubscribedUser.create).toHaveBeenCalledWith({
       email: "newuser@example.com",
     });
 
+    // Ensure that the email was sent
     expect(sendEmail).toHaveBeenCalledWith(
       "newuser@example.com",
       "Welcome!",
       "Hello John!",
     );
 
+    // Verify the response
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "A verification email has been sent to your account.",
-      user: {
-        id: "newUser123",
-        email: "newuser@example.com",
-      },
     });
   });
 
@@ -267,15 +275,15 @@ describe("preSubscribeController", () => {
     });
   });
 
-  it("should call generateToken when user exists but is not subscribed", async () => {
-    // Simulate that the user exists but is not subscribed
+  it("should generate the correct confirmation URL in the email template", async () => {
     req.body = {
-      to: "notsubscribed@example.com",
+      to: "newuser@example.com",
       subject: "Welcome!",
       templateName: "welcomeTemplate",
       templateData: { name: "John" },
     };
 
+    PreSubscribedUser.findOne.mockResolvedValue(null);
     User.findOne.mockResolvedValue({
       _id: "user123",
       email: req.body.to,
@@ -283,36 +291,35 @@ describe("preSubscribeController", () => {
     });
 
     const newPreSubscribedUser = { _id: "preSub123", email: req.body.to };
-    PreSubscribedUser.findOneAndUpdate.mockResolvedValue(newPreSubscribedUser);
+    PreSubscribedUser.create.mockResolvedValue(newPreSubscribedUser);
 
+    // Mock the template file content
     fs.existsSync.mockReturnValue(true);
-    fs.readFileSync.mockReturnValue("Hello {{name}}!");
+    const mockTemplate =
+      "Hello {{name}}, please confirm your subscription at {{CONFIRM_SUBSCRIPTION_URL}}!";
+    fs.readFileSync.mockReturnValue(mockTemplate);
+
+    const mockToken = "mockToken123";
+    generateToken.mockReturnValue(mockToken);
 
     await preSubscribeController(req, res);
 
-    expect(generateToken).toHaveBeenCalledWith("notsubscribed@example.com");
+    const expectedConfirmUrl = `${process.env.BASE_URL}/?token=${mockToken}`;
 
-    expect(User.findOne).toHaveBeenCalledWith({
-      email: "notsubscribed@example.com",
-    });
-    expect(PreSubscribedUser.findOneAndUpdate).toHaveBeenCalledWith({
-      email: "notsubscribed@example.com",
-    });
+    // Check if the template has been properly replaced with the confirmation URL
+    const emailBody = fs.readFileSync.mock.results[0].value; // Get the content of the template file
+    expect(emailBody).toContain(expectedConfirmUrl); // Check if the template contains the generated URL
 
     expect(sendEmail).toHaveBeenCalledWith(
-      "notsubscribed@example.com",
+      "newuser@example.com",
       "Welcome!",
-      "Hello John!",
+      expect.stringContaining(expectedConfirmUrl), // Ensure the email contains the confirmation URL
     );
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "A verification email has been sent to your account.",
-      user: {
-        id: "preSub123",
-        email: "notsubscribed@example.com",
-      },
     });
   });
 });

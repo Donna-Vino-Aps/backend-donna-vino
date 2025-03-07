@@ -1,141 +1,127 @@
-import { logError, logInfo } from "../../util/logging.js";
-import validationErrorMessage from "../../util/validationErrorMessage.js";
-import { validateUser } from "../../models/users/userModels.js";
-import User from "../../models/users/userModels.js";
-import validateAllowedFields from "../../util/validateAllowedFields.js";
-import path from "path";
-import fs from "fs";
+import supertest from "supertest";
+import {
+  describe,
+  test,
+  beforeAll,
+  afterEach,
+  afterAll,
+  expect,
+  vi,
+} from "vitest";
+import {
+  connectToMockDB,
+  closeMockDatabase,
+  clearMockDatabase,
+} from "../../../__testUtils__/dbMock.js";
+import app from "../../../app.js";
 import { sendEmail } from "../../util/emailUtils.js";
-import SubscribedUser from "../../models/subscribe/subscribed.js";
 
-export const signup = async (req, res) => {
-  // Allowed fields in the user model
-  const allowedFields = [
-    "firstName",
-    "lastName",
-    "email",
-    "password",
-    "dateOfBirth",
-    "authProvider",
-    "isSubscribed",
-  ];
+const request = supertest(app);
 
-  if (!req.body.user || typeof req.body.user !== "object") {
-    return res.status(400).json({
-      success: false,
-      msg: `Invalid request: You need to provide a valid 'user' object. Received: ${JSON.stringify(
-        req.body.user,
-      )}`,
-    });
-  }
+vi.mock("../../util/emailUtils.js", () => ({
+  sendEmail: vi.fn().mockResolvedValue(true),
+}));
 
-  // Normalize email if provided
-  if (req.body.user.email && typeof req.body.user.email === "string") {
-    req.body.user.email = req.body.user.email.toLowerCase();
-  }
+describe("signupController", () => {
+  beforeAll(async () => {
+    await connectToMockDB();
+  });
 
-  // Validate `isSubscribed` field
-  if (
-    req.body.user.hasOwnProperty("isSubscribed") &&
-    typeof req.body.user.isSubscribed !== "boolean"
-  ) {
-    return res.status(400).json({
-      success: false,
-      msg: "Invalid request: 'isSubscribed' must be true or false.",
-    });
-  }
+  afterEach(async () => {
+    await clearMockDatabase();
+    vi.clearAllMocks();
+  });
 
-  // Validate the allowed fields
-  const invalidFieldsError = validateAllowedFields(
-    req.body.user,
-    allowedFields,
-  );
-  if (invalidFieldsError) {
-    return res.status(400).json({
-      success: false,
-      msg: `Invalid request: ${invalidFieldsError}`,
-    });
-  }
+  afterAll(async () => {
+    await closeMockDatabase();
+  });
 
-  // Validate the user data
-  const errorList = validateUser(req.body.user);
-  if (errorList.length > 0) {
-    return res.status(400).json({
-      success: false,
-      msg: validationErrorMessage(errorList),
-    });
-  }
+  test("Should pass if the request contains all required fields and successfully creates a user", async () => {
+    const newUser = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      password: "Password1234!",
+      dateOfBirth: "1990-02-01",
+    };
 
-  try {
-    const { email, isSubscribed = false } = req.body.user;
-    const existingUser = await User.findOne({ email });
+    const response = await request
+      .post("/api/auth/sign-up/")
+      .send({ user: newUser });
 
-    if (existingUser) {
-      // If the user exists, only update `isSubscribed` field if needed
-      if (!existingUser.isSubscribed && isSubscribed) {
-        existingUser.isSubscribed = true;
-        await existingUser.save();
-        logInfo(`Updated isSubscribed to true for existing user: ${email}`);
-      }
-      return res.status(200).json({
-        success: true,
-        msg: "User already exists.",
-        user: {
-          id: existingUser._id,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-          email: existingUser.email,
-          authProvider: existingUser.authProvider,
-          isVip: existingUser.isVip,
-          isSubscribed: existingUser.isSubscribed,
-        },
-      });
-    }
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.msg).toBe("User created successfully");
+  });
 
-    // If the user does not exist, create a new one
-    const newUser = await User.create(req.body.user);
-    logInfo(`User created successfully: ${newUser.email}`);
+  test("Should pass if user creation succeeds but email sending fails", async () => {
+    const newUser = {
+      firstName: "John",
+      lastName: "Doe",
+      email: "john.doe@example.com",
+      password: "Password1234!",
+      dateOfBirth: "1990-02-01",
+    };
 
-    // If the user previously subscribed to the newsletter, remove that record.
-    const subscribedRecord = await SubscribedUser.findOne({
-      email: newUser.email,
-    });
-    if (subscribedRecord) {
-      await SubscribedUser.deleteOne({ _id: subscribedRecord._id });
-      logInfo(`Removed existing SubscribedUser record for ${newUser.email}`);
-    }
+    sendEmail.mockRejectedValueOnce(new Error("Email sending failed"));
 
-    try {
-      const templatePath = path.resolve(
-        process.cwd(),
-        "src/templates/verifyEmailTemplate.html",
-      );
-      const templateContent = fs.readFileSync(templatePath, "utf-8");
-      const welcomeSubject = "Welcome to Donna Vino! Please Verify Your Email";
-      await sendEmail(newUser.email, welcomeSubject, templateContent);
-      logInfo(`Verify email sent to ${newUser.email}`);
-    } catch (emailError) {
-      logError("Error sending verify email: " + emailError.message);
-    }
+    const response = await request
+      .post("/api/auth/sign-up/")
+      .send({ user: newUser });
 
-    return res.status(201).json({
-      success: true,
-      msg: "User created successfully",
-      user: {
-        id: newUser._id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        authProvider: newUser.authProvider,
-        isVip: newUser.isVip,
-        isSubscribed: newUser.isSubscribed,
-      },
-    });
-  } catch (error) {
-    logError("Error in signup process: " + error.message);
-    return res.status(500).json({
-      success: false,
-      msg: "Unable to create user, please try again later.",
-    });
-  }
-};
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.msg).toBe("User created successfully");
+  });
+
+  test("Should fail if the request body contains an empty user object", async () => {
+    const user = {};
+
+    const response = await request.post("/api/auth/sign-up/").send({ user });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.msg).toBe(
+      "BAD REQUEST: First name is a required field., Last name is a required field., Email is a required field., Password is a required field., Date Of Birth is a required field.",
+    );
+  });
+
+  test("Should fail if the request body does not contain a user object", async () => {
+    const user = null;
+
+    const response = await request.post("/api/auth/sign-up/").send({ user });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.msg).toBe(
+      "Invalid request: You need to provide a valid 'user' object. Received: null",
+    );
+  });
+
+  test("Should fail if the request body does not contain a user object", async () => {
+    const response = await request.post("/api/auth/sign-up/").send();
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.msg).toBe(
+      "Invalid request: You need to provide a valid 'user' object. Received: undefined",
+    );
+  });
+
+  test("Should fail if the request does not contain a valid name", async () => {
+    const user = {
+      name: "John!",
+      email: "john.doe@example.com",
+      password: "Password1234!",
+      dateOfBirth: "1990-02-01",
+    };
+
+    const response = await request.post("/api/auth/sign-up/").send({ user });
+
+    expect(response.status).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.msg).toBe(
+      "Invalid request: The following properties are not allowed to be set: name",
+    );
+  });
+});

@@ -82,8 +82,6 @@ export const preSubscribeController = async (req, res) => {
       confirmUrl,
     );
 
-    logInfo(`Generated confirmation URL: ${confirmUrl}`);
-
     // Step 1: Check if the user is already in PreSubscribedUser
     const existingPreSubscribedUser = await PreSubscribedUser.findOne({
       email: to,
@@ -120,6 +118,8 @@ export const preSubscribeController = async (req, res) => {
 
       await sendEmail(to, subject, emailTemplate);
 
+      logInfo(`Sending email ${to}`);
+
       return res.status(200).json({
         success: true,
         message: "A verification email has been sent to your account.",
@@ -130,6 +130,7 @@ export const preSubscribeController = async (req, res) => {
     await ensurePreSubscribedUser(to);
 
     await sendEmail(to, subject, emailTemplate);
+    logInfo(`Sending email ${to}`);
 
     return res.status(200).json({
       success: true,

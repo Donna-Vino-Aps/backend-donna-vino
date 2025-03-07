@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 import { logError } from "./logging.js";
-dotenv.config({ path: ".env.test" });
+dotenv.config({ path: ".env" });
 
 import { Resend } from "resend";
 
