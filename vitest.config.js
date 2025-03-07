@@ -5,7 +5,7 @@ export default defineConfig({
     globals: true,
     environment: "node",
     include: ["src/__tests__/**/*.test.{js,ts}"],
-    exclude: ["**/node_modules/**", "**/dist/**", "**/jest.config.*"],
+    exclude: ["**/node_modules/**", "**/dist/**"],
     setupFiles: "./vitest.setup.js",
     hookTimeout: 60000,
   },

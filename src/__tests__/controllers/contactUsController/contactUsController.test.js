@@ -32,6 +32,7 @@ describe("contactUsController Tests", () => {
     const response = await request(app)
       .post("/api/contact-us")
       .send(invalidBody);
+
     expect(response.status).toBe(400);
     expect(response.body.message).toBe(
       "name, email, phone, and message are required",
@@ -40,9 +41,11 @@ describe("contactUsController Tests", () => {
 
   it("should return 400 if email format is invalid", async () => {
     const invalidBody = { ...validRequestBody, email: "invalid-email" };
+
     const response = await request(app)
       .post("/api/contact-us")
       .send(invalidBody);
+
     expect(response.status).toBe(400);
     expect(response.body.message).toBe(
       "Invalid email format. Example: example@domain.com",
@@ -58,6 +61,14 @@ describe("contactUsController Tests", () => {
 
     expect(response.status).toBe(200);
     expect(response.body.message).toBe("Contact message sent successfully!");
+
+    // Ensure that contactUsEmail was called with the correct parameters
+    expect(contactUsEmail).toHaveBeenCalledWith(
+      process.env.INFO_EMAIL, // 'to' address
+      "New Contact Request", // 'subject'
+      expect.stringContaining("Name: John Doe"), // Ensure the message contains the user's details
+      false, // 'isHtml'
+    );
   });
 
   it("should return 500 if contactUsEmail throws an error", async () => {

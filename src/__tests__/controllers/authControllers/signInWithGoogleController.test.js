@@ -18,18 +18,14 @@ import {
 import app from "../../../app.js";
 import User from "../../../models/users/userModels.js";
 import { OAuth2Client } from "google-auth-library";
-// import { sendWelcomeEmail } from "../../controllers/authControllers/emailWelcomeController.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../../../util/emailUtils.js";
 
 const request = supertest(app);
 
-// vi.mock("../../controllers/authControllers/emailWelcomeController.js", () => ({
-//   sendWelcomeEmail: vi.fn(),
-// }));
-
-vi.mock("../../util/logging.js", () => ({
-  logError: vi.fn(),
-  logInfo: vi.fn(),
+// Mocking the sendEmail function to prevent actual email sending
+vi.mock("../../../util/emailUtils.js", () => ({
+  sendEmail: vi.fn(),
 }));
 
 beforeAll(async () => {
@@ -75,6 +71,13 @@ describe("signInWithGoogleController", () => {
 
     const user = await User.findOne({ email: mockPayload.email });
     expect(user).toBeDefined();
+
+    // Ensure that sendEmail was called
+    expect(sendEmail).toHaveBeenCalledWith(
+      mockPayload.email,
+      "Welcome to Donna Vino!",
+      expect.any(String),
+    );
   });
 
   it("should return existing user without sending welcome email", async () => {
@@ -105,7 +108,9 @@ describe("signInWithGoogleController", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
     expect(response.body.user.email).toBe(existingUser.email);
-    // expect(sendWelcomeEmail).not.toHaveBeenCalled();
+
+    // Ensure that sendEmail was NOT called for an existing user
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("should return current session user if session is valid", async () => {

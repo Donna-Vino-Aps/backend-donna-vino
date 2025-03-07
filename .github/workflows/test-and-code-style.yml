@@ -23,9 +23,10 @@ jobs:
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-      MAIL_HOST: ${{ secrets.MAIL_HOST }}
-      MAIL_PORT: ${{ secrets.MAIL_PORT }}
-      MAIL_SECURE: ${{ secrets.MAIL_SECURE }}
+      API_URL_LOCAL: ${{ secrets.API_URL_LOCAL }}
+      API_URL_HEROKU: ${{ secrets.API_URL_HEROKU }}
+      DONNA_VINO_WEB_LOCAL: ${{ secrets.DONNA_VINO_WEB_LOCAL }}
+      DONNA_VINO_WEB_HEROKU: ${{ secrets.DONNA_VINO_WEB_HEROKU }}
       NODE_ENV: development
 
     steps:
