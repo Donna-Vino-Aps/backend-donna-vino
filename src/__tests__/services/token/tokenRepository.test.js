@@ -6,7 +6,7 @@ import {
   isTokenUsed,
   markTokenAsUsed,
 } from "../../../services/token/tokenRepository";
-import { logError } from "../../util/logging.js";
+import { logError } from "../../../util/logging.js";
 
 vi.mock("../../../models/token/tokensModel.js");
 vi.mock("../../../util/logging.js");

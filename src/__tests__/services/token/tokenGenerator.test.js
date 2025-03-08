@@ -1,4 +1,3 @@
-// tests/token/tokenGenerator.test.js
 import { describe, it, expect, vi } from "vitest";
 import jwt from "jsonwebtoken";
 import { generateToken } from "../../../services/token/tokenGenerator";

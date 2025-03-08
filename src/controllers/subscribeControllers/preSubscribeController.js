@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
-import PreSubscribedUser from "../../models/subscribe/preSubscribe.js";
+import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
