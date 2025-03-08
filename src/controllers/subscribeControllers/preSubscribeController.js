@@ -5,7 +5,7 @@ import PreSubscribedUser from "../../models/subscribe/preSubscribe.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
-import { generateToken } from "../../util/tokenUtils.js";
+import { generateToken } from "../../services/token/tokenGenerator.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
