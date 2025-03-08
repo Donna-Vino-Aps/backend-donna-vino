@@ -35,6 +35,10 @@ export const preSubscribeController = async (req, res) => {
     });
   }
 
+  if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+    return res.status(400).json({ message: "Invalid template name." });
+  }
+
   // Validate email format
   if (!validator.isEmail(to)) {
     return res.status(400).json({
