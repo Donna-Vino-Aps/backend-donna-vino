@@ -6,7 +6,7 @@ import validateAllowedFields from "../../util/validateAllowedFields.js";
 import path from "path";
 import fs from "fs";
 import { sendEmail } from "../../util/emailUtils.js";
-import SubscribedUser from "../../models/subscribe/subscribed.js";
+import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 
 export const signup = async (req, res) => {
   // Allowed fields in the user model

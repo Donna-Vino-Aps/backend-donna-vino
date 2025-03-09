@@ -1,11 +1,11 @@
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
-import PreSubscribedUser from "../../models/subscribe/preSubscribe.js";
+import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
-import { generateToken } from "../../util/tokenUtils.js";
+import { generateToken } from "../../services/token/tokenGenerator.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
@@ -33,6 +33,10 @@ export const preSubscribeController = async (req, res) => {
       success: false,
       message: "to, subject, and templateName are required",
     });
+  }
+
+  if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+    return res.status(400).json({ message: "Invalid template name." });
   }
 
   // Validate email format

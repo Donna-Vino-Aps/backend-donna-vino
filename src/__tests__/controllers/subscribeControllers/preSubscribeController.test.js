@@ -4,17 +4,17 @@ import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
 import { preSubscribeController } from "../../../controllers/subscribeControllers/preSubscribeController.js";
 import fs from "fs";
 import { sendEmail } from "../../../util/emailUtils.js";
-import PreSubscribedUser from "../../../models/subscribe/preSubscribe.js";
+import PreSubscribedUser from "../../../models/subscribe/preSubscribeModel.js";
 import User from "../../../models/users/userModels.js";
 import validator from "validator";
-import { generateToken } from "../../../util/tokenUtils.js";
+import { generateToken } from "../../../services/token/tokenGenerator.js";
 
 vi.mock("fs");
 vi.mock("../../../util/emailUtils.js");
-vi.mock("../../../models/subscribe/preSubscribe.js");
+vi.mock("../../../models/subscribe/preSubscribeModel.js");
 vi.mock("../../../models/users/userModels.js");
 vi.mock("validator");
-vi.mock("../../../util/tokenUtils.js", () => ({
+vi.mock("../../../services/token/tokenGenerator.js", () => ({
   generateToken: vi.fn(),
 }));
 

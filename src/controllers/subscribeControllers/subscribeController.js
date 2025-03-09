@@ -1,39 +1,128 @@
 import jwt from "jsonwebtoken";
-import PreSubscribedUser from "../../models/subscribe/preSubscribe.js";
-import { logError } from "../../util/logging.js";
+import dotenv from "dotenv";
+import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
+import SubscribedUser from "../../models/subscribe/subscribedModel.js";
+import { sendEmail } from "../../util/emailUtils.js";
+import { logInfo, logError } from "../../util/logging.js";
+import {
+  isTokenUsed,
+  markTokenAsUsed,
+} from "../../services/token/tokenRepository.js";
+import path from "path";
+import fs from "fs";
+
+dotenv.config();
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
 export const subscribeController = async (req, res) => {
-  const token = req.query.token; // Obtener el token desde la URL
-
-  // Verificar si el token está presente
-  if (!token) {
-    return res.redirect("/error"); // Redirigir a una página de error si el token está ausente
-  }
-
   try {
-    // Verificar y decodificar el token usando la clave secreta
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // Usa la clave secreta que configuraste
-    const email = decoded.email; // Suponiendo que el token contiene el email del usuario
+    const { token, subject, templateName, templateData } = req.body;
 
-    // Buscar al usuario en la colección PreSubscribedUser
-    const user = await PreSubscribedUser.findOne({ email });
-
-    // Si el usuario no se encuentra
-    if (!user) {
-      return res.redirect("/error"); // Redirigir a una página de error si no se encuentra el usuario
+    if (!token || !subject || !templateName) {
+      return res.status(400).json({
+        success: false,
+        message: "Token, subject, and templateName are required.",
+      });
     }
 
-    // Cambiar el estado de la suscripción del usuario a 'true'
-    user.isSubscribed = true;
+    if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+      return res.status(400).json({ message: "Invalid template name." });
+    }
 
-    // Guardar los cambios en la base de datos
-    await user.save();
+    const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
-    // Redirigir a una página de éxito
-    return res.redirect("/success"); // Redirigir a una página de éxito tras la confirmación
+    // Check if the template exists
+    if (!fs.existsSync(templatePath)) {
+      logError(`Email template not found at: ${templatePath}`);
+      return res.status(404).json({
+        success: false,
+        message: "Email template not found",
+      });
+    }
+
+    let emailTemplate;
+    try {
+      emailTemplate = fs.readFileSync(templatePath, "utf-8");
+    } catch (error) {
+      logError(`Error reading email template: ${error.message}`);
+      return res.status(500).json({
+        success: false,
+        message: "Internal server error: Failed to read template",
+      });
+    }
+
+    // Replace template variables with the provided data
+    if (templateData && typeof templateData === "object") {
+      Object.keys(templateData).forEach((key) => {
+        const regex = new RegExp(`{{${key}}}`, "g");
+        emailTemplate = emailTemplate.replace(regex, templateData[key]);
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (error) {
+      logError("Invalid or expired token.", error);
+      return res.status(401).json({
+        success: false,
+        message: "Invalid or expired token.",
+      });
+    }
+
+    const { email: to, id: tokenId } = decoded;
+
+    const tokenUsed = await isTokenUsed(tokenId);
+    if (tokenUsed) {
+      return res.status(400).json({
+        success: false,
+        message: "This token has already been used.",
+      });
+    }
+
+    const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
+    if (!preSubscribedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found in PreSubscribedUser",
+      });
+    }
+
+    const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
+    if (existingSubscribedUser) {
+      return res.status(200).json({
+        success: true,
+        message: "User is already subscribed.",
+      });
+    }
+
+    const newSubscribedUser = new SubscribedUser({ email: to });
+    await newSubscribedUser.save();
+
+    await PreSubscribedUser.deleteOne({ email: to });
+
+    logInfo(
+      `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
+    );
+
+    await markTokenAsUsed(tokenId);
+
+    await sendEmail(to, subject, emailTemplate);
+
+    logInfo(`Welcome email sent to ${to}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "Subscription confirmed and welcome email sent.",
+    });
   } catch (error) {
-    // En caso de error (por ejemplo, token inválido o expirado)
-    logError("Error during subscription confirmation:", error);
-    return res.redirect("/error"); // Redirigir a una página de error en caso de problemas
+    logError("Error in subscribeController", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };
