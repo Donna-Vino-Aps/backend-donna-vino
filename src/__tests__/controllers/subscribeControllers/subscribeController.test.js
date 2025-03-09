@@ -246,7 +246,6 @@ describe("subscribeController", () => {
         ".",
     );
 
-    // Confirmamos que los valores se han reemplazado correctamente
     expect(fs.readFileSync).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
