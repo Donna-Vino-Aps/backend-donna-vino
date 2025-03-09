@@ -15,16 +15,14 @@
         font-family: Barlow, sans-serif;
         background-color: #ffffff;
         margin: 0;
-        padding-left: 13rem;
-        padding-right: 13rem;
-        padding-top: 30px;
-        padding-bottom: 30px;
+        padding: 30px;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         flex-direction: column;
         gap: 56px;
+        text-align: center; /* Centra todo el contenido del body */
       }
 
       .container {
@@ -36,8 +34,8 @@
       }
 
       .header {
-        padding-top: 40px;
         text-align: center;
+        padding-top: 40px;
       }
 
       .header img {
@@ -48,13 +46,16 @@
 
       .heading {
         margin-bottom: 10px;
+        font-size: 24px;
+        font-weight: 700;
+        text-align: center;
       }
 
       .content p {
         text-align: center;
         font-size: 16px;
         line-height: 1.5;
-        margin: 0 250px;
+        margin: 0 20px;
         padding: 20px;
       }
 
@@ -93,10 +94,7 @@
       /* Responsiveness */
       @media (max-width: 1024px) {
         body {
-          padding-left: 10%;
-          padding-right: 10%;
-          padding-top: 100px;
-          padding-bottom: 100px;
+          padding: 100px 10%;
         }
 
         .container {
@@ -110,23 +108,38 @@
 
       @media (max-width: 600px) {
         body {
-          padding-left: 5%;
-          padding-right: 5%;
-          padding-top: 50px;
-          padding-bottom: 50px;
-        }
-
-        .container {
-          padding: 0 10px;
-        }
-
-        .content p {
-          margin: 0 10px;
+          padding: 50px 5%;
         }
 
         .header img {
           width: 100px;
           height: 70px;
+        }
+
+        .heading {
+          font-size: 22px;
+        }
+
+        .content p {
+          margin: 0 10px;
+        }
+      }
+
+      @media (max-width: 400px) {
+        body {
+          padding: 30px 5%;
+        }
+
+        .heading {
+          font-size: 20px;
+        }
+
+        .content p {
+          margin: 0 5px;
+        }
+
+        .footer {
+          font-size: 10px;
         }
       }
     </style>
