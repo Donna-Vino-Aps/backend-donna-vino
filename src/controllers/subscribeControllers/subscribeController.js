@@ -115,7 +115,7 @@ export const subscribeController = async (req, res) => {
     // Create the unsubscribe token
     const unsubscribeToken = await generateToken(to);
     const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
-    const homeUrl = `${baseDonnaVinoWebUrl}/api/subscribe/confirm?token=${token}`;
+    const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     emailTemplate = emailTemplate
       .replace("{{RE_DIRECT_URL}}", homeUrl)
