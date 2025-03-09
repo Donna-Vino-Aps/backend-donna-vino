@@ -8,8 +8,10 @@ import {
   isTokenUsed,
   markTokenAsUsed,
 } from "../../services/token/tokenRepository.js";
+import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
+import { baseApiUrl, baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 dotenv.config();
 
@@ -109,6 +111,15 @@ export const subscribeController = async (req, res) => {
     );
 
     await markTokenAsUsed(tokenId);
+
+    // Create the unsubscribe token
+    const unsubscribeToken = await generateToken(to);
+    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const homeUrl = `${baseDonnaVinoWebUrl}/api/subscribe/confirm?token=${token}`;
+
+    emailTemplate = emailTemplate
+      .replace("{{RE_DIRECT_URL}}", homeUrl)
+      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
 
     await sendEmail(to, subject, emailTemplate);
 

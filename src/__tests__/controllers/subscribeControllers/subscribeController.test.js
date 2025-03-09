@@ -9,7 +9,6 @@ import {
   isTokenUsed,
   markTokenAsUsed,
 } from "../../../services/token/tokenRepository.js";
-import path from "path";
 
 // Mock all external dependencies
 vi.mock("fs");
