@@ -9,7 +9,7 @@
       href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Welcome To Donna Vino</title>
+    <title>Email Verification</title>
     <style>
       body {
         font-family: Barlow, sans-serif;
@@ -60,7 +60,9 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 20px;
+        letter-spacing: 0.4px;
         margin: 0;
+        margin-bottom: 10px;
       }
 
       .button-container {
@@ -89,9 +91,10 @@
         background-color: #102a1a;
       }
 
-      .celebration {
+      .info {
         font-size: 12px;
         line-height: 16px;
+        font-style: italic;
         margin-bottom: 26px;
       }
 
@@ -151,7 +154,7 @@
           font-size: 15px;
         }
 
-        .celebration {
+        .info {
           font-size: 11px;
         }
 
@@ -177,7 +180,7 @@
           font-size: 14px;
         }
 
-        .celebration {
+        .info {
           font-size: 11px;
         }
 
@@ -203,7 +206,7 @@
           font-size: 11px;
         }
 
-        .celebration {
+        .info {
           font-size: 10px;
         }
 
@@ -237,7 +240,7 @@
           font-size: 12px;
         }
 
-        .celebration {
+        .info {
           font-size: 9px;
         }
 
@@ -255,22 +258,23 @@
           src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
           alt="Donna Vino Logo"
         />
-        <h2 class="heading">Welcome to our family!</h2>
+        <h2 class="heading">You are almost there!</h2>
       </div>
 
       <div class="main">
         <div class="content">
           <p class="content-text">
-            Get ready to embark on a thrilling journey of discovery as you
-            explore a world of exquisite wines. We're excited to have you join
-            our community and can't wait to share exclusive insights, special
-            offers, and unforgettable tasting experiences with you.
+            Verify your email address to complete the signup and log into your
+            account and verify your subscription to our newsletter.
           </p>
+          <p class="content-text">The link expires in <b>6 hours</b>.</p>
         </div>
         <div class="button-container">
-          <a href="{{RE_DIRECT_URL}}" class="button">Go to website</a>
+          <a href="{{VERIFY_URL}}" class="button">Verify email</a>
         </div>
-        <p class="celebration">Let's raise a glass to new beginnings! 🥂</p>
+        <p class="info">
+          (If you did not sign up for this account, you can ignore this email)
+        </p>
         <p class="thanks">Thank you,<br />Donna Vino Team</p>
       </div>
 
@@ -307,7 +311,7 @@
         </div>
         <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
         <p class="footer-links">
-          <a href="{{UNSUBSCRIBE_URL}}" class="footer-link">Unsubscribe</a> |
+          <a href="#" class="footer-link">Subscribe</a> |
           <a
             href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
             class="footer-link"
