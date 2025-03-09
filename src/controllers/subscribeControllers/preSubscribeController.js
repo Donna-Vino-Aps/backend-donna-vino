@@ -1,12 +1,28 @@
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
-import PreSubscribedUser from "../../models/subscribe/preSubscribe.js";
+import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
+import { generateToken } from "../../services/token/tokenGenerator.js";
+import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
+
+// Function to ensure the user is in the PreSubscribedUser collection
+const ensurePreSubscribedUser = async (email) => {
+  const preSubscribedUser = await PreSubscribedUser.findOne({ email });
+
+  if (!preSubscribedUser) {
+    await PreSubscribedUser.create({ email });
+    logInfo(`User ${email} added to PreSubscribedUser collection.`);
+  } else {
+    logInfo(`User ${email} was already in PreSubscribedUser collection.`);
+  }
+
+  return preSubscribedUser;
+};
 
 export const preSubscribeController = async (req, res) => {
   const { to, subject, templateName, templateData } = req.body;
@@ -19,6 +35,10 @@ export const preSubscribeController = async (req, res) => {
     });
   }
 
+  if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
+    return res.status(400).json({ message: "Invalid template name." });
+  }
+
   // Validate email format
   if (!validator.isEmail(to)) {
     return res.status(400).json({
@@ -29,7 +49,7 @@ export const preSubscribeController = async (req, res) => {
 
   const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
-  // Check if the email template exists
+  // Check if the template exists
   if (!fs.existsSync(templatePath)) {
     logError(`Email template not found at: ${templatePath}`);
     return res.status(404).json({
@@ -49,7 +69,7 @@ export const preSubscribeController = async (req, res) => {
     });
   }
 
-  // Replace template variables with provided data
+  // Replace template variables with the provided data
   if (templateData && typeof templateData === "object") {
     Object.keys(templateData).forEach((key) => {
       const regex = new RegExp(`{{${key}}}`, "g");
@@ -58,78 +78,64 @@ export const preSubscribeController = async (req, res) => {
   }
 
   try {
-    // Step 1: Check if the user is already in the PreSubscribedUser collection
+    // Generate the token
+    const token = generateToken(to);
+    const confirmUrl = `${baseDonnaVinoWebUrl}/?token=${token}`;
+    emailTemplate = emailTemplate.replace(
+      "{{CONFIRM_SUBSCRIPTION_URL}}",
+      confirmUrl,
+    );
+
+    // Step 1: Check if the user is already in PreSubscribedUser
     const existingPreSubscribedUser = await PreSubscribedUser.findOne({
       email: to,
     });
 
     if (existingPreSubscribedUser) {
       logInfo(`User ${to} is already in the PreSubscribedUser collection.`);
-
       return res.status(200).json({
         success: true,
         message: "A verification email has already been sent to your account.",
-        user: {
-          id: existingPreSubscribedUser._id,
-          email: existingPreSubscribedUser.email,
-        },
       });
     }
 
-    // Step 2: Check if the user exists in the User collection and is already subscribed
+    // Step 2: Check if the user is already in the User collection and if they are subscribed
     const user = await User.findOne({ email: to });
 
     if (user) {
       logInfo(`User ${to} exists in the User collection.`);
 
-      // If the user is already subscribed
       if (user.isSubscribed) {
         logInfo(`User ${to} is already subscribed.`);
         return res.status(200).json({
           success: true,
           message: "You are already subscribed.",
-          user: { id: user._id, email: user.email },
         });
       }
 
-      // If the user exists in User collection but is not subscribed, move them to PreSubscribedUser
       logInfo(
         `User ${to} is not subscribed, adding to PreSubscribedUser collection.`,
       );
+      // Add user to PreSubscribedUser if not already
+      await ensurePreSubscribedUser(to);
 
-      const newPreSubscribedUser = await PreSubscribedUser.findOneAndUpdate({
-        email: to,
-      });
-
-      logInfo(`User ${to} added to PreSubscribedUser collection.`);
-
-      // Send the verification email
       await sendEmail(to, subject, emailTemplate);
+      logInfo(`Sending email ${to}`);
 
       return res.status(200).json({
         success: true,
         message: "A verification email has been sent to your account.",
-        user: {
-          id: newPreSubscribedUser._id,
-          email: newPreSubscribedUser.email,
-        },
       });
     }
 
-    // Step 3: If the user doesn't exist in either collection, add them to PreSubscribedUser
-    const newPreSubscribedUser = await PreSubscribedUser.findOneAndUpdate({
-      email: to,
-    });
-
-    logInfo(`User ${to} added to PreSubscribedUser collection.`);
-
-    // Send the verification email
+    // Step 3: If the user is not found in any collection, add to PreSubscribedUser
+    await ensurePreSubscribedUser(to);
     await sendEmail(to, subject, emailTemplate);
+    logInfo(`Sending email ${to}`);
 
     return res.status(200).json({
       success: true,
       message: "A verification email has been sent to your account.",
-      user: { id: newPreSubscribedUser._id, email: newPreSubscribedUser.email },
     });
   } catch (error) {
     logError("Error processing subscription:", error);

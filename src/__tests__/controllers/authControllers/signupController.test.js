@@ -14,8 +14,13 @@ import {
   clearMockDatabase,
 } from "../../../__testUtils__/dbMock.js";
 import app from "../../../app.js";
+import { sendEmail } from "../../util/emailUtils.js";
 
 const request = supertest(app);
+
+vi.mock("../../util/emailUtils.js", () => ({
+  sendEmail: vi.fn().mockResolvedValue(true),
+}));
 
 describe("signupController", () => {
   beforeAll(async () => {
@@ -57,6 +62,8 @@ describe("signupController", () => {
       password: "Password1234!",
       dateOfBirth: "1990-02-01",
     };
+
+    sendEmail.mockRejectedValueOnce(new Error("Email sending failed"));
 
     const response = await request
       .post("/api/auth/sign-up/")
