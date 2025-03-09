@@ -7,6 +7,7 @@ import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
   markTokenAsUsed,
+  deleteToken, // función para eliminar token no válido
 } from "../../services/token/tokenRepository.js";
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
@@ -21,33 +22,17 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
 export const unSubscribeController = async (req, res) => {
   try {
-    const { token, subject, templateName, templateData } = req.body;
-
-    if (!token || !subject || !templateName) {
-      return res.status(400).json({
-        success: false,
-        message: "Token, subject, and templateName are required.",
-      });
-    }
-
-    if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
-      return res.status(400).json({ message: "Invalid template name." });
-    }
-
-    const templatePath = resolvePath(`src/templates/${templateName}.html`);
-
-    // Check if the template exists
-    if (!fs.existsSync(templatePath)) {
-      logError(`Email template not found at: ${templatePath}`);
-      return res.status(404).json({
-        success: false,
-        message: "Email template not found",
-      });
-    }
+    const unsubscribeTemplatePath = resolvePath(
+      "src/templates/unsubscribeTemplate.html",
+    );
+    const unsubscribeConfirmationTemplatePath = resolvePath(
+      "src/templates/unsubscribeConfirmation.html",
+    );
 
     let emailTemplate;
     try {
-      emailTemplate = fs.readFileSync(templatePath, "utf-8");
+      // Cargar plantilla de correo dependiendo de si es válido o caducado
+      emailTemplate = fs.readFileSync(unsubscribeTemplatePath, "utf-8");
     } catch (error) {
       logError(`Error reading email template: ${error.message}`);
       return res.status(500).json({
@@ -56,22 +41,38 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Replace template variables with the provided data
-    if (templateData && typeof templateData === "object") {
-      Object.keys(templateData).forEach((key) => {
-        const regex = new RegExp(`{{${key}}}`, "g");
-        emailTemplate = emailTemplate.replace(regex, templateData[key]);
-      });
-    }
-
+    // Verificar si el token es válido
+    const { token } = req.query; // Suponiendo que el token es pasado como query
     let decoded;
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
       logError("Invalid or expired token.", error);
+      // Enviar el correo de "token caducado"
+      const expiredEmailTemplate = fs.readFileSync(
+        unsubscribeConfirmationTemplatePath,
+        "utf-8",
+      );
+      const { email: to, id: tokenId } = decoded || {};
+
+      await deleteToken(tokenId);
+
+      const unsubscribeToken = await generateToken(to);
+      const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+      const homeUrl = `${baseDonnaVinoWebUrl}`;
+
+      const newExpiredEmail = expiredEmailTemplate
+        .replace("{{RE_DIRECT_URL}}", homeUrl)
+        .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
+
+      await sendEmail(to, "Your unsubscribe link has expired", newExpiredEmail);
+
+      logInfo(`Expired unsubscribe email sent to ${to}`);
+
       return res.status(401).json({
         success: false,
-        message: "Invalid or expired token.",
+        message:
+          "Invalid or expired token. A new unsubscribe email has been sent.",
       });
     }
 
@@ -112,7 +113,6 @@ export const unSubscribeController = async (req, res) => {
 
     await markTokenAsUsed(tokenId);
 
-    // Create the unsubscribe token
     const unsubscribeToken = await generateToken(to);
     const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
     const homeUrl = `${baseDonnaVinoWebUrl}`;
@@ -121,7 +121,7 @@ export const unSubscribeController = async (req, res) => {
       .replace("{{RE_DIRECT_URL}}", homeUrl)
       .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
 
-    await sendEmail(to, subject, emailTemplate);
+    await sendEmail(to, "Subscription confirmed", emailTemplate);
 
     logInfo(`Welcome email sent to ${to}`);
 
@@ -130,7 +130,7 @@ export const unSubscribeController = async (req, res) => {
       message: "Subscription confirmed and welcome email sent.",
     });
   } catch (error) {
-    logError("Error in subscribeController", error);
+    logError("Error in unsubscribeController", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
