@@ -20,6 +20,16 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
+const createUnsubscribeUrl = async (email) => {
+  try {
+    const unsubscribeRequestToken = await generateToken(email);
+    return `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+  } catch (error) {
+    logError("Error generating unsubscribe URL", error);
+    throw new Error("Failed to generate unsubscribe URL");
+  }
+};
+
 export const subscribeController = async (req, res) => {
   try {
     const { token, subject, templateName, templateData } = req.body;
@@ -114,9 +124,7 @@ export const subscribeController = async (req, res) => {
     await markTokenAsUsed(tokenId);
     await deleteToken(tokenId);
 
-    // Create the unsubscribe token
-    const unsubscribeRequestToken = await generateToken(to);
-    const unsubscribeRequestUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+    const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     emailTemplate = emailTemplate

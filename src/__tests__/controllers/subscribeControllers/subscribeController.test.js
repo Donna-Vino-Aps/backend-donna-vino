@@ -279,4 +279,47 @@ describe("subscribeController", () => {
         "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
+
+  it("should dynamically generate the unsubscribe URL and include it in the email", async () => {
+    req.body = {
+      token: "validtoken",
+      subject: "Welcome!",
+      templateName: "emailWelcomeTemplate",
+      templateData: { name: "User" },
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
+    SubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
+
+    fs.existsSync.mockReturnValue(true);
+    fs.readFileSync.mockReturnValue(
+      "Hello {{name}}! Click here: {{RE_DIRECT_URL}} or unsubscribe here: {{UNSUBSCRIBE_URL}}.",
+    );
+
+    jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
+
+    const unsubscribeToken = "unsubscribeToken123";
+    generateToken.mockResolvedValue(unsubscribeToken);
+
+    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const homeUrl = `${baseDonnaVinoWebUrl}`;
+
+    await subscribeController(req, res);
+
+    expect(generateToken).toHaveBeenCalledWith("test@example.com");
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      "test@example.com",
+      "Welcome!",
+      `Hello User! Click here: ${homeUrl} or unsubscribe here: ${unsubscribeUrl}.`,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
+    });
+  });
 });
