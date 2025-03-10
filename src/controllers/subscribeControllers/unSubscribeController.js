@@ -1,6 +1,5 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
@@ -20,20 +19,39 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
+// Helper function to read email templates
+const readTemplate = (templatePath) => {
+  try {
+    return fs.readFileSync(templatePath, "utf-8");
+  } catch (error) {
+    logError(`Error reading template at ${templatePath}: ${error.message}`);
+    throw new Error("Failed to read template");
+  }
+};
+
+// Helper function to create the unsubscribe URL
+const createUnsubscribeUrl = (email) => {
+  const unsubscribeRequestToken = generateToken(email); // Token expires in 15 minutes by default
+  return `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+};
+
 export const unSubscribeController = async (req, res) => {
   try {
-    const unsubscribeTemplatePath = resolvePath(
-      "src/templates/unsubscribeRequest.html",
+    const unsubscribeSuccessTemplatePath = resolvePath(
+      "src/templates/unsubscribeSuccessTemplate.html",
     );
     const unsubscribeConfirmationTemplatePath = resolvePath(
       "src/templates/unsubscribeConfirmation.html",
     );
 
     let emailTemplate;
+    let unsubscribeConfirmationTemplate;
     try {
-      emailTemplate = fs.readFileSync(unsubscribeTemplatePath, "utf-8");
+      emailTemplate = readTemplate(unsubscribeSuccessTemplatePath);
+      unsubscribeConfirmationTemplate = readTemplate(
+        unsubscribeConfirmationTemplatePath,
+      );
     } catch (error) {
-      logError(`Error reading email template: ${error.message}`);
       return res.status(500).json({
         success: false,
         message: "Internal server error: Failed to read template",
@@ -47,25 +65,16 @@ export const unSubscribeController = async (req, res) => {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
       logError("Invalid or expired token.", error);
-      // Generar nuevo token para solicitar la desuscripción
-      const expiredEmailTemplate = fs.readFileSync(
-        unsubscribeConfirmationTemplatePath,
-        "utf-8",
+
+      const { email: to } = decoded || {};
+
+      // Handle expired token - generate a new one and send confirmation email
+      const unsubscribeRequestUrl = createUnsubscribeUrl(to);
+
+      const newExpiredEmail = unsubscribeConfirmationTemplate.replace(
+        "{{UNSUBSCRIBE_URL}}",
+        unsubscribeRequestUrl,
       );
-      const { email: to, id: tokenId } = decoded || {};
-
-      // Eliminar el token caducado
-      await deleteToken(tokenId);
-
-      // Crear un nuevo token de solicitud de desuscripción
-      const unsubscribeRequestToken = await generateToken(to);
-      const unsubscribeRequestUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
-      const homeUrl = `${baseDonnaVinoWebUrl}`;
-
-      // Actualizar el contenido del email con el nuevo enlace
-      const newExpiredEmail = expiredEmailTemplate
-        .replace("{{RE_DIRECT_URL}}", homeUrl)
-        .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
       await sendEmail(to, "Confirm your unsubscribe request", newExpiredEmail);
 
@@ -78,10 +87,10 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Token válido
+    // Token is valid, proceed with the unsubscribe process
     const { email: to, id: tokenId } = decoded;
 
-    // Verificar si el token ya fue utilizado
+    // Check if the token has already been used
     const tokenUsed = await isTokenUsed(tokenId);
     if (tokenUsed) {
       return res.status(400).json({
@@ -90,38 +99,26 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Verificar si el usuario existe en PreSubscribedUser
-    const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
-    if (!preSubscribedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found in PreSubscribedUser.",
-      });
-    }
-
-    // Verificar si el usuario ya está suscrito
+    // Check if the user exists in SubscribedUser collection
     const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
-    if (existingSubscribedUser) {
-      return res.status(200).json({
-        success: true,
-        message: "User is already subscribed.",
+    if (!existingSubscribedUser) {
+      return res.status(400).json({
+        success: false,
+        message: "User does not exist in the subscribed list.",
       });
     }
 
-    // Mover al usuario a SubscribedUser
-    await SubscribedUser.create({ email: to });
+    // Remove user from SubscribedUser collection
+    await SubscribedUser.deleteOne({ email: to });
 
-    // Eliminar de PreSubscribedUser
-    await PreSubscribedUser.deleteOne({ email: to });
+    logInfo(`User ${to} unsubscribed successfully.`);
 
-    logInfo(`User ${to} moved to SubscribedUser.`);
-
-    // Marcar el token como usado
+    // Mark the token as used and delete it
     await markTokenAsUsed(tokenId);
+    await deleteToken(tokenId);
 
-    // Generar un nuevo token para futuras solicitudes de desuscripción
-    const unsubscribeRequestToken = await generateToken(to);
-    const unsubscribeRequestUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+    // Generate a new token for future unsubscribe requests
+    const unsubscribeRequestUrl = createUnsubscribeUrl(to);
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     emailTemplate = emailTemplate
