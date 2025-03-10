@@ -8,6 +8,7 @@ import SubscribedUser from "../../../models/subscribe/subscribedModel.js";
 import {
   isTokenUsed,
   markTokenAsUsed,
+  deleteToken,
 } from "../../../services/token/tokenRepository.js";
 import { generateToken } from "../../../services/token/tokenGenerator.js";
 import {
@@ -43,6 +44,7 @@ describe("subscribeController", () => {
     jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
     isTokenUsed.mockResolvedValue(false); // Token is not used
     markTokenAsUsed.mockResolvedValue();
+    deleteToken.mockResolvedValue(true);
     PreSubscribedUser.findOne = vi.fn();
     PreSubscribedUser.deleteOne = vi.fn();
     SubscribedUser.findOne = vi.fn();
@@ -210,14 +212,12 @@ describe("subscribeController", () => {
   });
 
   it("should replace the dynamic URLs in the email template", async () => {
-    // Mocking necessary data
     req.body = {
       token: "validtoken",
       subject: "Welcome!",
       templateName: "emailWelcomeTemplate",
     };
 
-    // Mocking PreSubscribedUser, SubscribedUser, and other relevant data
     PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
     SubscribedUser.findOne.mockResolvedValue(null);
     SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
@@ -247,6 +247,29 @@ describe("subscribeController", () => {
     );
 
     expect(fs.readFileSync).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "Subscription confirmed and welcome email sent.",
+    });
+  });
+
+  it("should delete the token after successful subscription", async () => {
+    req.body = {
+      token: "validtoken",
+      subject: "Welcome!",
+      templateName: "emailWelcomeTemplate",
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
+    SubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
+
+    jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
+
+    await subscribeController(req, res);
+
+    expect(deleteToken).toHaveBeenCalledWith("token123");
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,

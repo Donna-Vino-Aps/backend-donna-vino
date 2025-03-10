@@ -55,12 +55,15 @@ export const unSubscribeController = async (req, res) => {
       );
       const { email: to, id: tokenId } = decoded || {};
 
+      // Eliminar el token caducado
       await deleteToken(tokenId);
 
+      // Aquí generamos un nuevo token para desuscripción y lo enviamos
       const unsubscribeToken = await generateToken(to);
       const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
       const homeUrl = `${baseDonnaVinoWebUrl}`;
 
+      // Reemplazar en la plantilla de token caducado
       const newExpiredEmail = expiredEmailTemplate
         .replace("{{RE_DIRECT_URL}}", homeUrl)
         .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
@@ -76,8 +79,10 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
+    // Si el token es válido
     const { email: to, id: tokenId } = decoded;
 
+    // Verificar si el token ha sido usado
     const tokenUsed = await isTokenUsed(tokenId);
     if (tokenUsed) {
       return res.status(400).json({
@@ -86,6 +91,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
+    // Verificar si el usuario existe en la base de datos
     const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
     if (!preSubscribedUser) {
       return res.status(404).json({
@@ -94,6 +100,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
+    // Verificar si el usuario ya está suscrito
     const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
     if (existingSubscribedUser) {
       return res.status(200).json({
@@ -102,17 +109,21 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
+    // Mover al usuario a la lista de suscritos
     const newSubscribedUser = new SubscribedUser({ email: to });
     await newSubscribedUser.save();
 
+    // Eliminar de la lista de pre-suscritos
     await PreSubscribedUser.deleteOne({ email: to });
 
     logInfo(
       `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
     );
 
+    // Marcar el token como usado
     await markTokenAsUsed(tokenId);
 
+    // Crear un nuevo token de desuscripción
     const unsubscribeToken = await generateToken(to);
     const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
     const homeUrl = `${baseDonnaVinoWebUrl}`;

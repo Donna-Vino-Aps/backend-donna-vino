@@ -7,6 +7,7 @@ import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
   markTokenAsUsed,
+  deleteToken,
 } from "../../services/token/tokenRepository.js";
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
@@ -111,6 +112,7 @@ export const subscribeController = async (req, res) => {
     );
 
     await markTokenAsUsed(tokenId);
+    await deleteToken(tokenId);
 
     // Create the unsubscribe token
     const unsubscribeToken = await generateToken(to);
