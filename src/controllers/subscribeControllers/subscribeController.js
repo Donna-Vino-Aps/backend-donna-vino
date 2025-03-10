@@ -7,15 +7,28 @@ import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
   markTokenAsUsed,
+  deleteToken,
 } from "../../services/token/tokenRepository.js";
+import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
+import { baseApiUrl, baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
+
+const createUnsubscribeUrl = async (email) => {
+  try {
+    const unsubscribeRequestToken = await generateToken(email);
+    return `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+  } catch (error) {
+    logError("Error generating unsubscribe URL", error);
+    throw new Error("Failed to generate unsubscribe URL");
+  }
+};
 
 export const subscribeController = async (req, res) => {
   try {
@@ -109,14 +122,23 @@ export const subscribeController = async (req, res) => {
     );
 
     await markTokenAsUsed(tokenId);
+    await deleteToken(tokenId);
+
+    const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
+    const homeUrl = `${baseDonnaVinoWebUrl}`;
+
+    emailTemplate = emailTemplate
+      .replace("{{RE_DIRECT_URL}}", homeUrl)
+      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
     await sendEmail(to, subject, emailTemplate);
 
-    logInfo(`Welcome email sent to ${to}`);
+    logInfo(`Welcome email with unsubscribe option sent to ${to}`);
 
     return res.status(200).json({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   } catch (error) {
     logError("Error in subscribeController", error);

@@ -5,6 +5,7 @@ import {
   saveTokenId,
   isTokenUsed,
   markTokenAsUsed,
+  deleteToken,
 } from "../../../services/token/tokenRepository";
 import { logError } from "../../../util/logging.js";
 
@@ -69,6 +70,16 @@ describe("Token Repository", () => {
         { id: mockTokenId },
         { used: true },
       );
+    });
+  });
+
+  describe("deleteToken", () => {
+    it("should delete the token", async () => {
+      Token.deleteOne.mockResolvedValue();
+
+      await deleteToken(mockTokenId);
+
+      expect(Token.deleteOne).toHaveBeenCalledWith({ id: mockTokenId });
     });
   });
 });

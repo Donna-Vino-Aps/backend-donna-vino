@@ -8,8 +8,13 @@ import SubscribedUser from "../../../models/subscribe/subscribedModel.js";
 import {
   isTokenUsed,
   markTokenAsUsed,
+  deleteToken,
 } from "../../../services/token/tokenRepository.js";
-import path from "path";
+import { generateToken } from "../../../services/token/tokenGenerator.js";
+import {
+  baseApiUrl,
+  baseDonnaVinoWebUrl,
+} from "../../../config/environment.js";
 
 // Mock all external dependencies
 vi.mock("fs");
@@ -18,6 +23,9 @@ vi.mock("../../../util/emailUtils.js");
 vi.mock("../../../models/subscribe/preSubscribeModel.js");
 vi.mock("../../../models/subscribe/subscribedModel.js");
 vi.mock("../../../services/token/tokenRepository.js");
+vi.mock("../../../services/token/tokenGenerator.js", () => ({
+  generateToken: vi.fn(),
+}));
 
 describe("subscribeController", () => {
   let req, res;
@@ -36,6 +44,7 @@ describe("subscribeController", () => {
     jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
     isTokenUsed.mockResolvedValue(false); // Token is not used
     markTokenAsUsed.mockResolvedValue();
+    deleteToken.mockResolvedValue(true);
     PreSubscribedUser.findOne = vi.fn();
     PreSubscribedUser.deleteOne = vi.fn();
     SubscribedUser.findOne = vi.fn();
@@ -180,7 +189,8 @@ describe("subscribeController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
 
@@ -199,6 +209,117 @@ describe("subscribeController", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: false,
       message: "Internal server error",
+    });
+  });
+
+  it("should replace the dynamic URLs in the email template", async () => {
+    req.body = {
+      token: "validtoken",
+      subject: "Welcome!",
+      templateName: "emailWelcomeTemplate",
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
+    SubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
+
+    fs.existsSync.mockReturnValue(true);
+    fs.readFileSync.mockReturnValue(
+      "Hello {{name}}! Please click here: {{RE_DIRECT_URL}} or unsubscribe at {{UNSUBSCRIBE_URL}}.",
+    );
+    jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
+
+    const unsubscribeToken = "unsubscribeToken123";
+    vi.mocked(generateToken).mockResolvedValue(unsubscribeToken);
+
+    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const homeUrl = `${baseDonnaVinoWebUrl}`;
+
+    await subscribeController(req, res);
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      "test@example.com",
+      "Welcome!",
+      "Hello {{name}}! Please click here: " +
+        homeUrl +
+        " or unsubscribe at " +
+        unsubscribeUrl +
+        ".",
+    );
+
+    expect(fs.readFileSync).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
+    });
+  });
+
+  it("should delete the token after successful subscription", async () => {
+    req.body = {
+      token: "validtoken",
+      subject: "Welcome!",
+      templateName: "emailWelcomeTemplate",
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
+    SubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
+
+    jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
+
+    await subscribeController(req, res);
+
+    expect(deleteToken).toHaveBeenCalledWith("token123");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
+    });
+  });
+
+  it("should dynamically generate the unsubscribe URL and include it in the email", async () => {
+    req.body = {
+      token: "validtoken",
+      subject: "Welcome!",
+      templateName: "emailWelcomeTemplate",
+      templateData: { name: "User" },
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
+    SubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
+
+    fs.existsSync.mockReturnValue(true);
+    fs.readFileSync.mockReturnValue(
+      "Hello {{name}}! Click here: {{RE_DIRECT_URL}} or unsubscribe here: {{UNSUBSCRIBE_URL}}.",
+    );
+
+    jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
+
+    const unsubscribeToken = "unsubscribeToken123";
+    generateToken.mockResolvedValue(unsubscribeToken);
+
+    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const homeUrl = `${baseDonnaVinoWebUrl}`;
+
+    await subscribeController(req, res);
+
+    expect(generateToken).toHaveBeenCalledWith("test@example.com");
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      "test@example.com",
+      "Welcome!",
+      `Hello User! Click here: ${homeUrl} or unsubscribe here: ${unsubscribeUrl}.`,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
 });

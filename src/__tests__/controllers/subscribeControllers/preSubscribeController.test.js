@@ -8,6 +8,7 @@ import PreSubscribedUser from "../../../models/subscribe/preSubscribeModel.js";
 import User from "../../../models/users/userModels.js";
 import validator from "validator";
 import { generateToken } from "../../../services/token/tokenGenerator.js";
+import { baseDonnaVinoWebUrl } from "../../../config/environment.js";
 
 vi.mock("fs");
 vi.mock("../../../util/emailUtils.js");
@@ -254,7 +255,6 @@ describe("preSubscribeController", () => {
   });
 
   it("should return 500 if sending email fails", async () => {
-    // Simulate email sending failure
     req.body = {
       to: "test@example.com",
       subject: "Test Subject",
@@ -273,6 +273,48 @@ describe("preSubscribeController", () => {
       success: false,
       message: "Failed to process subscription",
       error: "Email sending failed",
+    });
+  });
+
+  it("should replace dynamic confirmation URL in the email template", async () => {
+    req.body = {
+      to: "test@example.com",
+      subject: "Confirm your subscription",
+      templateName: "confirmationTemplate",
+      templateData: { name: "John" },
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue(null);
+    User.findOne.mockResolvedValue(null);
+    PreSubscribedUser.create.mockResolvedValue({
+      _id: "preSub123",
+      email: req.body.to,
+    });
+
+    fs.existsSync.mockReturnValue(true);
+    fs.readFileSync.mockReturnValue(
+      "Hello {{name}}! Click here to confirm: {{CONFIRM_SUBSCRIPTION_URL}}.",
+    );
+
+    const confirmationToken = "confirmationToken123";
+    vi.mocked(generateToken).mockResolvedValue(confirmationToken);
+
+    const expectedUrl = `${baseDonnaVinoWebUrl}/?token=${confirmationToken}`;
+
+    await preSubscribeController(req, res);
+
+    expect(generateToken).toHaveBeenCalledWith("test@example.com");
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      "test@example.com",
+      "Confirm your subscription",
+      `Hello John! Click here to confirm: ${expectedUrl}.`,
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "A verification email has been sent to your account.",
     });
   });
 });
