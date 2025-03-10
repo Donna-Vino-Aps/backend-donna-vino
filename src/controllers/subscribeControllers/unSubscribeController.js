@@ -11,7 +11,7 @@ import {
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
-import { baseApiUrl, baseDonnaVinoWebUrl } from "../../config/environment.js";
+import { baseApiUrl } from "../../config/environment.js";
 
 dotenv.config();
 
@@ -37,6 +37,7 @@ const createUnsubscribeUrl = (email) => {
 
 export const unSubscribeController = async (req, res) => {
   try {
+    // Define template paths
     const unsubscribeSuccessTemplatePath = resolvePath(
       "src/templates/unsubscribeSuccessTemplate.html",
     );
@@ -46,6 +47,8 @@ export const unSubscribeController = async (req, res) => {
 
     let emailTemplate;
     let unsubscribeConfirmationTemplate;
+
+    // Try reading the templates
     try {
       emailTemplate = readTemplate(unsubscribeSuccessTemplatePath);
       unsubscribeConfirmationTemplate = readTemplate(
@@ -58,6 +61,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
+    // Extract token from query parameters
     const { token } = req.query;
     let decoded;
 
@@ -66,11 +70,11 @@ export const unSubscribeController = async (req, res) => {
     } catch (error) {
       logError("Invalid or expired token.", error);
 
+      // If the token is expired, send the confirmation email
       const { email: to } = decoded || {};
-
-      // Handle expired token - generate a new one and send confirmation email
       const unsubscribeRequestUrl = createUnsubscribeUrl(to);
 
+      // Replace the placeholder in the confirmation template
       const newExpiredEmail = unsubscribeConfirmationTemplate.replace(
         "{{UNSUBSCRIBE_URL}}",
         unsubscribeRequestUrl,
@@ -87,7 +91,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Token is valid, proceed with the unsubscribe process
+    // If the token is valid, proceed with unsubscribe logic
     const { email: to, id: tokenId } = decoded;
 
     // Check if the token has already been used
@@ -99,7 +103,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Check if the user exists in SubscribedUser collection
+    // Check if the user exists in the subscribed list
     const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
     if (!existingSubscribedUser) {
       return res.status(400).json({
@@ -108,7 +112,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Remove user from SubscribedUser collection
+    // Remove user from the subscribed list
     await SubscribedUser.deleteOne({ email: to });
 
     logInfo(`User ${to} unsubscribed successfully.`);
@@ -117,26 +121,15 @@ export const unSubscribeController = async (req, res) => {
     await markTokenAsUsed(tokenId);
     await deleteToken(tokenId);
 
-    // Generate a new token for future unsubscribe requests
-    const unsubscribeRequestUrl = createUnsubscribeUrl(to);
-    const homeUrl = `${baseDonnaVinoWebUrl}`;
+    // Send the unsubscribe success email
+    await sendEmail(to, "Subscription successfully canceled", emailTemplate);
 
-    emailTemplate = emailTemplate
-      .replace("{{RE_DIRECT_URL}}", homeUrl)
-      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
-
-    await sendEmail(
-      to,
-      "Subscription confirmed - Manage your preferences",
-      emailTemplate,
-    );
-
-    logInfo(`Subscription confirmation email sent to ${to}`);
+    logInfo(`Unsubscribe success email sent to ${to}`);
 
     return res.status(200).json({
       success: true,
       message:
-        "Unsubscribe request received. Please check your email to confirm.",
+        "You have been unsubscribed successfully. A confirmation email has been sent.",
     });
   } catch (error) {
     logError("Error in unSubscribeController", error);
