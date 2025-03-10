@@ -7,7 +7,7 @@ import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
   markTokenAsUsed,
-  deleteToken, // función para eliminar token no válido
+  deleteToken,
 } from "../../services/token/tokenRepository.js";
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
@@ -23,7 +23,7 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 export const unSubscribeController = async (req, res) => {
   try {
     const unsubscribeTemplatePath = resolvePath(
-      "src/templates/unsubscribeTemplate.html",
+      "src/templates/unsubscribeRequest.html",
     );
     const unsubscribeConfirmationTemplatePath = resolvePath(
       "src/templates/unsubscribeConfirmation.html",
@@ -31,7 +31,6 @@ export const unSubscribeController = async (req, res) => {
 
     let emailTemplate;
     try {
-      // Cargar plantilla de correo dependiendo de si es válido o caducado
       emailTemplate = fs.readFileSync(unsubscribeTemplatePath, "utf-8");
     } catch (error) {
       logError(`Error reading email template: ${error.message}`);
@@ -41,14 +40,14 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Verificar si el token es válido
-    const { token } = req.query; // Suponiendo que el token es pasado como query
+    const { token } = req.query;
     let decoded;
+
     try {
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
       logError("Invalid or expired token.", error);
-      // Enviar el correo de "token caducado"
+      // Generar nuevo token para solicitar la desuscripción
       const expiredEmailTemplate = fs.readFileSync(
         unsubscribeConfirmationTemplatePath,
         "utf-8",
@@ -58,45 +57,45 @@ export const unSubscribeController = async (req, res) => {
       // Eliminar el token caducado
       await deleteToken(tokenId);
 
-      // Aquí generamos un nuevo token para desuscripción y lo enviamos
-      const unsubscribeToken = await generateToken(to);
-      const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+      // Crear un nuevo token de solicitud de desuscripción
+      const unsubscribeRequestToken = await generateToken(to);
+      const unsubscribeRequestUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
       const homeUrl = `${baseDonnaVinoWebUrl}`;
 
-      // Reemplazar en la plantilla de token caducado
+      // Actualizar el contenido del email con el nuevo enlace
       const newExpiredEmail = expiredEmailTemplate
         .replace("{{RE_DIRECT_URL}}", homeUrl)
-        .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
+        .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
-      await sendEmail(to, "Your unsubscribe link has expired", newExpiredEmail);
+      await sendEmail(to, "Confirm your unsubscribe request", newExpiredEmail);
 
-      logInfo(`Expired unsubscribe email sent to ${to}`);
+      logInfo(`Unsubscribe request email sent to ${to}`);
 
       return res.status(401).json({
         success: false,
         message:
-          "Invalid or expired token. A new unsubscribe email has been sent.",
+          "Your unsubscribe link has expired. A new confirmation email has been sent.",
       });
     }
 
-    // Si el token es válido
+    // Token válido
     const { email: to, id: tokenId } = decoded;
 
-    // Verificar si el token ha sido usado
+    // Verificar si el token ya fue utilizado
     const tokenUsed = await isTokenUsed(tokenId);
     if (tokenUsed) {
       return res.status(400).json({
         success: false,
-        message: "This token has already been used.",
+        message: "This unsubscribe request has already been processed.",
       });
     }
 
-    // Verificar si el usuario existe en la base de datos
+    // Verificar si el usuario existe en PreSubscribedUser
     const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
     if (!preSubscribedUser) {
       return res.status(404).json({
         success: false,
-        message: "User not found in PreSubscribedUser",
+        message: "User not found in PreSubscribedUser.",
       });
     }
 
@@ -109,39 +108,41 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Mover al usuario a la lista de suscritos
-    const newSubscribedUser = new SubscribedUser({ email: to });
-    await newSubscribedUser.save();
+    // Mover al usuario a SubscribedUser
+    await SubscribedUser.create({ email: to });
 
-    // Eliminar de la lista de pre-suscritos
+    // Eliminar de PreSubscribedUser
     await PreSubscribedUser.deleteOne({ email: to });
 
-    logInfo(
-      `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
-    );
+    logInfo(`User ${to} moved to SubscribedUser.`);
 
     // Marcar el token como usado
     await markTokenAsUsed(tokenId);
 
-    // Crear un nuevo token de desuscripción
-    const unsubscribeToken = await generateToken(to);
-    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    // Generar un nuevo token para futuras solicitudes de desuscripción
+    const unsubscribeRequestToken = await generateToken(to);
+    const unsubscribeRequestUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     emailTemplate = emailTemplate
       .replace("{{RE_DIRECT_URL}}", homeUrl)
-      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
+      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
-    await sendEmail(to, "Subscription confirmed", emailTemplate);
+    await sendEmail(
+      to,
+      "Subscription confirmed - Manage your preferences",
+      emailTemplate,
+    );
 
-    logInfo(`Welcome email sent to ${to}`);
+    logInfo(`Subscription confirmation email sent to ${to}`);
 
     return res.status(200).json({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Unsubscribe request received. Please check your email to confirm.",
     });
   } catch (error) {
-    logError("Error in unsubscribeController", error);
+    logError("Error in unSubscribeController", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

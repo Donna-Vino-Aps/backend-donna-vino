@@ -115,21 +115,22 @@ export const subscribeController = async (req, res) => {
     await deleteToken(tokenId);
 
     // Create the unsubscribe token
-    const unsubscribeToken = await generateToken(to);
-    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const unsubscribeRequestToken = await generateToken(to);
+    const unsubscribeRequestUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     emailTemplate = emailTemplate
       .replace("{{RE_DIRECT_URL}}", homeUrl)
-      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeUrl);
+      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
     await sendEmail(to, subject, emailTemplate);
 
-    logInfo(`Welcome email sent to ${to}`);
+    logInfo(`Welcome email with unsubscribe option sent to ${to}`);
 
     return res.status(200).json({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   } catch (error) {
     logError("Error in subscribeController", error);

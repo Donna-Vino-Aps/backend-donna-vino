@@ -189,7 +189,8 @@ describe("subscribeController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
 
@@ -250,7 +251,8 @@ describe("subscribeController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
 
@@ -273,7 +275,8 @@ describe("subscribeController", () => {
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
-      message: "Subscription confirmed and welcome email sent.",
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
 });
