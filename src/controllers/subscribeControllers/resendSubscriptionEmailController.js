@@ -4,6 +4,7 @@ import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import User from "../../models/users/userModels.js";
+import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import validator from "validator";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
@@ -33,11 +34,21 @@ export const resendSubscriptionEmailController = async (req, res) => {
   }
 
   try {
-    // Check if the user exists in PreSubscribedUser or User collection
+    // Check if the user exists in PreSubscribedUser, User, or Subscribe
     const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
     const user = await User.findOne({ email: to });
+    const subscribedUser = await SubscribedUser.findOne({ email: to });
 
-    // If not found in either collection, return error
+    // If user exists in Subscribe, they are already confirmed
+    if (subscribedUser) {
+      logInfo(`User ${to} is already confirmed in Subscribe collection.`);
+      return res.status(200).json({
+        success: true,
+        message: "You are already subscribed.",
+      });
+    }
+
+    // If user doesn't exist in any collection, return error
     if (!preSubscribedUser && !user) {
       return res.status(404).json({
         success: false,
@@ -45,8 +56,9 @@ export const resendSubscriptionEmailController = async (req, res) => {
       });
     }
 
-    // If the user is already subscribed, no need to resend the email
+    // If the user exists in User collection and is already subscribed
     if (user && user.isSubscribed) {
+      logInfo(`User ${to} is already subscribed in User collection.`);
       return res.status(200).json({
         success: true,
         message: "You are already subscribed.",

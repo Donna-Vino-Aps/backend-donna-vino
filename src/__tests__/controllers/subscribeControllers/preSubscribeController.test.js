@@ -299,7 +299,7 @@ describe("preSubscribeController", () => {
     const confirmationToken = "confirmationToken123";
     vi.mocked(generateToken).mockResolvedValue(confirmationToken);
 
-    const expectedUrl = `${baseDonnaVinoWebUrl}/?token=${confirmationToken}`;
+    const expectedUrl = `${baseDonnaVinoWebUrl}/subscription/verify?token=${confirmationToken}`;
 
     await preSubscribeController(req, res);
 
