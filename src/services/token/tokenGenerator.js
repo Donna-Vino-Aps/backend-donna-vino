@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
-import { saveTokenId } from "../token/tokenRepository";
+import { saveTokenId } from "../token/tokenRepository.js";
 
 dotenv.config();
 
