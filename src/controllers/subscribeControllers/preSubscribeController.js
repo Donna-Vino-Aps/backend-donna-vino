@@ -14,7 +14,7 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 const createConfirmSubscriptionUrl = async (email) => {
   try {
     const token = await generateToken(email);
-    return `${baseDonnaVinoWebUrl}/?token=${token}`;
+    return `${baseDonnaVinoWebUrl}/subscription/verify?token=${token}`;
   } catch (error) {
     throw new Error("Error generating confirmation URL: " + error.message);
   }
