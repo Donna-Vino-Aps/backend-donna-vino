@@ -10,6 +10,16 @@ import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
+// Helper function to generate subscription confirmation URL
+const createConfirmSubscriptionUrl = async (email) => {
+  try {
+    const token = await generateToken(email);
+    return `${baseDonnaVinoWebUrl}/?token=${token}`;
+  } catch (error) {
+    throw new Error("Error generating confirmation URL: " + error.message);
+  }
+};
+
 // Function to ensure the user is in the PreSubscribedUser collection
 const ensurePreSubscribedUser = async (email) => {
   const preSubscribedUser = await PreSubscribedUser.findOne({ email });
@@ -78,9 +88,8 @@ export const preSubscribeController = async (req, res) => {
   }
 
   try {
-    // Generate the token
-    const token = generateToken(to);
-    const confirmUrl = `${baseDonnaVinoWebUrl}/?token=${token}`;
+    // Generate subscription confirmation URL using helper function
+    const confirmUrl = await createConfirmSubscriptionUrl(to);
     emailTemplate = emailTemplate.replace(
       "{{CONFIRM_SUBSCRIPTION_URL}}",
       confirmUrl,

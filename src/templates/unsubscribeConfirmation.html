@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>Unsubscribe Confirmation</title>
+    <style>
+      body {
+        font-family: Barlow, sans-serif;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        max-width: 530px;
+        margin: auto;
+        text-align: center;
+        color: #101010;
+      }
+
+      .header {
+        margin-top: 48px;
+        margin-bottom: 20px;
+      }
+
+      .logo {
+        width: 124px;
+        margin-bottom: 56px;
+      }
+
+      .heading {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 19px;
+        font-size: 22px;
+        line-height: 28px;
+        font-weight: 700;
+      }
+
+      .main {
+        margin-bottom: 56px;
+      }
+
+      .content {
+        margin-bottom: 24px;
+      }
+
+      .content-text {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 20px;
+        margin: 0;
+      }
+
+      .button-container {
+        text-align: center;
+        margin: 25px 0;
+      }
+
+      .unsubscribe-link {
+        background-color: #183f27;
+        color: #ffffff;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        border-radius: 6px;
+        font-size: 16px;
+        font-family: Inter, sans-serif;
+      }
+
+      .unsubscribe-link:hover {
+        opacity: 0.85;
+      }
+
+      .unsubscribe-link:active {
+        transform: scale(0.95);
+        background-color: #102a1a;
+      }
+
+      .celebration {
+        font-size: 12px;
+        line-height: 16px;
+        margin-bottom: 26px;
+      }
+
+      .thanks {
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 20px;
+      }
+
+      .footer {
+        margin-bottom: 48px;
+        color: #6c6c6c;
+      }
+
+      .footer > p {
+        font-size: 12px;
+        line-height: 16px;
+      }
+
+      .socials {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 6px;
+      }
+
+      .social-heading {
+        font-size: 12px;
+        margin-bottom: 6px;
+      }
+
+      img.social-icon {
+        width: 20px;
+        height: 20px;
+        margin: 10px;
+      }
+
+      .address {
+        margin: 0;
+        margin-bottom: 16px;
+      }
+
+      .footer-link {
+        color: #007aff;
+      }
+
+      @media (max-width: 768px) {
+        .heading {
+          font-size: 21px;
+        }
+
+        .content-text {
+          font-size: 13px;
+        }
+
+        .unsubscribe-link {
+          font-size: 15px;
+        }
+
+        .celebration {
+          font-size: 11px;
+        }
+
+        .thanks {
+          font-size: 13px;
+        }
+      }
+
+      @media (max-width: 576px) {
+        .heading {
+          font-size: 20px;
+        }
+
+        .content-text {
+          font-size: 12px;
+        }
+
+        .button-container {
+          margin: 20px 0;
+        }
+
+        .unsubscribe-link {
+          font-size: 14px;
+        }
+
+        .celebration {
+          font-size: 11px;
+        }
+
+        .thanks {
+          font-size: 12px;
+        }
+
+        .logo {
+          margin-bottom: 45px;
+        }
+      }
+
+      @media (max-width: 456px) {
+        .container {
+          padding: 0 15px;
+        }
+
+        .heading {
+          font-size: 19px;
+        }
+
+        .content-text {
+          font-size: 11px;
+        }
+
+        .celebration {
+          font-size: 10px;
+        }
+
+        .button-container {
+          margin: 18px 0;
+        }
+
+        .unsubscribe-link {
+          font-size: 13px;
+        }
+
+        .thanks {
+          font-size: 11px;
+        }
+      }
+
+      @media (max-width: 382px) {
+        .container {
+          padding: 0 15px;
+        }
+
+        .heading {
+          font-size: 18px;
+        }
+
+        .content-text {
+          font-size: 10px;
+        }
+
+        .unsubscribe-link {
+          font-size: 12px;
+        }
+
+        .celebration {
+          font-size: 9px;
+        }
+
+        .thanks {
+          font-size: 10px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          class="logo"
+          src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
+          alt="Donna Vino Logo"
+        />
+        <h2 class="heading">We're sorry to see you go!</h2>
+      </div>
+
+      <div class="main">
+        <div class="content">
+          <p class="content-text">
+            We received your request to unsubscribe from our newsletter. If you
+            would like to confirm your unsubscription, please click the link
+            below:
+          </p>
+        </div>
+        <div class="button-container">
+          <a href="{{UNSUBSCRIBE_URL}}" class="unsubscribe-link"
+            >Click here to unsubscribe</a
+          >
+        </div>
+        <p class="celebration">
+          Thank you for being a part of our community! 🥂
+        </p>
+        <p class="thanks">Best regards,<br />Donna Vino Team</p>
+      </div>
+
+      <div class="footer">
+        <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
+        <p class="footer-links">
+          <a href="{{UNSUBSCRIBE_URL}}" class="footer-link">Unsubscribe</a> |
+          <a
+            href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
+            class="footer-link"
+            >Privacy Policy</a
+          >
+          |
+          <a
+            href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/contact"
+            class="footer-link"
+            >Contact Us</a
+          >
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

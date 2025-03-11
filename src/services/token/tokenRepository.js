@@ -15,5 +15,17 @@ export const isTokenUsed = async (id) => {
 };
 
 export const markTokenAsUsed = async (id) => {
-  await Token.findOneAndUpdate({ id }, { used: true });
+  try {
+    await Token.findOneAndUpdate({ id }, { used: true });
+  } catch (error) {
+    logError("Error marking token as used:", error);
+  }
+};
+
+export const deleteToken = async (id) => {
+  try {
+    await Token.deleteOne({ id });
+  } catch (error) {
+    logError("Error deleting token:", error);
+  }
 };
