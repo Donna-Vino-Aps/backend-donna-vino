@@ -116,7 +116,7 @@ export const signInWithGoogleController = async (req, res) => {
       try {
         const templatePath = path.resolve(
           process.cwd(),
-          "src/templates/emailWelcomeTemplate.html",
+          "src/templates/emailWelcomeTemplateGoogle.html",
         );
         const templateContent = fs.readFileSync(templatePath, "utf-8");
         const welcomeSubject = "Welcome to Donna Vino!";
