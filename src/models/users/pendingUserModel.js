@@ -7,7 +7,7 @@ const pendingUserSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  birthdate: { type: Date, required: true },
+  dateOfBirth: { type: Date, required: true },
   isSubscribed: { type: Boolean, default: false },
   verificationToken: { type: String, required: true },
 });
