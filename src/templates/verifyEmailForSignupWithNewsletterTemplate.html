@@ -22,6 +22,18 @@
         height: 100vh;
       }
 
+      a.social-link {
+        text-decoration: none;
+        color: inherit;
+      }
+
+      a.social-link img {
+        border: none;
+        outline: none;
+        text-decoration: none;
+        display: inline-block;
+      }
+
       .container {
         max-width: 530px;
         margin: auto;
@@ -117,9 +129,7 @@
       }
 
       .socials {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        text-align: center;
         margin-bottom: 6px;
       }
 
@@ -274,7 +284,7 @@
             Verify your email address to complete the signup and log into your
             account and verify your subscription to our newsletter.
           </p>
-          <p class="content-text">The link expires in <b>6 hours</b>.</p>
+          <p class="content-text">The link expires in <b>1 hour</b>.</p>
         </div>
         <div class="button-container">
           <a href="{{VERIFY_URL}}" class="button">Verify email</a>
