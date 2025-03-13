@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
+import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
@@ -105,6 +106,15 @@ export const preSubscribeController = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "A verification email has already been sent to your account.",
+      });
+    }
+
+    // Step 2: Check if the user is already in SubscribedUser
+    const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
+    if (existingSubscribedUser) {
+      return res.status(200).json({
+        success: true,
+        message: "User is already subscribed.",
       });
     }
 

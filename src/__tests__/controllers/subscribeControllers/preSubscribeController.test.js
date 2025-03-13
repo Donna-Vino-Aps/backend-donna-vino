@@ -5,6 +5,7 @@ import { preSubscribeController } from "../../../controllers/subscribeController
 import fs from "fs";
 import { sendEmail } from "../../../util/emailUtils.js";
 import PreSubscribedUser from "../../../models/subscribe/preSubscribeModel.js";
+import SubscribedUser from "../../../models/subscribe/subscribedModel.js";
 import User from "../../../models/users/userModels.js";
 import validator from "validator";
 import { generateToken } from "../../../services/token/tokenGenerator.js";
@@ -13,6 +14,7 @@ import { baseDonnaVinoWebUrl } from "../../../config/environment.js";
 vi.mock("fs");
 vi.mock("../../../util/emailUtils.js");
 vi.mock("../../../models/subscribe/preSubscribeModel.js");
+vi.mock("../../../models/subscribe/subscribedModel.js");
 vi.mock("../../../models/users/userModels.js");
 vi.mock("validator");
 vi.mock("../../../services/token/tokenGenerator.js", () => ({
@@ -29,14 +31,14 @@ describe("preSubscribeController", () => {
       json: vi.fn(),
     };
 
-    // Mock function responses for the test cases
     sendEmail.mockResolvedValue({ messageId: "12345" });
     fs.existsSync.mockReturnValue(true);
     fs.readFileSync.mockReturnValue("Hello {{name}}!");
     validator.isEmail.mockReturnValue(true);
 
     PreSubscribedUser.findOne = vi.fn();
-    PreSubscribedUser.findOneAndUpdate = vi.fn();
+    PreSubscribedUser.create = vi.fn();
+    SubscribedUser.findOne = vi.fn();
     User.findOne = vi.fn();
   });
 
@@ -315,6 +317,94 @@ describe("preSubscribeController", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       message: "A verification email has been sent to your account.",
+    });
+  });
+
+  it("should return 200 if user is already subscribed in SubscribedUser", async () => {
+    req.body = {
+      to: "subscribed@example.com",
+      subject: "Welcome!",
+      templateName: "welcomeTemplate",
+    };
+
+    SubscribedUser.findOne.mockResolvedValue({
+      _id: "subscribed123",
+      email: req.body.to,
+    });
+
+    await preSubscribeController(req, res);
+
+    expect(SubscribedUser.findOne).toHaveBeenCalledWith({
+      email: "subscribed@example.com",
+    });
+
+    expect(sendEmail).not.toHaveBeenCalled();
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "User is already subscribed.",
+    });
+  });
+
+  it("should check SubscribedUser before adding to PreSubscribedUser", async () => {
+    req.body = {
+      to: "newuser@example.com",
+      subject: "Welcome!",
+      templateName: "welcomeTemplate",
+      templateData: { name: "John" },
+    };
+
+    User.findOne.mockResolvedValue(null);
+    PreSubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.findOne.mockResolvedValue(null);
+
+    PreSubscribedUser.create.mockResolvedValue({
+      _id: "newUser123",
+      email: req.body.to,
+    });
+
+    const confirmationToken = "confirmationToken123";
+    vi.mocked(generateToken).mockResolvedValue(confirmationToken);
+
+    await preSubscribeController(req, res);
+
+    expect(SubscribedUser.findOne).toHaveBeenCalledWith({
+      email: "newuser@example.com",
+    });
+    expect(PreSubscribedUser.create).toHaveBeenCalledWith({
+      email: "newuser@example.com",
+    });
+
+    expect(sendEmail).toHaveBeenCalledWith(
+      "newuser@example.com",
+      "Welcome!",
+      expect.stringContaining("Hello John!"),
+    );
+
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "A verification email has been sent to your account.",
+    });
+  });
+
+  it("should return 500 if an error occurs while processing", async () => {
+    req.body = {
+      to: "error@example.com",
+      subject: "Test Error",
+      templateName: "errorTemplate",
+    };
+
+    SubscribedUser.findOne.mockRejectedValue(new Error("DB Error"));
+
+    await preSubscribeController(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.json).toHaveBeenCalledWith({
+      success: false,
+      message: "Failed to process subscription",
+      error: "DB Error",
     });
   });
 });
