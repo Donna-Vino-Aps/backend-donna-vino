@@ -8,7 +8,7 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 export const generateToken = async (email) => {
-  const expiresIn = "15m";
+  const expiresIn = "60m";
   const tokenId = uuidv4();
 
   const payload = { email, id: tokenId };
