@@ -21,6 +21,16 @@
         align-items: center;
         height: 100vh;
       }
+      a.social-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      a.social-link img {
+        border: none;
+        outline: none;
+        text-decoration: none;
+        display: inline-block;
+      }
 
       .container {
         max-width: 530px;
@@ -115,9 +125,7 @@
       }
 
       .socials {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        text-align: center;
         margin-bottom: 6px;
       }
 
@@ -270,7 +278,9 @@
           <p class="content-text">The link expires in <b>6 hours</b>.</p>
         </div>
         <div class="button-container">
-          <a href="{{VERIFY_URL}}" class="button">Confirm Subscription</a>
+          <a href="{{CONFIRM_SUBSCRIPTION_URL}}" class="button"
+            >Confirm Subscription</a
+          >
         </div>
         <p class="info">
           (If you did not subscribe for our newsletter, you can ignore this
@@ -312,7 +322,6 @@
         </div>
         <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
         <p class="footer-links">
-          <a href="#" class="footer-link">Subscribe</a> |
           <a
             href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
             class="footer-link"
