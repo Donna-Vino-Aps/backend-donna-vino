@@ -89,13 +89,6 @@ export const preSubscribeController = async (req, res) => {
   }
 
   try {
-    // Generate subscription confirmation URL using helper function
-    const confirmUrl = await createConfirmSubscriptionUrl(to);
-    emailTemplate = emailTemplate.replace(
-      "{{CONFIRM_SUBSCRIPTION_URL}}",
-      confirmUrl,
-    );
-
     // Step 1: Check if the user is already in PreSubscribedUser
     const existingPreSubscribedUser = await PreSubscribedUser.findOne({
       email: to,
@@ -138,6 +131,13 @@ export const preSubscribeController = async (req, res) => {
       // Add user to PreSubscribedUser if not already
       await ensurePreSubscribedUser(to);
 
+      // Generate subscription confirmation URL using helper function
+      const confirmUrl = await createConfirmSubscriptionUrl(to);
+      emailTemplate = emailTemplate.replace(
+        "{{CONFIRM_SUBSCRIPTION_URL}}",
+        confirmUrl,
+      );
+
       await sendEmail(to, subject, emailTemplate);
       logInfo(`Sending email ${to}`);
 
@@ -148,6 +148,14 @@ export const preSubscribeController = async (req, res) => {
     }
 
     // Step 3: If the user is not found in any collection, add to PreSubscribedUser
+
+    // Generate subscription confirmation URL using helper function
+    const confirmUrl = await createConfirmSubscriptionUrl(to);
+    emailTemplate = emailTemplate.replace(
+      "{{CONFIRM_SUBSCRIPTION_URL}}",
+      confirmUrl,
+    );
+
     await ensurePreSubscribedUser(to);
     await sendEmail(to, subject, emailTemplate);
     logInfo(`Sending email ${to}`);

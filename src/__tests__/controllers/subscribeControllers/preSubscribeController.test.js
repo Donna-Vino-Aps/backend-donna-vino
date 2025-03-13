@@ -407,4 +407,80 @@ describe("preSubscribeController", () => {
       error: "DB Error",
     });
   });
+
+  it("should not generate a token if the user is already in PreSubscribedUser", async () => {
+    // User already in PreSubscribedUser
+    req.body = {
+      to: "test@example.com",
+      subject: "Welcome!",
+      templateName: "welcomeTemplate",
+    };
+
+    // Mock the response from PreSubscribedUser
+    PreSubscribedUser.findOne.mockResolvedValue({
+      _id: "preSub123",
+      email: req.body.to,
+    });
+
+    await preSubscribeController(req, res);
+
+    // Ensure token is not generated
+    expect(generateToken).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "A verification email has already been sent to your account.",
+    });
+  });
+
+  it("should not generate a token if the user is already in SubscribedUser", async () => {
+    // User already subscribed
+    req.body = {
+      to: "subscribed@example.com",
+      subject: "Welcome!",
+      templateName: "welcomeTemplate",
+    };
+
+    // Mock the response from SubscribedUser
+    SubscribedUser.findOne.mockResolvedValue({
+      _id: "subscribed123",
+      email: req.body.to,
+    });
+
+    await preSubscribeController(req, res);
+
+    // Ensure token is not generated
+    expect(generateToken).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "User is already subscribed.",
+    });
+  });
+
+  it("should not generate a token if the user is already subscribed in the User collection", async () => {
+    // User exists and is already subscribed
+    req.body = {
+      to: "subscribeduser@example.com",
+      subject: "Welcome!",
+      templateName: "welcomeTemplate",
+    };
+
+    // Mock the response from User
+    User.findOne.mockResolvedValue({
+      _id: "user123",
+      email: req.body.to,
+      isSubscribed: true,
+    });
+
+    await preSubscribeController(req, res);
+
+    // Ensure token is not generated
+    expect(generateToken).not.toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message: "You are already subscribed.",
+    });
+  });
 });
