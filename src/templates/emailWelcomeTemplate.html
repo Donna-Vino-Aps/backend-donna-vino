@@ -21,10 +21,12 @@
         align-items: center;
         height: 100vh;
       }
+
       a.social-link {
         text-decoration: none;
         color: inherit;
       }
+
       a.social-link img {
         border: none;
         outline: none;
@@ -85,11 +87,11 @@
         color: #ffffff;
         padding: 15px 32px;
         text-align: center;
-        text-decoration: none;
         display: inline-block;
         border-radius: 6px;
         font-size: 16px;
         font-family: Inter, sans-serif;
+        text-decoration: none;
       }
 
       .button:hover {
@@ -146,6 +148,12 @@
 
       .footer-link {
         color: #007aff;
+      }
+
+      /* Aseguramos que el enlace no cambie a azul */
+      .button {
+        color: white !important;
+        text-decoration: none !important;
       }
 
       @media (max-width: 768px) {
@@ -278,6 +286,7 @@
           </p>
         </div>
         <div class="button-container">
+          <!-- Hacemos que el enlace sea el propio botón -->
           <a href="{{RE_DIRECT_URL}}" class="button">Go to website</a>
         </div>
         <p class="celebration">Let's raise a glass to new beginnings! 🥂</p>
