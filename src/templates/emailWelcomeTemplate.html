@@ -21,6 +21,16 @@
         align-items: center;
         height: 100vh;
       }
+      a.social-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      a.social-link img {
+        border: none;
+        outline: none;
+        text-decoration: none;
+        display: inline-block;
+      }
 
       .container {
         max-width: 530px;
@@ -60,7 +70,9 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 20px;
+        letter-spacing: 0.4px;
         margin: 0;
+        margin-bottom: 10px;
       }
 
       .button-container {
@@ -112,9 +124,7 @@
       }
 
       .socials {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        text-align: center;
         margin-bottom: 6px;
       }
 
@@ -307,7 +317,6 @@
         </div>
         <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
         <p class="footer-links">
-          <a href="{{UNSUBSCRIBE_URL}}" class="footer-link">Unsubscribe</a> |
           <a
             href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
             class="footer-link"
