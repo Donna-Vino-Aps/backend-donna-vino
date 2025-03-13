@@ -4,6 +4,9 @@ import { validateUser } from "../../models/users/userModels.js";
 import User from "../../models/users/userModels.js";
 import PendingUser from "../../models/users/pendingUserModel.js";
 import validateAllowedFields from "../../util/validateAllowedFields.js";
+import path from "path";
+import fs from "fs";
+import { sendEmail } from "../../util/emailUtils.js";
 import { generateToken } from "../../services/token/tokenGenerator.js";
 
 export const preSignUp = async (req, res) => {
@@ -130,6 +133,30 @@ export const preSignUp = async (req, res) => {
       success: false,
       msg: "Unable to create your account. Please try again later.",
     });
+  }
+
+  // Send verification email
+  try {
+    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
+    const verifyUrl = `${baseUrl}/api/auth/sign-up?token=${token}`;
+
+    const templateName = isSubscribed
+      ? "verifyEmailForSignupWithNewsletterTemplate.html"
+      : "verifyEmailForSignupTemplate.html";
+
+    const templatePath = path.resolve(
+      process.cwd(),
+      `src/templates/${templateName}`,
+    );
+
+    let templateContent = fs.readFileSync(templatePath, "utf-8");
+    templateContent = templateContent.replace("{{VERIFY_URL}}", verifyUrl);
+
+    const verifySubject = "Verify your email address for Donna Vino";
+    await sendEmail(pendingUser.email, verifySubject, templateContent);
+    logInfo(`Verification email sent to ${pendingUser.email}`);
+  } catch (emailError) {
+    logError("Error sending verification email: " + emailError.message);
   }
 
   return res.status(201).json({
