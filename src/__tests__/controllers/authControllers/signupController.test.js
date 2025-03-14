@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
-import { signUp } from "../../../controllers/authControllers/signUpController.js";
+import { signUp } from "../../../controllers/authControllers/signupController.js";
 import fs from "fs";
 import path from "path";
 import jwt from "jsonwebtoken";

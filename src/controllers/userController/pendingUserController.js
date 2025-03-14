@@ -1,7 +1,7 @@
 import express from "express";
 const app = express();
 import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
-import { signUp } from "../authControllers/signUpController.js";
+import { signUp } from "../authControllers/signupController.js";
 import { logInfo, logError } from "../../util/logging.js";
 import PendingUserModel from "../../models/pendingUserModel.js";
 import { signUpUser } from "../../services/authService.js";
