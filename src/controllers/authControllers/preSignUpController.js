@@ -16,7 +16,9 @@ export const preSignUp = async (req, res) => {
     "email",
     "password",
     "dateOfBirth",
+    "isVip",
     "isSubscribed",
+    "authProvider",
   ];
 
   if (!req.body.user || typeof req.body.user !== "object") {
@@ -55,7 +57,12 @@ export const preSignUp = async (req, res) => {
     });
   }
 
-  const { email, isSubscribed = false } = req.body.user;
+  const {
+    email,
+    isSubscribed = false,
+    isVip = false,
+    authProvider = "local",
+  } = req.body.user;
 
   // Check if a permanent user already exists with this email
   let existingUser;
@@ -108,12 +115,13 @@ export const preSignUp = async (req, res) => {
   // Create or update pending user
   try {
     if (pendingUser) {
-      pendingUser.verificationToken = token;
       pendingUser.firstName = req.body.user.firstName;
       pendingUser.lastName = req.body.user.lastName;
       pendingUser.password = req.body.user.password;
       pendingUser.dateOfBirth = new Date(req.body.user.dateOfBirth);
       pendingUser.isSubscribed = isSubscribed;
+      pendingUser.isVip = isVip;
+      pendingUser.authProvider = authProvider;
 
       await pendingUser.save();
       logInfo(`Updated existing pending user: ${pendingUser.email}`);
@@ -121,7 +129,6 @@ export const preSignUp = async (req, res) => {
       pendingUser = await PendingUser.create({
         ...req.body.user,
         dateOfBirth: new Date(req.body.user.dateOfBirth),
-        verificationToken: token,
       });
       logInfo(`Created new pending user: ${pendingUser.email}`);
     }
