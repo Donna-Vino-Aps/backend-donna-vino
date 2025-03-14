@@ -1,141 +1,172 @@
 import { logError, logInfo } from "../../util/logging.js";
-import validationErrorMessage from "../../util/validationErrorMessage.js";
-import { validateUser } from "../../models/users/userModels.js";
 import User from "../../models/users/userModels.js";
-import validateAllowedFields from "../../util/validateAllowedFields.js";
+import PendingUser from "../../models/users/pendingUserModel.js";
 import path from "path";
 import fs from "fs";
 import { sendEmail } from "../../util/emailUtils.js";
-import SubscribedUser from "../../models/subscribe/subscribedModel.js";
+import jwt from "jsonwebtoken";
+import {
+  isTokenUsed,
+  markTokenAsUsed,
+  deleteToken,
+} from "../../services/token/tokenRepository.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
-export const signup = async (req, res) => {
-  // Allowed fields in the user model
-  const allowedFields = [
-    "firstName",
-    "lastName",
-    "email",
-    "password",
-    "dateOfBirth",
-    "authProvider",
-    "isSubscribed",
-  ];
+export const signUp = async (req, res) => {
+  const { token } = req.query;
 
-  if (!req.body.user || typeof req.body.user !== "object") {
-    return res.status(400).json({
-      success: false,
-      msg: `Invalid request: You need to provide a valid 'user' object. Received: ${JSON.stringify(
-        req.body.user,
-      )}`,
-    });
+  // 1.Check if token exists
+  if (!token) {
+    logError("Missing token in verification request");
+    return res.redirect(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=missing_token`,
+    );
   }
 
-  // Normalize email if provided
-  if (req.body.user.email && typeof req.body.user.email === "string") {
-    req.body.user.email = req.body.user.email.toLowerCase();
-  }
-
-  // Validate `isSubscribed` field
-  if (
-    req.body.user.hasOwnProperty("isSubscribed") &&
-    typeof req.body.user.isSubscribed !== "boolean"
-  ) {
-    return res.status(400).json({
-      success: false,
-      msg: "Invalid request: 'isSubscribed' must be true or false.",
-    });
-  }
-
-  // Validate the allowed fields
-  const invalidFieldsError = validateAllowedFields(
-    req.body.user,
-    allowedFields,
-  );
-  if (invalidFieldsError) {
-    return res.status(400).json({
-      success: false,
-      msg: `Invalid request: ${invalidFieldsError}`,
-    });
-  }
-
-  // Validate the user data
-  const errorList = validateUser(req.body.user);
-  if (errorList.length > 0) {
-    return res.status(400).json({
-      success: false,
-      msg: validationErrorMessage(errorList),
-    });
-  }
-
+  // 2. Verify JWT token format and signature
+  let decoded;
   try {
-    const { email, isSubscribed = false } = req.body.user;
-    const existingUser = await User.findOne({ email });
+    const JWT_SECRET = process.env.JWT_SECRET;
+    decoded = jwt.verify(token, JWT_SECRET);
+  } catch (error) {
+    if (error.name === "TokenExpiredError") {
+      logError(`Token expired: ${token}`);
+      return res.redirect(
+        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=token_expired`,
+      );
+    } else if (error.name === "JsonWebTokenError") {
+      logError(`Invalid token: ${token}, error: ${error.message}`);
+      return res.redirect(
+        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=token_invalid`,
+      );
+    } else {
+      logError(`Error verifying token: ${error.message}`);
+      return res.redirect(
+        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      );
+    }
+  }
+
+  // 3. Check if token has been used
+  try {
+    if (await isTokenUsed(decoded.id)) {
+      logError(`Token ${decoded.id} has already been used`);
+      return res.redirect(
+        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=token_used`,
+      );
+    }
+  } catch (error) {
+    logError(`Error checking if token is used: ${error.message}`);
+    return res.redirect(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+    );
+  }
+
+  // 4. Mark token as used immediately
+  try {
+    await markTokenAsUsed(decoded.id);
+  } catch (error) {
+    logError(`Error marking token as used: ${error.message}`);
+    return res.redirect(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+    );
+  }
+
+  // 5. Find the pending user by email
+  let pendingUser;
+  try {
+    pendingUser = await PendingUser.findOne({ email: decoded.email });
+
+    if (!pendingUser) {
+      logError(`No pending user found for email: ${decoded.email}`);
+      return res.redirect(
+        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=no_pending_user`,
+      );
+    }
+  } catch (dbError) {
+    logError(`Database error finding pending user: ${dbError.message}`);
+    return res.redirect(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+    );
+  }
+
+  // 6. Check if user already exists
+  try {
+    const existingUser = await User.findOne({ email: decoded.email });
 
     if (existingUser) {
-      // If the user exists, only update `isSubscribed` field if needed
-      if (!existingUser.isSubscribed && isSubscribed) {
-        existingUser.isSubscribed = true;
-        await existingUser.save();
-        logInfo(`Updated isSubscribed to true for existing user: ${email}`);
+      logInfo(`User ${decoded.email} already exists, cleaning up pending user`);
+
+      try {
+        await PendingUser.deleteOne({ _id: pendingUser._id });
+        logInfo(
+          `Deleted pending user for already existing user: ${pendingUser.email}`,
+        );
+      } catch (deleteError) {
+        logError(`Error deleting pending user: ${deleteError.message}`);
       }
-      return res.status(200).json({
-        success: true,
-        msg: "User already exists.",
-        user: {
-          id: existingUser._id,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-          email: existingUser.email,
-          authProvider: existingUser.authProvider,
-          isVip: existingUser.isVip,
-          isSubscribed: existingUser.isSubscribed,
-        },
-      });
+
+      return res.redirect(`${baseDonnaVinoEcommerceWebUrl}/login`); //how to log in user
     }
-
-    // If the user does not exist, create a new one
-    const newUser = await User.create(req.body.user);
-    logInfo(`User created successfully: ${newUser.email}`);
-
-    // If the user previously subscribed to the newsletter, remove that record.
-    const subscribedRecord = await SubscribedUser.findOne({
-      email: newUser.email,
-    });
-    if (subscribedRecord) {
-      await SubscribedUser.deleteOne({ _id: subscribedRecord._id });
-      logInfo(`Removed existing SubscribedUser record for ${newUser.email}`);
-    }
-
-    try {
-      const templatePath = path.resolve(
-        process.cwd(),
-        "src/templates/verifyEmailTemplate.html",
-      );
-      const templateContent = fs.readFileSync(templatePath, "utf-8");
-      const welcomeSubject = "Welcome to Donna Vino! Please Verify Your Email";
-      await sendEmail(newUser.email, welcomeSubject, templateContent);
-      logInfo(`Verify email sent to ${newUser.email}`);
-    } catch (emailError) {
-      logError("Error sending verify email: " + emailError.message);
-    }
-
-    return res.status(201).json({
-      success: true,
-      msg: "User created successfully",
-      user: {
-        id: newUser._id,
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        email: newUser.email,
-        authProvider: newUser.authProvider,
-        isVip: newUser.isVip,
-        isSubscribed: newUser.isSubscribed,
-      },
-    });
-  } catch (error) {
-    logError("Error in signup process: " + error.message);
-    return res.status(500).json({
-      success: false,
-      msg: "Unable to create user, please try again later.",
-    });
+  } catch (dbError) {
+    logError(`Database error checking existing user: ${dbError.message}`);
+    return res.redirect(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+    );
   }
+
+  // 7. Create the permanent user
+  let newUser;
+  try {
+    const pendingUserData = pendingUser.toObject();
+    delete pendingUserData._id;
+    delete pendingUserData.__v;
+
+    newUser = await User.create(pendingUserData);
+
+    logInfo(`User created successfully from pending user: ${newUser.email}`);
+  } catch (dbError) {
+    logError(`Error creating user: ${dbError.message}`);
+    return res.redirect(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+    );
+  }
+
+  // 8. Send welcome email
+  try {
+    const templatePath = path.resolve(
+      process.cwd(),
+      "src/templates/emailWelcomeTemplate.html",
+    );
+    let templateContent = fs.readFileSync(templatePath, "utf-8");
+    templateContent = templateContent.replace(
+      "{{RE_DIRECT_URL}}",
+      `${baseDonnaVinoEcommerceWebUrl}`,
+    );
+    const welcomeSubject = "Welcome to Donna Vino!";
+
+    await sendEmail(newUser.email, welcomeSubject, templateContent);
+    logInfo(`Welcome email sent to ${newUser.email}`);
+  } catch (error) {
+    logError(`Error sending welcome email: ${error.message}`);
+  }
+
+  // 9. Delete the pending user record
+  try {
+    await PendingUser.deleteOne({ _id: pendingUser._id });
+    logInfo(`Deleted pending user record for ${pendingUser.email}`);
+  } catch (dbError) {
+    logError(`Error deleting pending user: ${dbError.message}`);
+  }
+
+  // 10. Clean up by deleting the token
+  try {
+    await deleteToken(decoded.id);
+    logInfo(`Deleted token ${decoded.id}`);
+  } catch (dbError) {
+    logError(`Error deleting token: ${dbError.message}`);
+  }
+
+  // 11. Success
+  return res.redirect(`${baseDonnaVinoEcommerceWebUrl}/login`);
 };
