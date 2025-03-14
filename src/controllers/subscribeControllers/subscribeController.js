@@ -123,6 +123,7 @@ export const subscribeController = async (req, res) => {
 
     logInfo(`Marking token as used: ${tokenId}`);
     await markTokenAsUsed(tokenId);
+
     logInfo(`Deleting token: ${tokenId}`);
     await deleteToken(tokenId);
 
