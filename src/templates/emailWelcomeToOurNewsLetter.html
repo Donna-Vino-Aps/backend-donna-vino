@@ -9,7 +9,7 @@
       href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Email Verification</title>
+    <title>Welcome to Donna Vino</title>
     <style>
       body {
         font-family: Barlow, sans-serif;
@@ -21,10 +21,12 @@
         align-items: center;
         height: 100vh;
       }
+
       a.social-link {
         text-decoration: none;
         color: inherit;
       }
+
       a.social-link img {
         border: none;
         outline: none;
@@ -85,13 +87,11 @@
         color: #ffffff;
         padding: 15px 32px;
         text-align: center;
-        text-decoration: none;
         display: inline-block;
         border-radius: 6px;
         font-size: 16px;
         font-family: Inter, sans-serif;
-        transition: transform 0.2s ease-in-out,
-          background-color 0.2s ease-in-out;
+        text-decoration: none;
       }
 
       .button:hover {
@@ -103,16 +103,9 @@
         background-color: #102a1a;
       }
 
-      .button:link,
-      .button:visited {
-        text-decoration: none;
-        color: #ffffff;
-      }
-
-      .info {
+      .celebration {
         font-size: 12px;
         line-height: 16px;
-        font-style: italic;
         margin-bottom: 26px;
       }
 
@@ -175,7 +168,7 @@
           font-size: 15px;
         }
 
-        .info {
+        .celebration {
           font-size: 11px;
         }
 
@@ -201,7 +194,7 @@
           font-size: 14px;
         }
 
-        .info {
+        .celebration {
           font-size: 11px;
         }
 
@@ -227,7 +220,7 @@
           font-size: 11px;
         }
 
-        .info {
+        .celebration {
           font-size: 10px;
         }
 
@@ -261,7 +254,7 @@
           font-size: 12px;
         }
 
-        .info {
+        .celebration {
           font-size: 9px;
         }
 
@@ -279,25 +272,25 @@
           src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
           alt="Donna Vino Logo"
         />
-        <h2 class="heading">You are almost there!</h2>
+        <h2 class="heading">Thank you for subscribing to our newsletter!</h2>
       </div>
 
       <div class="main">
         <div class="content">
           <p class="content-text">
-            Verify your email address to complete the subscription to our
-            newsletter.
+            We're thrilled to have you join our community! As a subscriber,
+            you'll receive exclusive offers, wine recommendations, and updates
+            on our latest events and tasting experiences.
           </p>
-          <p class="content-text">The link expires in <b>1 hour</b>.</p>
+          <p class="content-text">
+            Stay tuned for exciting updates and offers straight to your inbox!
+          </p>
         </div>
         <div class="button-container">
-          <a href="{{CONFIRM_SUBSCRIPTION_URL}}" class="button"
-            >Confirm Subscription</a
-          >
+          <a href="{{RE_DIRECT_URL}}" class="button">Visit Our Website</a>
         </div>
-        <p class="info">
-          (If you did not subscribe for our newsletter, you can ignore this
-          email)
+        <p class="celebration">
+          Here's to discovering amazing wines together! 🍷
         </p>
         <p class="thanks">Thank you,<br />Donna Vino Team</p>
       </div>
@@ -335,6 +328,7 @@
         </div>
         <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
         <p class="footer-links">
+          <a href="{{UNSUBSCRIBE_URL}}" class="footer-link">Unsubscribe</a> |
           <a
             href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
             class="footer-link"

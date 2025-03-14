@@ -72,7 +72,9 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 20px;
+        letter-spacing: 0.4px;
         margin: 0;
+        margin-bottom: 10px;
       }
 
       .button-container {
@@ -85,11 +87,11 @@
         color: #ffffff;
         padding: 15px 32px;
         text-align: center;
-        text-decoration: none;
         display: inline-block;
         border-radius: 6px;
         font-size: 16px;
         font-family: Inter, sans-serif;
+        text-decoration: none;
       }
 
       .button:hover {
@@ -146,6 +148,11 @@
 
       .footer-link {
         color: #007aff;
+      }
+
+      .button {
+        color: white !important;
+        text-decoration: none !important;
       }
 
       @media (max-width: 768px) {
@@ -278,6 +285,7 @@
           </p>
         </div>
         <div class="button-container">
+          <!-- Hacemos que el enlace sea el propio botón -->
           <a href="{{RE_DIRECT_URL}}" class="button">Go to website</a>
         </div>
         <p class="celebration">Let's raise a glass to new beginnings! 🥂</p>
@@ -317,7 +325,6 @@
         </div>
         <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
         <p class="footer-links">
-          <a href="{{UNSUBSCRIBE_URL}}" class="footer-link">Unsubscribe</a> |
           <a
             href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
             class="footer-link"

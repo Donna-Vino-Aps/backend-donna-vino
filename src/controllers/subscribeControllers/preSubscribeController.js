@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
+import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/users/userModels.js";
 import validator from "validator";
@@ -88,13 +89,6 @@ export const preSubscribeController = async (req, res) => {
   }
 
   try {
-    // Generate subscription confirmation URL using helper function
-    const confirmUrl = await createConfirmSubscriptionUrl(to);
-    emailTemplate = emailTemplate.replace(
-      "{{CONFIRM_SUBSCRIPTION_URL}}",
-      confirmUrl,
-    );
-
     // Step 1: Check if the user is already in PreSubscribedUser
     const existingPreSubscribedUser = await PreSubscribedUser.findOne({
       email: to,
@@ -105,6 +99,15 @@ export const preSubscribeController = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: "A verification email has already been sent to your account.",
+      });
+    }
+
+    // Step 2: Check if the user is already in SubscribedUser
+    const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
+    if (existingSubscribedUser) {
+      return res.status(200).json({
+        success: true,
+        message: "User is already subscribed.",
       });
     }
 
@@ -128,6 +131,13 @@ export const preSubscribeController = async (req, res) => {
       // Add user to PreSubscribedUser if not already
       await ensurePreSubscribedUser(to);
 
+      // Generate subscription confirmation URL using helper function
+      const confirmUrl = await createConfirmSubscriptionUrl(to);
+      emailTemplate = emailTemplate.replace(
+        "{{CONFIRM_SUBSCRIPTION_URL}}",
+        confirmUrl,
+      );
+
       await sendEmail(to, subject, emailTemplate);
       logInfo(`Sending email ${to}`);
 
@@ -138,6 +148,14 @@ export const preSubscribeController = async (req, res) => {
     }
 
     // Step 3: If the user is not found in any collection, add to PreSubscribedUser
+
+    // Generate subscription confirmation URL using helper function
+    const confirmUrl = await createConfirmSubscriptionUrl(to);
+    emailTemplate = emailTemplate.replace(
+      "{{CONFIRM_SUBSCRIPTION_URL}}",
+      confirmUrl,
+    );
+
     await ensurePreSubscribedUser(to);
     await sendEmail(to, subject, emailTemplate);
     logInfo(`Sending email ${to}`);

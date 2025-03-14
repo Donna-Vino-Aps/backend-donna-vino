@@ -121,7 +121,9 @@ export const subscribeController = async (req, res) => {
       `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
     );
 
+    logInfo(`Marking token as used: ${tokenId}`);
     await markTokenAsUsed(tokenId);
+    logInfo(`Deleting token: ${tokenId}`);
     await deleteToken(tokenId);
 
     const unsubscribeRequestUrl = await createUnsubscribeUrl(to);

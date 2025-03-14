@@ -322,4 +322,28 @@ describe("subscribeController", () => {
         "Subscription confirmed. An email has been sent with unsubscribe options.",
     });
   });
+
+  it("should delete the token after verifying the user in PreSubscribedUser", async () => {
+    req.body = {
+      token: "validtoken",
+      subject: "Welcome!",
+      templateName: "emailWelcomeTemplate",
+    };
+
+    PreSubscribedUser.findOne.mockResolvedValue({ email: "test@example.com" });
+    SubscribedUser.findOne.mockResolvedValue(null);
+    SubscribedUser.create.mockResolvedValue({ email: "test@example.com" });
+
+    jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
+
+    await subscribeController(req, res);
+
+    expect(deleteToken).toHaveBeenCalledWith("token123");
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      success: true,
+      message:
+        "Subscription confirmed. An email has been sent with unsubscribe options.",
+    });
+  });
 });
