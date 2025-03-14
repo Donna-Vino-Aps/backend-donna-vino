@@ -1,127 +1,217 @@
-import supertest from "supertest";
+import dotenv from "dotenv";
+dotenv.config({ path: ".env.test" });
+import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
+import { signUp } from "../../../controllers/authControllers/signupController.js";
+import fs from "fs";
+import path from "path";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../../../util/emailUtils.js";
+import PendingUser from "../../../models/users/pendingUserModel.js";
+import User from "../../../models/users/userModels.js";
 import {
-  describe,
-  test,
-  beforeAll,
-  afterEach,
-  afterAll,
-  expect,
-  vi,
-} from "vitest";
-import {
-  connectToMockDB,
-  closeMockDatabase,
-  clearMockDatabase,
-} from "../../../__testUtils__/dbMock.js";
-import app from "../../../app.js";
-import { sendEmail } from "../../util/emailUtils.js";
+  isTokenUsed,
+  markTokenAsUsed,
+  deleteToken,
+} from "../../../services/token/tokenRepository.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../../config/environment.js";
+import { logError, logInfo } from "../../../util/logging.js";
 
-const request = supertest(app);
-
-vi.mock("../../util/emailUtils.js", () => ({
-  sendEmail: vi.fn().mockResolvedValue(true),
+vi.mock("fs");
+vi.mock("path");
+vi.mock("jsonwebtoken");
+vi.mock("../../../util/emailUtils.js");
+vi.mock("../../../models/users/pendingUserModel.js");
+vi.mock("../../../models/users/userModels.js");
+vi.mock("../../../services/token/tokenRepository.js");
+vi.mock("../../../config/environment.js", () => ({
+  baseDonnaVinoEcommerceWebUrl: "http://localhost:3000",
 }));
+vi.mock("../../../util/logging.js");
 
-describe("signupController", () => {
-  beforeAll(async () => {
-    await connectToMockDB();
-  });
+describe("SignUp Controller", () => {
+  let req, res;
+  const mockToken = "mock-verification-token";
+  const mockTokenId = "token-id-123";
+  const mockEmail = "test@example.com";
+  const mockJwtSecret = "test-jwt-secret";
 
-  afterEach(async () => {
-    await clearMockDatabase();
+  let pendingUserData;
+
+  beforeEach(() => {
+    process.env.JWT_SECRET = mockJwtSecret;
+
+    req = {
+      query: {
+        token: mockToken,
+      },
+    };
+
+    res = {
+      status: vi.fn().mockReturnThis(),
+      json: vi.fn(),
+      redirect: vi.fn(),
+    };
+
+    pendingUserData = {
+      _id: "pending-user-123",
+      firstName: "John",
+      lastName: "Doe",
+      email: mockEmail,
+      password: "Password123!",
+      dateOfBirth: new Date("1990-01-01"),
+      isVip: false,
+      isSubscribed: false,
+      authProvider: "local",
+      toObject: vi.fn().mockReturnValue({
+        firstName: "John",
+        lastName: "Doe",
+        email: mockEmail,
+        password: "Password123!",
+        dateOfBirth: new Date("1990-01-01"),
+        isVip: false,
+        isSubscribed: false,
+        authProvider: "local",
+      }),
+    };
+
+    fs.readFileSync.mockReturnValue("<html>Welcome {{NAME}}</html>");
+    path.resolve.mockReturnValue("/mock/path/to/template.html");
+    sendEmail.mockResolvedValue(true);
+
+    jwt.verify.mockReturnValue({ id: mockTokenId, email: mockEmail });
+    isTokenUsed.mockResolvedValue(false);
+    markTokenAsUsed.mockResolvedValue(true);
+    deleteToken.mockResolvedValue(true);
+
+    PendingUser.findOne = vi.fn().mockResolvedValue(pendingUserData);
+    PendingUser.deleteOne = vi.fn().mockResolvedValue({ deletedCount: 1 });
+
+    User.findOne = vi.fn().mockResolvedValue(null);
+    User.create = vi.fn().mockImplementation((data) =>
+      Promise.resolve({
+        ...data,
+        _id: "new-user-123",
+        save: vi.fn().mockResolvedValue(true),
+      }),
+    );
+
     vi.clearAllMocks();
   });
 
-  afterAll(async () => {
-    await closeMockDatabase();
+  afterEach(() => {
+    vi.clearAllMocks();
+    delete process.env.JWT_SECRET;
   });
 
-  test("Should pass if the request contains all required fields and successfully creates a user", async () => {
-    const newUser = {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      password: "Password1234!",
-      dateOfBirth: "1990-02-01",
-    };
+  it("redirects when token is missing", async () => {
+    req.query.token = undefined;
 
-    const response = await request
-      .post("/api/auth/sign-up/")
-      .send({ user: newUser });
+    await signUp(req, res);
 
-    expect(response.status).toBe(201);
-    expect(response.body.success).toBe(true);
-    expect(response.body.msg).toBe("User created successfully");
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=missing_token`,
+    );
+    expect(logError).toHaveBeenCalled();
   });
 
-  test("Should pass if user creation succeeds but email sending fails", async () => {
-    const newUser = {
-      firstName: "John",
-      lastName: "Doe",
-      email: "john.doe@example.com",
-      password: "Password1234!",
-      dateOfBirth: "1990-02-01",
-    };
+  it("redirects when token is already used", async () => {
+    isTokenUsed.mockResolvedValueOnce(true);
 
-    sendEmail.mockRejectedValueOnce(new Error("Email sending failed"));
+    await signUp(req, res);
 
-    const response = await request
-      .post("/api/auth/sign-up/")
-      .send({ user: newUser });
-
-    expect(response.status).toBe(201);
-    expect(response.body.success).toBe(true);
-    expect(response.body.msg).toBe("User created successfully");
-  });
-
-  test("Should fail if the request body contains an empty user object", async () => {
-    const user = {};
-
-    const response = await request.post("/api/auth/sign-up/").send({ user });
-
-    expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe(
-      "BAD REQUEST: First name is a required field., Last name is a required field., Email is a required field., Password is a required field., Date Of Birth is a required field.",
+    expect(isTokenUsed).toHaveBeenCalledWith(mockTokenId);
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=token_used`,
     );
   });
 
-  test("Should fail if the request body does not contain a user object", async () => {
-    const user = null;
+  it("redirects when token is expired", async () => {
+    jwt.verify.mockImplementationOnce(() => {
+      const error = new Error("Token expired");
+      error.name = "TokenExpiredError";
+      throw error;
+    });
 
-    const response = await request.post("/api/auth/sign-up/").send({ user });
+    await signUp(req, res);
 
-    expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe(
-      "Invalid request: You need to provide a valid 'user' object. Received: null",
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=token_expired`,
     );
+    expect(logError).toHaveBeenCalled();
   });
 
-  test("Should fail if the request body does not contain a user object", async () => {
-    const response = await request.post("/api/auth/sign-up/").send();
+  it("redirects when token is invalid", async () => {
+    jwt.verify.mockImplementationOnce(() => {
+      const error = new Error("Invalid token");
+      error.name = "JsonWebTokenError";
+      throw error;
+    });
 
-    expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe(
-      "Invalid request: You need to provide a valid 'user' object. Received: undefined",
+    await signUp(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=token_invalid`,
     );
+    expect(logError).toHaveBeenCalled();
   });
 
-  test("Should fail if the request does not contain a valid name", async () => {
-    const user = {
-      name: "John!",
-      email: "john.doe@example.com",
-      password: "Password1234!",
-      dateOfBirth: "1990-02-01",
-    };
+  it("redirects when no pending user is found", async () => {
+    PendingUser.findOne.mockResolvedValueOnce(null);
 
-    const response = await request.post("/api/auth/sign-up/").send({ user });
+    await signUp(req, res);
 
-    expect(response.status).toBe(400);
-    expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe(
-      "Invalid request: The following properties are not allowed to be set: name",
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=no_pending_user`,
     );
+    expect(logError).toHaveBeenCalled();
+  });
+
+  it("redirects to login when user already exists", async () => {
+    User.findOne.mockResolvedValueOnce({
+      _id: "existing-user-id",
+      email: mockEmail,
+    });
+
+    await signUp(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/login`,
+    );
+    expect(PendingUser.deleteOne).toHaveBeenCalled();
+    expect(logInfo).toHaveBeenCalled();
+  });
+
+  it("handles database errors when creating user", async () => {
+    User.create.mockRejectedValueOnce(new Error("Database error"));
+
+    await signUp(req, res);
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+    );
+    expect(logError).toHaveBeenCalled();
+  });
+
+  it("successfully creates a user and redirects to login", async () => {
+    await signUp(req, res);
+
+    expect(jwt.verify).toHaveBeenCalledWith(mockToken, mockJwtSecret);
+
+    expect(isTokenUsed).toHaveBeenCalledWith(mockTokenId);
+    expect(markTokenAsUsed).toHaveBeenCalledWith(mockTokenId);
+
+    expect(PendingUser.findOne).toHaveBeenCalledWith({ email: mockEmail });
+
+    expect(User.create).toHaveBeenCalled();
+
+    expect(sendEmail).toHaveBeenCalled();
+    expect(path.resolve).toHaveBeenCalled();
+    expect(fs.readFileSync).toHaveBeenCalled();
+
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/login`,
+    );
+
+    expect(logInfo).toHaveBeenCalled();
   });
 });
