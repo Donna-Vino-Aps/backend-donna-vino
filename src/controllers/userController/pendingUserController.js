@@ -1,7 +1,7 @@
 import express from "express";
 const app = express();
 import { sendEmailController } from "../sendEmailControllers/sendEmailController.js";
-import { signup } from "../authControllers/signupController.js";
+import { signUp } from "../authControllers/signUpController.js";
 import { logInfo, logError } from "../../util/logging.js";
 import PendingUserModel from "../../models/pendingUserModel.js";
 import { signUpUser } from "../../services/authService.js";
@@ -58,7 +58,7 @@ export const verifyPendingUser = async (req, res) => {
       },
     };
 
-    await signup(signupRequest, res);
+    await signUp(signupRequest, res);
 
     await PendingUserModel.findByIdAndDelete(pendingUser._id);
   } catch (error) {
