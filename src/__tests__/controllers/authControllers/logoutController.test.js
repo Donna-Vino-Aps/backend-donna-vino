@@ -52,7 +52,6 @@ describe("logoutController", () => {
       dateOfBirth: "1990-02-01",
     };
 
-    // Directly create user in the database instead of using sign-up endpoint
     await User.create(testUser);
 
     // User log-in to obtain the session cookie and token

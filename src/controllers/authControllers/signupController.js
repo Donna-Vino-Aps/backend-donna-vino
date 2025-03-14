@@ -106,7 +106,7 @@ export const signUp = async (req, res) => {
         logError(`Error deleting pending user: ${deleteError.message}`);
       }
 
-      return res.redirect(`${baseDonnaVinoEcommerceWebUrl}/login`); //how to log in user
+      return res.redirect(`${baseDonnaVinoEcommerceWebUrl}/login`);
     }
   } catch (dbError) {
     logError(`Database error checking existing user: ${dbError.message}`);
