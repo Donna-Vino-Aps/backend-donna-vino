@@ -8,6 +8,8 @@ const {
   API_URL_LOCAL,
   DONNA_VINO_WEB_LOCAL,
   DONNA_VINO_WEB_HEROKU,
+  DONNA_VINO_ECOMMERCE_WEB_LOCAL,
+  DONNA_VINO_ECOMMERCE_WEB_HEROKU,
   NODE_ENV,
 } = process.env;
 
@@ -24,6 +26,11 @@ export const baseApiUrl =
 
 export const baseDonnaVinoWebUrl =
   NODE_ENV === "production" ? DONNA_VINO_WEB_HEROKU : DONNA_VINO_WEB_LOCAL;
+
+export const baseDonnaVinoEcommerceWebUrl =
+  NODE_ENV === "production"
+    ? DONNA_VINO_ECOMMERCE_WEB_HEROKU
+    : DONNA_VINO_ECOMMERCE_WEB_LOCAL;
 
 logInfo(`🌐 Server URL: ${baseApiUrl}`);
 logInfo(`🍷 Donna Vino Web URL: ${baseDonnaVinoWebUrl}`);
