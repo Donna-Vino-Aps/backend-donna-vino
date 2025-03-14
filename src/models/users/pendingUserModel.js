@@ -7,9 +7,10 @@ const pendingUserSchema = new mongoose.Schema({
   lastName: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  birthdate: { type: Date, required: true },
+  dateOfBirth: { type: Date, required: true },
+  isVip: { type: Boolean, default: false },
   isSubscribed: { type: Boolean, default: false },
-  verificationToken: { type: String, required: true },
+  authProvider: { type: String, enum: ["local", "google"], default: "local" },
 });
 
 // Hashing the password
