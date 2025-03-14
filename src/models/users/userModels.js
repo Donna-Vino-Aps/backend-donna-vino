@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     },
   },
   dateOfBirth: {
-    type: String,
+    type: Date,
     trim: true,
     // Required only for manual sign-up
     required: function () {
@@ -63,6 +63,7 @@ export const validateUser = (userObject) => {
     "dateOfBirth",
     "authProvider",
     "isSubscribed",
+    "isVip",
   ];
   const validatedKeysMessage = validateAllowedFields(userObject, allowedKeys);
   if (validatedKeysMessage.length > 0) {
