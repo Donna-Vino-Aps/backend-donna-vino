@@ -22,11 +22,14 @@ export const preSignUp = async (req, res) => {
   ];
 
   if (!req.body.user || typeof req.body.user !== "object") {
-    return res.status(400).json({
-      success: false,
-      msg: `Invalid request: You need to provide a valid 'user' object. Received: ${JSON.stringify(
+    logError(
+      `Invalid request: You need to provide a valid 'user' object. Received: ${JSON.stringify(
         req.body.user,
       )}`,
+    );
+    return res.status(400).json({
+      success: false,
+      msg: "Invalid request",
     });
   }
 
@@ -41,9 +44,10 @@ export const preSignUp = async (req, res) => {
     pendingUserAllowedFields,
   );
   if (invalidFieldsError) {
+    logError(`Invalid fields present in the request: ${invalidFieldsError}`);
     return res.status(400).json({
       success: false,
-      msg: `Invalid request: ${invalidFieldsError}`,
+      msg: "Invalid request",
     });
   }
 
@@ -51,6 +55,7 @@ export const preSignUp = async (req, res) => {
   const userToValidate = { ...req.body.user };
   const errorList = validateUser(userToValidate);
   if (errorList.length > 0) {
+    logError(`Validation errors: ${JSON.stringify(errorList)}`);
     return res.status(400).json({
       success: false,
       msg: validationErrorMessage(errorList),
@@ -69,15 +74,10 @@ export const preSignUp = async (req, res) => {
   try {
     existingUser = await User.findOne({ email });
     if (existingUser) {
+      logInfo(`User with email ${email} already exists, returning user info`);
       return res.status(200).json({
         success: true,
         msg: "User already exists.",
-        user: {
-          id: existingUser._id,
-          firstName: existingUser.firstName,
-          lastName: existingUser.lastName,
-          email: existingUser.email,
-        },
       });
     }
   } catch (dbError) {
