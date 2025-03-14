@@ -15,6 +15,7 @@ import {
   clearMockDatabase,
 } from "../../__testUtils__/dbMock.js";
 import app from "../../app.js";
+import User from "../../models/users/userModels.js";
 
 const request = supertest(app);
 
@@ -43,7 +44,7 @@ describe("requireAuth Middleware Tests", () => {
       dateOfBirth: "1990-02-01",
     };
 
-    await request.post("/api/auth/sign-up").send({ user: testUser });
+    await User.create(testUser);
 
     const loginResponse = await request
       .post("/api/auth/log-in")

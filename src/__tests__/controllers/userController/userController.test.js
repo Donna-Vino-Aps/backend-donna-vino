@@ -1,3 +1,4 @@
+import { beforeAll, afterEach, afterAll, describe, test, expect } from "vitest";
 import supertest from "supertest";
 import {
   connectToMockDB,
@@ -11,6 +12,25 @@ const request = supertest(app);
 
 beforeAll(async () => {
   await connectToMockDB();
+});
+
+beforeEach(async () => {
+  await clearMockDatabase();
+  // Insert mock users before each test
+  await User.create({
+    firstName: "User",
+    lastName: "1",
+    email: "user1@example.com",
+    password: "Password1!",
+    dateOfBirth: "1990-02-01",
+  });
+  await User.create({
+    firstName: "User",
+    lastName: "2",
+    email: "user2@example.com",
+    password: "Password2!",
+    dateOfBirth: "1990-02-01",
+  });
 });
 
 afterEach(async () => {
@@ -27,29 +47,6 @@ describe("getUsers Controller", () => {
   });
 
   test("Should return list of users when getUsers is successful", async () => {
-    const users = [
-      {
-        firstName: "User",
-        lastName: "1",
-        email: "user1@example.com",
-        password: "Password1!",
-        dateOfBirth: "1990-02-01",
-      },
-      {
-        firstName: "User",
-        lastName: "2",
-        email: "user2@example.com",
-        password: "Password2!",
-        dateOfBirth: "1990-02-01",
-      },
-    ];
-
-    await Promise.all(
-      users.map(async (user) => {
-        await request.post("/api/auth/sign-up").send({ user });
-      }),
-    );
-
     const loginUser = {
       email: "user1@example.com",
       password: "Password1!",
@@ -82,29 +79,6 @@ describe("getUsers Controller", () => {
   });
 
   test("Should return 401 if session token does not match", async () => {
-    const users = [
-      {
-        firstName: "User",
-        lastName: "1",
-        email: "user1@example.com",
-        password: "Password1!",
-        dateOfBirth: "1990-02-01",
-      },
-      {
-        firstName: "User",
-        lastName: "2",
-        email: "user2@example.com",
-        password: "Password2!",
-        dateOfBirth: "1990-02-01",
-      },
-    ];
-
-    await Promise.all(
-      users.map(async (user) => {
-        await request.post("/api/auth/sign-up").send({ user });
-      }),
-    );
-
     const loginUser = {
       email: "user1@example.com",
       password: "Password1!",
@@ -133,29 +107,6 @@ describe("getUsers Controller", () => {
   });
 
   test("Should return 401 if userId is not found in session token", async () => {
-    const users = [
-      {
-        firstName: "User",
-        lastName: "1",
-        email: "user1@example.com",
-        password: "Password1!",
-        dateOfBirth: "1990-02-01",
-      },
-      {
-        firstName: "User",
-        lastName: "2",
-        email: "user2@example.com",
-        password: "Password2!",
-        dateOfBirth: "1990-02-01",
-      },
-    ];
-
-    await Promise.all(
-      users.map(async (user) => {
-        await request.post("/api/auth/sign-up").send({ user });
-      }),
-    );
-
     const loginUser = {
       email: "user1@example.com",
       password: "Password1!",
