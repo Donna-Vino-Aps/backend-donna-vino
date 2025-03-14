@@ -14,6 +14,7 @@ import {
   clearMockDatabase,
 } from "../../../__testUtils__/dbMock.js";
 import app from "../../../app.js";
+import User from "../../../models/users/userModels.js";
 
 const request = supertest(app);
 
@@ -41,7 +42,7 @@ describe("loginController", () => {
       dateOfBirth: "1990-02-01",
     };
 
-    await request.post("/api/auth/sign-up").send({ user: testUser });
+    await User.create(testUser);
   });
 
   test("Should fail if the request does not contain a valid email", async () => {
