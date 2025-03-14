@@ -10,11 +10,6 @@ import {
   markTokenAsUsed,
   deleteToken,
 } from "../../../services/token/tokenRepository.js";
-import { generateToken } from "../../../services/token/tokenGenerator.js";
-import {
-  baseApiUrl,
-  baseDonnaVinoWebUrl,
-} from "../../../config/environment.js";
 
 // Mock all external dependencies
 vi.mock("fs");
