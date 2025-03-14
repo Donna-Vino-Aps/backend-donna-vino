@@ -16,6 +16,7 @@ import {
   clearMockDatabase,
 } from "../../../__testUtils__/dbMock.js";
 import app from "../../../app.js";
+import User from "../../../models/users/userModels.js";
 
 const request = supertest(app);
 
@@ -41,7 +42,7 @@ describe("logoutController", () => {
   let testUser;
   let cookie;
 
-  // Before each test, create a test user, sign them up, and log them in to get the cookie
+  // Before each test, create a test user directly in the database and log them in to get the cookie
   beforeEach(async () => {
     testUser = {
       firstName: "Test",
@@ -51,8 +52,8 @@ describe("logoutController", () => {
       dateOfBirth: "1990-02-01",
     };
 
-    // User sign-up
-    await request.post("/api/auth/sign-up").send({ user: testUser });
+    // Directly create user in the database instead of using sign-up endpoint
+    await User.create(testUser);
 
     // User log-in to obtain the session cookie and token
     const loginResponse = await request
