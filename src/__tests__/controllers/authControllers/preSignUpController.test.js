@@ -42,6 +42,8 @@ describe("preSignUp Controller", () => {
     password: "Password123!",
     dateOfBirth: "1990-01-01",
     isSubscribed: false,
+    isVip: false,
+    authProvider: "local",
   };
 
   beforeEach(() => {
@@ -144,12 +146,6 @@ describe("preSignUp Controller", () => {
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       msg: "User already exists.",
-      user: {
-        id: existingUser._id,
-        firstName: existingUser.firstName,
-        lastName: existingUser.lastName,
-        email: existingUser.email,
-      },
     });
   });
 
@@ -204,7 +200,6 @@ describe("preSignUp Controller", () => {
     const existingPendingUser = {
       _id: "pending-user-id",
       email: validUserData.email,
-      verificationToken: "old-token",
       save: vi.fn().mockResolvedValue(true),
     };
 
@@ -215,9 +210,10 @@ describe("preSignUp Controller", () => {
     expect(PendingUser.findOne).toHaveBeenCalledWith({
       email: validUserData.email,
     });
-    expect(existingPendingUser.verificationToken).toBe(mockToken);
     expect(existingPendingUser.firstName).toBe(validUserData.firstName);
     expect(existingPendingUser.lastName).toBe(validUserData.lastName);
+    expect(existingPendingUser.isVip).toBe(validUserData.isVip);
+    expect(existingPendingUser.authProvider).toBe(validUserData.authProvider);
     expect(existingPendingUser.save).toHaveBeenCalled();
     expect(PendingUser.create).not.toHaveBeenCalled();
     expect(logInfo).toHaveBeenCalledWith(
@@ -234,7 +230,6 @@ describe("preSignUp Controller", () => {
     expect(PendingUser.create).toHaveBeenCalledWith({
       ...validUserData,
       dateOfBirth: expect.any(Date),
-      verificationToken: mockToken,
     });
     expect(logInfo).toHaveBeenCalledWith(
       expect.stringContaining("Created new pending user"),
