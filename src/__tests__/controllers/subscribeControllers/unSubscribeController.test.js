@@ -10,7 +10,7 @@ import {
   deleteToken,
 } from "../../../services/token/tokenRepository.js";
 import { generateToken } from "../../../services/token/tokenGenerator.js";
-import { baseApiUrl } from "../../../config/environment.js";
+import { baseDonnaVinoWebUrl } from "../../../config/environment.js";
 
 // Mock all external dependencies
 vi.mock("fs");
@@ -150,10 +150,10 @@ describe("unSubscribeController", () => {
     );
     jwt.verify.mockReturnValue({ email: "test@example.com", id: "token123" });
 
-    const unsubscribeToken = "unsubscribeToken123";
-    vi.mocked(generateToken).mockResolvedValue(unsubscribeToken);
+    const unsubscribeRequestToken = "unsubscribeToken123";
+    vi.mocked(generateToken).mockResolvedValue(unsubscribeRequestToken);
 
-    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const unsubscribeUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
 
     await unSubscribeController(req, res);
 

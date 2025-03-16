@@ -11,7 +11,7 @@ import {
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
-import { baseApiUrl } from "../../config/environment.js";
+import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 dotenv.config();
 
@@ -32,7 +32,7 @@ const readTemplate = (templatePath) => {
 // Helper function to create the unsubscribe URL
 const createUnsubscribeUrl = async (email) => {
   const unsubscribeRequestToken = await generateToken(email); // Wait for the token to resolve
-  return `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+  return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
 };
 
 export const unSubscribeController = async (req, res) => {

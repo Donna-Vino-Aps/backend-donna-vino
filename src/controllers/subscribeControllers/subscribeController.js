@@ -23,7 +23,7 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 const createUnsubscribeUrl = async (email) => {
   try {
     const unsubscribeRequestToken = await generateToken(email);
-    return `${baseDonnaVinoWebUrl}/api/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
+    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
   } catch (error) {
     logError("Error generating unsubscribe URL", error);
     throw new Error("Failed to generate unsubscribe URL");

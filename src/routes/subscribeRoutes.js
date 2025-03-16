@@ -8,7 +8,7 @@ const subscribeRouter = express.Router();
 
 subscribeRouter.post("/pre-subscribe", preSubscribeController);
 subscribeRouter.post("/confirm-subscription", subscribeController);
-subscribeRouter.post("/un-subscribe", unSubscribeController);
+subscribeRouter.post("/unsubscribe-request", unSubscribeController);
 subscribeRouter.post("/resend-email", resendSubscriptionEmailController);
 
 export default subscribeRouter;
