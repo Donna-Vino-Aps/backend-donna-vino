@@ -19,7 +19,6 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
-// Cargar plantillas de email
 const unsubscribeSuccessTemplatePath = resolvePath(
   "src/templates/unsubscribeSuccessTemplate.html",
 );
@@ -43,7 +42,6 @@ try {
   logError("Error reading email templates", error);
 }
 
-// Función para generar la URL de desuscripción
 const createUnsubscribeUrl = async (email) => {
   try {
     const unsubscribeRequestToken = await generateToken(email);
@@ -67,24 +65,34 @@ export const unSubscribeController = async (req, res) => {
 
     let decoded;
     try {
+      // Verify token validity
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
       logError("Invalid or expired token.", error);
 
-      // Intentamos obtener el email del token sin verificarlo (puede haber caducado)
+      // Attempt to decode the token to retrieve email and token ID
       const expiredTokenData = jwt.decode(token);
       const email = expiredTokenData?.email;
+      const tokenId = expiredTokenData?.id;
 
-      if (email) {
-        // Generamos un nuevo token y lo incrustamos en la plantilla
+      if (email && tokenId) {
+        // 1. Mark the expired token as used
+        await markTokenAsUsed(tokenId);
+
+        // 2. Delete the expired token
+        await deleteToken(tokenId);
+
+        // 3. Generate a new unsubscribe token
         const newUnsubscribeUrl = await createUnsubscribeUrl(email);
+
+        // 4. Replace the placeholder in the confirmation email template
         const updatedConfirmationEmail =
           unsubscribeConfirmationTemplate.replace(
             "{{CONFIRM_UNSUBSCRIBE_URL}}",
             newUnsubscribeUrl,
           );
 
-        // Enviamos el email con el nuevo token
+        // 5. Send the new confirmation email with the updated token
         await sendEmail(
           email,
           "Your unsubscribe request has expired",
@@ -107,7 +115,7 @@ export const unSubscribeController = async (req, res) => {
 
     const { email: to, id: tokenId } = decoded;
 
-    // Verificar si el token ya fue usado
+    // Check if the token has already been used
     if (await isTokenUsed(tokenId)) {
       return res.status(400).json({
         success: false,
@@ -115,7 +123,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Verificar si el usuario está suscrito
+    // Verify if the user exists in the subscribed list
     const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
     if (!existingSubscribedUser) {
       logInfo(`User with email ${to} not found in the subscribed list.`);
@@ -125,16 +133,16 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    // Eliminar al usuario de la base de datos
+    // Remove the user from the subscription list
     await SubscribedUser.deleteOne({ email: to });
 
     logInfo(`User ${to} unsubscribed successfully.`);
 
-    // Marcar el token como usado y eliminarlo
+    // Mark the token as used and delete it
     await markTokenAsUsed(tokenId);
     await deleteToken(tokenId);
 
-    // Enviar email de confirmación (sin token)
+    // Send the success email (no token included)
     await sendEmail(
       to,
       "Subscription successfully canceled",
