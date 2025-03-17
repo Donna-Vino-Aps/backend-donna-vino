@@ -229,7 +229,7 @@ describe("subscribeController", () => {
     const unsubscribeToken = "unsubscribeToken123";
     vi.mocked(generateToken).mockResolvedValue(unsubscribeToken);
 
-    const unsubscribeUrl = `${baseDonnaVinoWebUrl}/api/subscription/unsubscribe-request?token=${unsubscribeToken}`;
+    const unsubscribeUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeToken}`;
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     await subscribeController(req, res);
