@@ -9,7 +9,7 @@
       href="https://fonts.googleapis.com/css2?family=Barlow:wght@100..900&family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-    <title>Unsubscribe Confirmation</title>
+    <title>Email Verification</title>
     <style>
       body {
         font-family: Barlow, sans-serif;
@@ -20,6 +20,16 @@
         justify-content: center;
         align-items: center;
         height: 100vh;
+      }
+      a.social-link {
+        text-decoration: none;
+        color: inherit;
+      }
+      a.social-link img {
+        border: none;
+        outline: none;
+        text-decoration: none;
+        display: inline-block;
       }
 
       .container {
@@ -60,7 +70,9 @@
         font-weight: 400;
         font-size: 14px;
         line-height: 20px;
+        letter-spacing: 0.4px;
         margin: 0;
+        margin-bottom: 10px;
       }
 
       .button-container {
@@ -68,7 +80,7 @@
         margin: 25px 0;
       }
 
-      .unsubscribe-link {
+      .button {
         background-color: #183f27;
         color: #ffffff;
         padding: 15px 32px;
@@ -78,22 +90,29 @@
         border-radius: 6px;
         font-size: 16px;
         font-family: Inter, sans-serif;
+        transition: transform 0.2s ease-in-out,
+          background-color 0.2s ease-in-out;
       }
 
-      /* Hover effect */
-      .unsubscribe-link:hover {
+      .button:hover {
         opacity: 0.85;
       }
 
-      /* Active effect */
-      .unsubscribe-link:active {
+      .button:active {
         transform: scale(0.95);
         background-color: #102a1a;
       }
 
-      .celebration {
+      .button:link,
+      .button:visited {
+        text-decoration: none;
+        color: #ffffff;
+      }
+
+      .info {
         font-size: 12px;
         line-height: 16px;
+        font-style: italic;
         margin-bottom: 26px;
       }
 
@@ -114,9 +133,7 @@
       }
 
       .socials {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        text-align: center;
         margin-bottom: 6px;
       }
 
@@ -154,11 +171,11 @@
           font-size: 13px;
         }
 
-        .unsubscribe-link {
+        .button {
           font-size: 15px;
         }
 
-        .celebration {
+        .info {
           font-size: 11px;
         }
 
@@ -180,11 +197,11 @@
           margin: 20px 0;
         }
 
-        .unsubscribe-link {
+        .button {
           font-size: 14px;
         }
 
-        .celebration {
+        .info {
           font-size: 11px;
         }
 
@@ -210,7 +227,7 @@
           font-size: 11px;
         }
 
-        .celebration {
+        .info {
           font-size: 10px;
         }
 
@@ -218,7 +235,7 @@
           margin: 18px 0;
         }
 
-        .unsubscribe-link {
+        .button {
           font-size: 13px;
         }
 
@@ -240,11 +257,11 @@
           font-size: 10px;
         }
 
-        .unsubscribe-link {
+        .button {
           font-size: 12px;
         }
 
-        .celebration {
+        .info {
           font-size: 9px;
         }
 
@@ -262,32 +279,61 @@
           src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/images/donna-vino-logo-transparent.png"
           alt="Donna Vino Logo"
         />
-        <h2 class="heading">We're sorry to see you go!</h2>
+        <h2 class="heading">You are almost there!</h2>
       </div>
 
       <div class="main">
         <div class="content">
           <p class="content-text">
-            We received your request to unsubscribe from our newsletter. If you
-            would like to confirm your unsubscription, please click the link
-            below:
+            To complete your unsubscribe request from our newsletter, please
+            click the button below.
           </p>
+          <p class="content-text">The link expires in <b>1 hour</b>.</p>
         </div>
         <div class="button-container">
-          <a href="{{UNSUBSCRIBE_URL}}" class="unsubscribe-link"
-            >Click here to unsubscribe</a
+          <a href="{{CONFIRM_UNSUBSCRIBE_URL}}" class="button"
+            >Confirm Unsubscribe</a
           >
         </div>
-        <p class="celebration">
-          Thank you for being a part of our community! 🥂
+        <p class="info">
+          (If you did not request to unsubscribe, you can ignore this email)
         </p>
-        <p class="thanks">Best regards,<br />Donna Vino Team</p>
+        <p class="thanks">Thank you,<br />Donna Vino Team</p>
       </div>
 
       <div class="footer">
+        <p class="social-heading">Want updates through more platforms?</p>
+        <div class="socials">
+          <a href="https://www.facebook.com/donnavino.dk/" class="social-link">
+            <img
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/facebook-line.png"
+              alt="Facebook"
+              class="social-icon"
+            />
+          </a>
+          <a
+            href="https://www.instagram.com/donna_vino_winetastings/?api=postMessage%2F"
+            class="social-link"
+          >
+            <img
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/instagram-original.png"
+              alt="Instagram"
+              class="social-icon"
+            />
+          </a>
+          <a
+            href="https://www.linkedin.com/company/donna-vino-aps/"
+            class="social-link"
+          >
+            <img
+              src="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/icons/emails/linkedin-alt.png"
+              alt="LinkedIn"
+              class="social-icon"
+            />
+          </a>
+        </div>
         <p class="address">Christianshavn Voldgade 54 - 1424 København</p>
         <p class="footer-links">
-          <a href="{{UNSUBSCRIBE_URL}}" class="footer-link">Unsubscribe</a> |
           <a
             href="https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com/privacy-policy"
             class="footer-link"

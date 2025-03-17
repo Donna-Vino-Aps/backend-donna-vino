@@ -12,7 +12,7 @@ import {
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
-import { baseApiUrl, baseDonnaVinoWebUrl } from "../../config/environment.js";
+import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 dotenv.config();
 
@@ -23,7 +23,7 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 const createUnsubscribeUrl = async (email) => {
   try {
     const unsubscribeRequestToken = await generateToken(email);
-    return `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
   } catch (error) {
     logError("Error generating unsubscribe URL", error);
     throw new Error("Failed to generate unsubscribe URL");
