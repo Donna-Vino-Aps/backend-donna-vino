@@ -27,6 +27,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 const allowedOrigins = [
+  "http://www.donnavino.dk",
   "http://localhost:3000",
   "http://localhost:5000",
   "http://localhost:5001",
