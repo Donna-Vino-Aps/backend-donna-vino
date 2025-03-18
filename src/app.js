@@ -27,11 +27,13 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 const allowedOrigins = [
+  "http://www.donnavino.dk",
   "http://localhost:3000",
   "http://localhost:5000",
   "http://localhost:5001",
   "https://donna-vino-ecommerce-45b8fd279992.herokuapp.com",
   "https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com",
+  "https://donna-vino-aps-corporate-prod-365809e9340a.herokuapp.com",
 ];
 
 // CORS configuration
