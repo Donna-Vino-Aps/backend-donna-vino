@@ -28,6 +28,7 @@ app.use(bodyParser.json());
 
 const allowedOrigins = [
   "http://www.donnavino.dk",
+  "https://www.donnavino.dk",
   "http://localhost:3000",
   "http://localhost:5000",
   "http://localhost:5001",
