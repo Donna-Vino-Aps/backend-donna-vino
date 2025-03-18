@@ -70,4 +70,23 @@ describe("User Model Middleware", () => {
       );
     }
   });
+
+  it("should not hash password when _skipPasswordHashing flag is set", async () => {
+    vi.spyOn(User.prototype, "save").mockResolvedValueOnce();
+
+    const testHash = "$2b$10$knownhashfortest";
+    const user = new User({
+      firstName: "Test",
+      lastName: "User",
+      email: "testhash@example.com",
+      password: testHash,
+      dateOfBirth: "1990-01-01",
+      authProvider: "local",
+      _skipPasswordHashing: true,
+    });
+
+    await user.save();
+
+    expect(user.password).toBe(testHash);
+  });
 });
