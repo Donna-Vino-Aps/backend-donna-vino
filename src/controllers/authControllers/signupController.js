@@ -122,6 +122,10 @@ export const signUp = async (req, res) => {
     delete pendingUserData._id;
     delete pendingUserData.__v;
 
+    // Set a flag to tell the user model to skip password hashing since
+    // the password is already hashed by the pendingUser model
+    pendingUserData._skipPasswordHashing = true;
+
     newUser = await User.create(pendingUserData);
 
     logInfo(`User created successfully from pending user: ${newUser.email}`);
