@@ -214,4 +214,35 @@ describe("SignUp Controller", () => {
 
     expect(logInfo).toHaveBeenCalled();
   });
+
+  it("transfers password from pending user without double-hashing", async () => {
+    const originalHash = "$2b$10$originalhashvalue";
+
+    pendingUserData.password = originalHash;
+    pendingUserData.toObject = vi.fn().mockReturnValue({
+      ...pendingUserData,
+      password: originalHash,
+    });
+
+    PendingUser.findOne.mockResolvedValue(pendingUserData);
+
+    let skipPasswordHashingFlagWasSet = false;
+    let passwordWasPreserved = false;
+
+    User.create.mockImplementation((userData) => {
+      skipPasswordHashingFlagWasSet = userData._skipPasswordHashing === true;
+      passwordWasPreserved = userData.password === originalHash;
+
+      return Promise.resolve({
+        ...userData,
+        _id: "new-user-123",
+        save: vi.fn().mockResolvedValue(true),
+      });
+    });
+
+    await signUp(req, res);
+
+    expect(skipPasswordHashingFlagWasSet).toBe(true);
+    expect(passwordWasPreserved).toBe(true);
+  });
 });
