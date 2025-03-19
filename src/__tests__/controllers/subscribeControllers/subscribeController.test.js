@@ -11,10 +11,7 @@ import {
   deleteToken,
 } from "../../../services/token/tokenRepository.js";
 import { generateToken } from "../../../services/token/tokenGenerator.js";
-import {
-  baseApiUrl,
-  baseDonnaVinoWebUrl,
-} from "../../../config/environment.js";
+import { baseDonnaVinoWebUrl } from "../../../config/environment.js";
 
 // Mock all external dependencies
 vi.mock("fs");
@@ -232,7 +229,7 @@ describe("subscribeController", () => {
     const unsubscribeToken = "unsubscribeToken123";
     vi.mocked(generateToken).mockResolvedValue(unsubscribeToken);
 
-    const unsubscribeUrl = `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeToken}`;
+    const unsubscribeUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeToken}`;
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
     await subscribeController(req, res);

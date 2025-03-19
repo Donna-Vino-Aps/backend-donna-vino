@@ -11,7 +11,7 @@ import {
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
-import { baseApiUrl } from "../../config/environment.js";
+import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 dotenv.config();
 
@@ -19,109 +19,121 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
-// Helper function to read email templates
-const readTemplate = (templatePath) => {
-  try {
-    return fs.readFileSync(templatePath, "utf-8");
-  } catch (error) {
-    logError(`Error reading template at ${templatePath}: ${error.message}`);
-    throw new Error("Failed to read template");
-  }
-};
+const unsubscribeSuccessTemplatePath = resolvePath(
+  "src/templates/unsubscribeSuccessTemplate.html",
+);
+const unsubscribeConfirmationTemplatePath = resolvePath(
+  "src/templates/confirmUnsubscribeTemplate.html",
+);
 
-// Helper function to create the unsubscribe URL
+let emailSuccessTemplate;
+let unsubscribeConfirmationTemplate;
+
+try {
+  emailSuccessTemplate = fs.readFileSync(
+    unsubscribeSuccessTemplatePath,
+    "utf8",
+  );
+  unsubscribeConfirmationTemplate = fs.readFileSync(
+    unsubscribeConfirmationTemplatePath,
+    "utf8",
+  );
+} catch (error) {
+  logError("Error reading email templates", error);
+}
+
 const createUnsubscribeUrl = async (email) => {
-  const unsubscribeRequestToken = await generateToken(email); // Wait for the token to resolve
-  return `${baseApiUrl}/api/subscribe/un-subscribe?token=${unsubscribeRequestToken}`;
+  try {
+    const unsubscribeRequestToken = await generateToken(email);
+    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
+  } catch (error) {
+    logError("Error generating unsubscribe URL", error);
+    throw new Error("Failed to generate unsubscribe URL");
+  }
 };
 
 export const unSubscribeController = async (req, res) => {
   try {
-    // Check if token is missing in the query
-    const { token } = req.query;
-    if (!token) {
+    const { token, subject } = req.body;
+
+    if (!token || !subject) {
       return res.status(400).json({
         success: false,
-        message: "Token is required.",
-      });
-    }
-
-    // Define template paths
-    const unsubscribeSuccessTemplatePath = resolvePath(
-      "src/templates/unsubscribeSuccessTemplate.html",
-    );
-    const unsubscribeConfirmationTemplatePath = resolvePath(
-      "src/templates/unsubscribeConfirmation.html",
-    );
-
-    let emailTemplate;
-    let unsubscribeConfirmationTemplate;
-
-    // Try reading the templates
-    try {
-      emailTemplate = readTemplate(unsubscribeSuccessTemplatePath);
-      unsubscribeConfirmationTemplate = readTemplate(
-        unsubscribeConfirmationTemplatePath,
-      );
-    } catch (error) {
-      return res.status(500).json({
-        success: false,
-        message: "Internal server error: Failed to read template",
+        message: "Token and subject are required.",
       });
     }
 
     let decoded;
-
     try {
+      // Verify token validity
       decoded = jwt.verify(token, JWT_SECRET);
     } catch (error) {
       logError("Invalid or expired token.", error);
 
-      // If the token is expired, send the confirmation email
-      const { email: to } = decoded || {};
-      const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
+      // Attempt to decode the token to retrieve email and token ID
+      const expiredTokenData = jwt.decode(token);
+      const email = expiredTokenData?.email;
+      const tokenId = expiredTokenData?.id;
 
-      // Replace the placeholder in the confirmation template
-      const newExpiredEmail = unsubscribeConfirmationTemplate.replace(
-        "{{UNSUBSCRIBE_URL}}",
-        unsubscribeRequestUrl,
-      );
+      if (email && tokenId) {
+        // 1. Mark the expired token as used
+        await markTokenAsUsed(tokenId);
 
-      await sendEmail(to, "Confirm your unsubscribe request", newExpiredEmail);
+        // 2. Delete the expired token
+        await deleteToken(tokenId);
 
-      logInfo(
-        `Unsubscribe email sent to ${to} with subject "Confirm your unsubscribe request"`,
-      );
+        // 3. Generate a new unsubscribe token
+        const newUnsubscribeUrl = await createUnsubscribeUrl(email);
 
-      return res.status(401).json({
+        // 4. Replace the placeholder in the confirmation email template
+        const updatedConfirmationEmail =
+          unsubscribeConfirmationTemplate.replace(
+            "{{CONFIRM_UNSUBSCRIBE_URL}}",
+            newUnsubscribeUrl,
+          );
+
+        // 5. Send the new confirmation email with the updated token
+        await sendEmail(
+          email,
+          "Your unsubscribe request has expired",
+          updatedConfirmationEmail,
+        );
+
+        logInfo(`Token expired. Sent new unsubscribe email to ${email}`);
+
+        return res.status(401).json({
+          success: false,
+          message: "Token expired. A new confirmation email has been sent.",
+        });
+      }
+
+      return res.status(400).json({
         success: false,
-        message:
-          "Your unsubscribe link has expired. A new confirmation email has been sent.",
+        message: "Invalid token structure.",
       });
     }
 
-    // If the token is valid, proceed with unsubscribe logic
     const { email: to, id: tokenId } = decoded;
 
     // Check if the token has already been used
-    const tokenUsed = await isTokenUsed(tokenId);
-    if (tokenUsed) {
+    if (await isTokenUsed(tokenId)) {
       return res.status(400).json({
         success: false,
         message: "This unsubscribe request has already been processed.",
       });
     }
 
-    // Check if the user exists in the subscribed list
+    // Verify if the user exists in the subscribed list
     const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
     if (!existingSubscribedUser) {
+      logInfo(`User with email ${to} not found in the subscribed list.`);
       return res.status(404).json({
         success: false,
         message: "User does not exist in the subscribed list.",
       });
     }
 
-    // Remove user from the subscribed list
+    // Remove the user from the subscription list
     await SubscribedUser.deleteOne({ email: to });
 
     logInfo(`User ${to} unsubscribed successfully.`);
@@ -130,18 +142,12 @@ export const unSubscribeController = async (req, res) => {
     await markTokenAsUsed(tokenId);
     await deleteToken(tokenId);
 
-    // Create the unsubscribe URL
-    const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
-
-    // Replace the unsubscribe URL in the success email template
-    const newSuccessEmail = emailTemplate.replace(
-      "{{UNSUBSCRIBE_URL}}",
-      unsubscribeRequestUrl,
+    // Send the success email (no token included)
+    await sendEmail(
+      to,
+      "Subscription successfully canceled",
+      emailSuccessTemplate,
     );
-
-    // Send the unsubscribe success email
-    await sendEmail(to, "Subscription successfully canceled", newSuccessEmail);
-
     logInfo(`Unsubscribe success email sent to ${to}`);
 
     return res.status(200).json({
