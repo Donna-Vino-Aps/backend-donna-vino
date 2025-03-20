@@ -4,40 +4,61 @@ import validateAllowedFields from "../../util/validateAllowedFields.js";
 import { logInfo } from "../../util/logging.js";
 
 // Updated user schema
-const userSchema = new mongoose.Schema({
-  firstName: { type: String, required: true, trim: true },
-  lastName: { type: String, required: true, trim: true },
-  email: { type: String, required: true, unique: true, trim: true },
-  password: {
-    type: String,
-    trim: true,
-    // Required only for manual sign-up
-    required: function () {
-      return this.authProvider === "local";
+const userSchema = new mongoose.Schema(
+  {
+    firstName: { type: String, required: true, trim: true },
+    lastName: { type: String, required: true, trim: true },
+    email: { type: String, required: true, unique: true, trim: true },
+    password: {
+      type: String,
+      trim: true,
+      // Required only for manual sign-up
+      required: function () {
+        return this.authProvider === "local";
+      },
     },
-  },
-  dateOfBirth: {
-    type: Date,
-    trim: true,
-    // Required only for manual sign-up
-    required: function () {
-      return this.authProvider === "local";
+    dateOfBirth: {
+      type: Date,
+      trim: true,
+      // Required only for manual sign-up
+      required: function () {
+        return this.authProvider === "local";
+      },
     },
+    isVip: { type: Boolean, default: false },
+    isSubscribed: { type: Boolean, default: false },
+    authProvider: {
+      type: String,
+      enum: ["local", "google"],
+      default: "local",
+    },
+    // Optional fields for future or Google sign-in
+    googleId: { type: String },
+    picture: { type: String },
   },
-  isVip: { type: Boolean, default: false },
-  isSubscribed: { type: Boolean, default: false },
-  authProvider: {
-    type: String,
-    enum: ["local", "google"],
-    default: "local",
+  {
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
-  // Optional fields for future or Google sign-in
-  googleId: { type: String },
-  picture: { type: String },
-});
+);
+
+// Add _skipPasswordHashing as a virtual property (not stored in the database)
+userSchema
+  .virtual("_skipPasswordHashing")
+  .get(function () {
+    return this._skipPasswordHashingFlag;
+  })
+  .set(function (value) {
+    this._skipPasswordHashingFlag = value;
+  });
 
 // Pre-save hook to hash the password if modified and only for local sign-up
 userSchema.pre("save", async function (next) {
+  if (this._skipPasswordHashing) {
+    delete this._skipPasswordHashingFlag;
+    return next();
+  }
+
   if (this.isModified("password") && this.authProvider === "local") {
     try {
       const salt = await bcrypt.genSalt(10);

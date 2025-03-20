@@ -8,6 +8,7 @@ import path from "path";
 import fs from "fs";
 import { sendEmail } from "../../util/emailUtils.js";
 import { generateToken } from "../../services/token/tokenGenerator.js";
+import { baseApiUrl } from "../../config/environment.js";
 
 export const preSignUp = async (req, res) => {
   const pendingUserAllowedFields = [
@@ -144,8 +145,7 @@ export const preSignUp = async (req, res) => {
 
   // Send verification email
   try {
-    const baseUrl = process.env.BASE_URL || "http://localhost:3000";
-    const verifyUrl = `${baseUrl}/api/auth/sign-up?token=${token}`;
+    const verifyUrl = `${baseApiUrl}/api/auth/sign-up?token=${token}`;
 
     const templateName = isSubscribed
       ? "verifyEmailForSignupWithNewsletterTemplate.html"
