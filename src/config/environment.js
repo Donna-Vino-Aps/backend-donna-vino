@@ -16,7 +16,9 @@ const {
 } = process.env;
 
 if (!API_URL_LOCAL || !API_URL_STAGING || !API_URL_PRODUCTION) {
-  logError("❌ Missing API URLs in environment variables");
+  logError(
+    "❌ Missing one or more API URLs (LOCAL/STAGING/PRODUCTION) in environment variables",
+  );
 }
 
 if (
@@ -24,7 +26,15 @@ if (
   !DONNA_VINO_WEB_STAGING ||
   !DONNA_VINO_WEB_PRODUCTION
 ) {
-  logError("❌ Missing Donna Vino web URLs in environment variables");
+  logError(
+    "❌ Missing one or more Donna Vino web URLs (LOCAL/STAGING/PRODUCTION) in environment variables",
+  );
+}
+
+if (!DONNA_VINO_ECOMMERCE_WEB_HEROKU || !DONNA_VINO_ECOMMERCE_WEB_LOCAL) {
+  logError(
+    "❌ Missing one or more Donna Vino Ecommerce URLs (HEROKU/LOCAL) in environment variables",
+  );
 }
 
 export const baseApiUrl =
