@@ -20,6 +20,7 @@ jobs:
       INFO_EMAIL: ${{ secrets.AUTH_EMAIL }}
       AUTH_PASSWORD: ${{ secrets.AUTH_PASSWORD }}
       MONGODB_URI: ${{ secrets.MONGODB_URI }}
+      MONGODB_URI_PRODUCTION: ${{ secrets.MONGODB_URI_PRODUCTION }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
