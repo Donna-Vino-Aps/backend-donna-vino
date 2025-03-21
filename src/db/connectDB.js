@@ -5,8 +5,13 @@ const connectDB = () => {
   return new Promise((resolve, reject) => {
     mongoose.set("strictQuery", false);
 
+    const dbURI =
+      process.env.NODE_ENV === "production"
+        ? process.env.MONGODB_URI_PRODUCTION
+        : process.env.MONGODB_URI;
+
     mongoose
-      .connect(process.env.MONGODB_URI, {
+      .connect(dbURI, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
       })
