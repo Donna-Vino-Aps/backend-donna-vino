@@ -1,30 +1,29 @@
 import mongoose from "mongoose";
 import { logError, logInfo } from "../util/logging.js";
 
-const connectDB = async () => {
-  try {
+const connectDB = () => {
+  return new Promise((resolve, reject) => {
     mongoose.set("strictQuery", false);
 
-    const dbURI = process.env.MONGODB_URI;
-
-    await mongoose.connect(dbURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-
-    const dbName =
+    const dbURI =
       process.env.NODE_ENV === "production"
-        ? "donna-vino-aps-production"
-        : "donna-vino-aps";
+        ? process.env.MONGODB_URI_PRODUCTION
+        : process.env.MONGODB_URI;
 
-    const db = mongoose.connection.useDb(dbName);
-
-    logInfo(`MongoDB connected to database: ${dbName}`);
-    return db;
-  } catch (error) {
-    logError("Error connecting to MongoDB:", error);
-    throw error;
-  }
+    mongoose
+      .connect(dbURI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      })
+      .then(() => {
+        logInfo("MongoDB connected successfully");
+        resolve();
+      })
+      .catch((error) => {
+        logError("Error connecting to MongoDB:", error);
+        reject(error);
+      });
+  });
 };
 
 export default connectDB;
