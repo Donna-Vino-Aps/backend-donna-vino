@@ -32,7 +32,7 @@ jobs:
       DONNA_VINO_WEB_PRODUCTION: ${{ secrets.DONNA_VINO_WEB_PRODUCTION }}
       DONNA_VINO_ECOMMERCE_WEB_HEROKU: ${{ secrets.DONNA_VINO_ECOMMERCE_WEB_HEROKU }}
       DONNA_VINO_ECOMMERCE_WEB_LOCAL: ${{ secrets.DONNA_VINO_ECOMMERCE_WEB_LOCAL }}
-      NODE_ENV: development
+      NODE_ENV: ${{ secrets.NODE_ENV }}
 
     steps:
       - uses: actions/checkout@v3
