@@ -5,8 +5,11 @@ const connectDB = () => {
   return new Promise((resolve, reject) => {
     mongoose.set("strictQuery", false);
 
+    const currentEnv = process.env.NODE_ENV || "not defined";
+    logInfo(`Current NODE_ENV: ${currentEnv}`); // Log to check environment variable
+
     const dbURI =
-      process.env.NODE_ENV === "production"
+      currentEnv === "production"
         ? process.env.MONGODB_URI_PRODUCTION
         : process.env.MONGODB_URI;
 

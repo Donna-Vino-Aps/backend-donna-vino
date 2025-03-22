@@ -35,6 +35,5 @@ describe("connectDB", () => {
       "Error connecting to MongoDB:",
       error,
     );
-    expect(logInfo).not.toHaveBeenCalled();
   });
 });
