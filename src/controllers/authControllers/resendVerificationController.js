@@ -1,5 +1,6 @@
-import { logError } from "../../util/logging.js";
+import { logError, logInfo } from "../../util/logging.js";
 import PendingUser from "../../models/users/pendingUserModel.js";
+import { generateToken } from "../../services/token/tokenGenerator.js";
 
 export const resendVerificationEmail = async (req, res) => {
   const { email } = req.query;
@@ -35,6 +36,19 @@ export const resendVerificationEmail = async (req, res) => {
     return res.status(500).json({
       success: false,
       msg: "Unable to process your request. Please try again later.",
+    });
+  }
+
+  // Generate new verification token
+  let token;
+  try {
+    token = await generateToken(normalizedEmail);
+    logInfo(`Generated new verification token for ${normalizedEmail}`);
+  } catch (tokenError) {
+    logError(`Error generating new token for resend: ${tokenError.message}`);
+    return res.status(500).json({
+      success: false,
+      msg: "Unable to create verification token. Please try again later.",
     });
   }
 };
