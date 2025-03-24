@@ -75,10 +75,10 @@ export const preSignUp = async (req, res) => {
   try {
     existingUser = await User.findOne({ email });
     if (existingUser) {
-      logInfo(`User with email ${email} already exists, returning user info`);
-      return res.status(200).json({
-        success: true,
-        msg: "User already exists.",
+      logInfo(`User with email ${email} already exists`);
+      return res.status(409).json({
+        success: false,
+        msg: "A user with this email already exists. Please try logging in instead.",
       });
     }
   } catch (dbError) {

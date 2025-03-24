@@ -142,10 +142,10 @@ describe("preSignUp Controller", () => {
     await preSignUp(req, res);
 
     expect(User.findOne).toHaveBeenCalledWith({ email: validUserData.email });
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledWith(409);
     expect(res.json).toHaveBeenCalledWith({
-      success: true,
-      msg: "User already exists.",
+      success: false,
+      msg: "A user with this email already exists. Please try logging in instead.",
     });
   });
 
