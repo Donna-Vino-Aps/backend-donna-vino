@@ -1,10 +1,6 @@
 import { logError, logInfo } from "../../util/logging.js";
 import PendingUser from "../../models/users/pendingUserModel.js";
-import path from "path";
-import fs from "fs";
-import { sendEmail } from "../../util/emailUtils.js";
-import { generateToken } from "../../services/token/tokenGenerator.js";
-import { baseApiUrl } from "../../config/environment.js";
+import { sendVerificationEmail } from "../../services/email/verificationEmailService.js";
 
 export const resendVerificationEmail = async (req, res) => {
   const { email } = req.query;
@@ -43,37 +39,9 @@ export const resendVerificationEmail = async (req, res) => {
     });
   }
 
-  // Generate new verification token
-  let token;
+  // Generate new verification token and send email using the service
   try {
-    token = await generateToken(normalizedEmail);
-    logInfo(`Generated new verification token for ${normalizedEmail}`);
-  } catch (tokenError) {
-    logError(`Error generating new token for resend: ${tokenError.message}`);
-    return res.status(500).json({
-      success: false,
-      msg: "Unable to create verification token. Please try again later.",
-    });
-  }
-
-  // Send new verification email
-  try {
-    const verifyUrl = `${baseApiUrl}/api/auth/sign-up?token=${token}`;
-
-    const templateName = pendingUser.isSubscribed
-      ? "verifyEmailForSignupWithNewsletterTemplate.html"
-      : "verifyEmailForSignupTemplate.html";
-
-    const templatePath = path.resolve(
-      process.cwd(),
-      `src/templates/${templateName}`,
-    );
-
-    let templateContent = fs.readFileSync(templatePath, "utf-8");
-    templateContent = templateContent.replace("{{VERIFY_URL}}", verifyUrl);
-
-    const verifySubject = "Verify your email address for Donna Vino";
-    await sendEmail(pendingUser.email, verifySubject, templateContent);
+    await sendVerificationEmail(pendingUser);
     logInfo(`New verification email sent to ${pendingUser.email}`);
 
     return res.status(200).json({
@@ -85,8 +53,8 @@ export const resendVerificationEmail = async (req, res) => {
         lastName: pendingUser.lastName,
       },
     });
-  } catch (emailError) {
-    logError(`Error sending resend verification email: ${emailError.message}`);
+  } catch (error) {
+    logError(`Error sending resend verification email: ${error.message}`);
     return res.status(500).json({
       success: false,
       msg: "Unable to send verification email. Please try again later.",
