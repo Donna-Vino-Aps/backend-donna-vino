@@ -109,7 +109,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=missing_token`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=missing`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -121,7 +121,7 @@ describe("SignUp Controller", () => {
 
     expect(isTokenUsed).toHaveBeenCalledWith(mockTokenId);
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=token_used`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
     );
   });
 
@@ -135,7 +135,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=token_expired`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -150,7 +150,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=token_invalid`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -161,7 +161,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=no_pending_user`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=not_found`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -187,7 +187,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
     expect(logError).toHaveBeenCalled();
   });
