@@ -19,7 +19,7 @@ export const signUp = async (req, res) => {
   if (!token) {
     logError("Missing token in verification request");
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=missing_token`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=missing`,
     );
   }
 
@@ -32,17 +32,17 @@ export const signUp = async (req, res) => {
     if (error.name === "TokenExpiredError") {
       logError(`Token expired: ${token}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=token_expired`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
       );
     } else if (error.name === "JsonWebTokenError") {
       logError(`Invalid token: ${token}, error: ${error.message}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=token_invalid`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
       );
     } else {
       logError(`Error verifying token: ${error.message}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
       );
     }
   }
@@ -52,13 +52,13 @@ export const signUp = async (req, res) => {
     if (await isTokenUsed(decoded.id)) {
       logError(`Token ${decoded.id} has already been used`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=token_used`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
       );
     }
   } catch (error) {
     logError(`Error checking if token is used: ${error.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -68,7 +68,7 @@ export const signUp = async (req, res) => {
   } catch (error) {
     logError(`Error marking token as used: ${error.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -80,13 +80,13 @@ export const signUp = async (req, res) => {
     if (!pendingUser) {
       logError(`No pending user found for email: ${decoded.email}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=no_pending_user`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=not_found`,
       );
     }
   } catch (dbError) {
     logError(`Database error finding pending user: ${dbError.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -111,7 +111,7 @@ export const signUp = async (req, res) => {
   } catch (dbError) {
     logError(`Database error checking existing user: ${dbError.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -132,7 +132,7 @@ export const signUp = async (req, res) => {
   } catch (dbError) {
     logError(`Error creating user: ${dbError.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
