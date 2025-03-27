@@ -11,6 +11,7 @@ import {
   deleteToken,
 } from "../../services/token/tokenRepository.js";
 import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
+import { sendVerificationEmail } from "../../services/email/verificationEmailService.js";
 
 export const signUp = async (req, res) => {
   const { token } = req.query;
@@ -31,6 +32,37 @@ export const signUp = async (req, res) => {
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       logError(`Token expired: ${token}`);
+
+      // Handle expired token by extracting email and finding pending user
+      try {
+        const expiredTokenData = jwt.decode(token);
+        const email = expiredTokenData?.email;
+        const tokenId = expiredTokenData?.id;
+
+        if (email && tokenId) {
+          // Find the pending user by email
+          const pendingUser = await PendingUser.findOne({ email });
+
+          if (pendingUser) {
+            // Mark old token as used and delete it
+            await markTokenAsUsed(tokenId);
+            await deleteToken(tokenId);
+
+            // Resend verification email
+            await sendVerificationEmail(pendingUser);
+            logInfo(
+              `Verification email resent to ${email} due to expired token`,
+            );
+
+            return res.redirect(
+              `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired&resent=true`,
+            );
+          }
+        }
+      } catch (resendError) {
+        logError(`Error handling expired token: ${resendError.message}`);
+      }
+
       return res.redirect(
         `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
       );
