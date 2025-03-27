@@ -15,6 +15,7 @@ import {
 } from "../../../services/token/tokenRepository.js";
 import { baseDonnaVinoEcommerceWebUrl } from "../../../config/environment.js";
 import { logError, logInfo } from "../../../util/logging.js";
+import { sendVerificationEmail } from "../../../services/email/verificationEmailService.js";
 
 vi.mock("fs");
 vi.mock("path");
@@ -27,6 +28,7 @@ vi.mock("../../../config/environment.js", () => ({
   baseDonnaVinoEcommerceWebUrl: "http://localhost:3000",
 }));
 vi.mock("../../../util/logging.js");
+vi.mock("../../../services/email/verificationEmailService.js");
 
 describe("SignUp Controller", () => {
   let req, res;
@@ -109,7 +111,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=missing_token`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=missing`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -121,7 +123,7 @@ describe("SignUp Controller", () => {
 
     expect(isTokenUsed).toHaveBeenCalledWith(mockTokenId);
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=token_used`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
     );
   });
 
@@ -135,9 +137,108 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=token_expired`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
     );
     expect(logError).toHaveBeenCalled();
+  });
+
+  it("resends verification email when token is expired and pending user exists", async () => {
+    // Setup for expired token
+    jwt.verify.mockImplementationOnce(() => {
+      const error = new Error("Token expired");
+      error.name = "TokenExpiredError";
+      throw error;
+    });
+
+    // Setup for token decoding
+    jwt.decode.mockReturnValueOnce({
+      email: mockEmail,
+      id: mockTokenId,
+    });
+
+    // Setup the pending user to be found
+    PendingUser.findOne.mockResolvedValueOnce(pendingUserData);
+
+    // Setup for the verification email to be sent
+    sendVerificationEmail.mockResolvedValueOnce(true);
+
+    await signUp(req, res);
+
+    // Verify token was marked as used and deleted
+    expect(markTokenAsUsed).toHaveBeenCalledWith(mockTokenId);
+    expect(deleteToken).toHaveBeenCalledWith(mockTokenId);
+
+    // Verify a new verification email was sent
+    expect(sendVerificationEmail).toHaveBeenCalledWith(pendingUserData);
+    expect(logInfo).toHaveBeenCalledWith(
+      `Verification email resent to ${mockEmail} due to expired token`,
+    );
+
+    // Verify the redirect includes the resent parameter
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired&resent=true`,
+    );
+  });
+
+  it("redirects to expired token page without resend when pending user not found", async () => {
+    // Setup for expired token
+    jwt.verify.mockImplementationOnce(() => {
+      const error = new Error("Token expired");
+      error.name = "TokenExpiredError";
+      throw error;
+    });
+
+    // Setup for token decoding
+    jwt.decode.mockReturnValueOnce({
+      email: mockEmail,
+      id: mockTokenId,
+    });
+
+    // Setup for pending user NOT found
+    PendingUser.findOne.mockResolvedValueOnce(null);
+
+    await signUp(req, res);
+
+    // Verify no verification email was sent
+    expect(sendVerificationEmail).not.toHaveBeenCalled();
+
+    // Verify standard expired token redirect without resent parameter
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
+    );
+  });
+
+  it("handles errors during the resend verification process", async () => {
+    // Setup for expired token
+    jwt.verify.mockImplementationOnce(() => {
+      const error = new Error("Token expired");
+      error.name = "TokenExpiredError";
+      throw error;
+    });
+
+    // Setup for token decoding
+    jwt.decode.mockReturnValueOnce({
+      email: mockEmail,
+      id: mockTokenId,
+    });
+
+    // Setup the pending user to be found
+    PendingUser.findOne.mockResolvedValueOnce(pendingUserData);
+
+    // Setup for error during verification email send
+    sendVerificationEmail.mockRejectedValueOnce(
+      new Error("Email sending failed"),
+    );
+
+    await signUp(req, res);
+
+    // Verify error was logged
+    expect(logError).toHaveBeenCalled();
+
+    // Verify standard expired token redirect without resent parameter
+    expect(res.redirect).toHaveBeenCalledWith(
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
+    );
   });
 
   it("redirects when token is invalid", async () => {
@@ -150,7 +251,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=token_invalid`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -161,7 +262,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${mockToken}&reason=no_pending_user`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=not_found`,
     );
     expect(logError).toHaveBeenCalled();
   });
@@ -187,7 +288,7 @@ describe("SignUp Controller", () => {
     await signUp(req, res);
 
     expect(res.redirect).toHaveBeenCalledWith(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
     expect(logError).toHaveBeenCalled();
   });

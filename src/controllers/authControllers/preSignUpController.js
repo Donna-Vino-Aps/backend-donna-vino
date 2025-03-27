@@ -4,11 +4,7 @@ import { validateUser } from "../../models/users/userModels.js";
 import User from "../../models/users/userModels.js";
 import PendingUser from "../../models/users/pendingUserModel.js";
 import validateAllowedFields from "../../util/validateAllowedFields.js";
-import path from "path";
-import fs from "fs";
-import { sendEmail } from "../../util/emailUtils.js";
-import { generateToken } from "../../services/token/tokenGenerator.js";
-import { baseApiUrl } from "../../config/environment.js";
+import { sendVerificationEmail } from "../../services/email/verificationEmailService.js";
 
 export const preSignUp = async (req, res) => {
   const pendingUserAllowedFields = [
@@ -101,18 +97,6 @@ export const preSignUp = async (req, res) => {
     });
   }
 
-  // Generate verification token
-  let token;
-  try {
-    token = await generateToken(email);
-  } catch (tokenError) {
-    logError("Error generating token: " + tokenError.message);
-    return res.status(500).json({
-      success: false,
-      msg: "Unable to create verification token. Please try again later.",
-    });
-  }
-
   // Create or update pending user
   try {
     if (pendingUser) {
@@ -143,25 +127,9 @@ export const preSignUp = async (req, res) => {
     });
   }
 
-  // Send verification email
+  // Generate new verification token and send email using the service
   try {
-    const verifyUrl = `${baseApiUrl}/api/auth/sign-up?token=${token}`;
-
-    const templateName = isSubscribed
-      ? "verifyEmailForSignupWithNewsletterTemplate.html"
-      : "verifyEmailForSignupTemplate.html";
-
-    const templatePath = path.resolve(
-      process.cwd(),
-      `src/templates/${templateName}`,
-    );
-
-    let templateContent = fs.readFileSync(templatePath, "utf-8");
-    templateContent = templateContent.replace("{{VERIFY_URL}}", verifyUrl);
-
-    const verifySubject = "Verify your email address for Donna Vino";
-    await sendEmail(pendingUser.email, verifySubject, templateContent);
-    logInfo(`Verification email sent to ${pendingUser.email}`);
+    await sendVerificationEmail(pendingUser);
   } catch (emailError) {
     logError("Error sending verification email: " + emailError.message);
   }

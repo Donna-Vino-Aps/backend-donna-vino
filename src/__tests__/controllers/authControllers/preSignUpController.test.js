@@ -2,19 +2,13 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.test" });
 import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
 import { preSignUp } from "../../../controllers/authControllers/preSignUpController.js";
-import fs from "fs";
-import path from "path";
-import { sendEmail } from "../../../util/emailUtils.js";
 import PendingUser from "../../../models/users/pendingUserModel.js";
 import User from "../../../models/users/userModels.js";
-import { generateToken } from "../../../services/token/tokenGenerator.js";
 import { logError, logInfo } from "../../../util/logging.js";
 import * as userModel from "../../../models/users/userModels.js";
 import validateAllowedFields from "../../../util/validateAllowedFields.js";
+import { sendVerificationEmail } from "../../../services/email/verificationEmailService.js";
 
-vi.mock("fs");
-vi.mock("path");
-vi.mock("../../../util/emailUtils.js");
 vi.mock("../../../models/users/pendingUserModel.js");
 vi.mock("../../../models/users/userModels.js", () => {
   return {
@@ -24,7 +18,7 @@ vi.mock("../../../models/users/userModels.js", () => {
     validateUser: vi.fn().mockReturnValue([]), // Mock validateUser to return empty array by default
   };
 });
-vi.mock("../../../services/token/tokenGenerator.js");
+vi.mock("../../../services/email/verificationEmailService.js");
 vi.mock("../../../util/logging.js");
 vi.mock("../../../util/validateAllowedFields.js", () => {
   return {
@@ -34,7 +28,6 @@ vi.mock("../../../util/validateAllowedFields.js", () => {
 
 describe("preSignUp Controller", () => {
   let req, res;
-  const mockToken = "mock-verification-token";
   const validUserData = {
     firstName: "John",
     lastName: "Doe",
@@ -61,10 +54,7 @@ describe("preSignUp Controller", () => {
     vi.clearAllMocks();
 
     // Setup default mock behavior
-    fs.readFileSync.mockReturnValue("{{VERIFY_URL}}");
-    path.resolve.mockReturnValue("/mock/path/to/template.html");
-    sendEmail.mockResolvedValue(true);
-    generateToken.mockResolvedValue(mockToken);
+    sendVerificationEmail.mockResolvedValue();
     userModel.validateUser.mockReturnValue([]);
     validateAllowedFields.mockReturnValue(null);
 
@@ -100,62 +90,58 @@ describe("preSignUp Controller", () => {
 
     await preSignUp(req, res);
 
-    expect(req.body.user.email).toBe("test.user@example.com");
+    // Get the PendingUser.create call arguments and verify email is lowercase
+    const createCall = PendingUser.create.mock.calls[0][0];
+    expect(createCall.email).toBe("test.user@example.com");
   });
 
-  it("returns 400 if fields are not allowed", async () => {
-    validateAllowedFields.mockReturnValueOnce("Invalid field: unknownField");
-
-    req.body.user.unknownField = "some value";
+  it("rejects invalid user data", async () => {
+    const validationErrors = ["Error 1", "Error 2"];
+    userModel.validateUser.mockReturnValueOnce(validationErrors);
 
     await preSignUp(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      msg: expect.stringContaining("Invalid request"),
+      msg: "BAD REQUEST: Error 1, Error 2",
     });
   });
 
-  it("returns 400 if validation fails", async () => {
-    userModel.validateUser.mockReturnValueOnce(["Password must be strong"]);
+  it("rejects disallowed fields", async () => {
+    const disallowedFields = ["role", "isAdmin"];
+    validateAllowedFields.mockReturnValueOnce(disallowedFields);
 
     await preSignUp(req, res);
 
     expect(res.status).toHaveBeenCalledWith(400);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      msg: expect.any(String),
+      msg: "Invalid request",
     });
   });
 
-  it("returns 200 if user already exists", async () => {
-    const existingUser = {
-      _id: "existing-user-id",
-      firstName: validUserData.firstName,
-      lastName: validUserData.lastName,
-      email: validUserData.email,
-    };
-
-    User.findOne.mockResolvedValueOnce(existingUser);
+  it("does not allow creating account if email already in use", async () => {
+    User.findOne.mockResolvedValueOnce({ email: validUserData.email });
 
     await preSignUp(req, res);
 
-    expect(User.findOne).toHaveBeenCalledWith({ email: validUserData.email });
     expect(res.status).toHaveBeenCalledWith(409);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      msg: "A user with this email already exists. Please try logging in instead.",
+      msg: expect.stringContaining("A user with this email already exists."),
     });
   });
 
   it("handles database error when checking for existing user", async () => {
-    User.findOne.mockRejectedValueOnce(new Error("Database connection error"));
+    User.findOne.mockRejectedValueOnce(
+      new Error("Database error checking for existing user"),
+    );
 
     await preSignUp(req, res);
 
     expect(logError).toHaveBeenCalledWith(
-      expect.stringContaining("Database error checking for existing user"),
+      "Database error checking for existing user: Database error checking for existing user",
     );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
@@ -166,13 +152,13 @@ describe("preSignUp Controller", () => {
 
   it("handles database error when checking for pending user", async () => {
     PendingUser.findOne.mockRejectedValueOnce(
-      new Error("Database connection error"),
+      new Error("Database error checking for pending user"),
     );
 
     await preSignUp(req, res);
 
     expect(logError).toHaveBeenCalledWith(
-      expect.stringContaining("Database error checking for pending user"),
+      "Database error checking for pending user: Database error checking for pending user",
     );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
@@ -181,18 +167,20 @@ describe("preSignUp Controller", () => {
     });
   });
 
-  it("handles token generation error", async () => {
-    generateToken.mockRejectedValueOnce(new Error("Token generation failed"));
+  it("handles database error when creating/updating pending user", async () => {
+    PendingUser.create.mockRejectedValueOnce(
+      new Error("Database error creating pending user"),
+    );
 
     await preSignUp(req, res);
 
     expect(logError).toHaveBeenCalledWith(
-      expect.stringContaining("Error generating token"),
+      "Database error creating/updating pending user: Database error creating pending user",
     );
     expect(res.status).toHaveBeenCalledWith(500);
     expect(res.json).toHaveBeenCalledWith({
       success: false,
-      msg: "Unable to create verification token. Please try again later.",
+      msg: "Unable to create your account. Please try again later.",
     });
   });
 
@@ -207,117 +195,74 @@ describe("preSignUp Controller", () => {
 
     await preSignUp(req, res);
 
-    expect(PendingUser.findOne).toHaveBeenCalledWith({
-      email: validUserData.email,
-    });
     expect(existingPendingUser.firstName).toBe(validUserData.firstName);
     expect(existingPendingUser.lastName).toBe(validUserData.lastName);
-    expect(existingPendingUser.isVip).toBe(validUserData.isVip);
-    expect(existingPendingUser.authProvider).toBe(validUserData.authProvider);
+    expect(existingPendingUser.password).toBe(validUserData.password);
     expect(existingPendingUser.save).toHaveBeenCalled();
-    expect(PendingUser.create).not.toHaveBeenCalled();
     expect(logInfo).toHaveBeenCalledWith(
       expect.stringContaining("Updated existing pending user"),
     );
+    expect(sendVerificationEmail).toHaveBeenCalledWith(existingPendingUser);
   });
 
-  it("creates a new pending user if one doesn't exist", async () => {
+  it("creates new pending user if one does not exist", async () => {
+    const createdUser = {
+      _id: "mock-pending-user-id",
+      ...validUserData,
+      dateOfBirth: new Date(validUserData.dateOfBirth),
+    };
+
+    PendingUser.create.mockResolvedValueOnce(createdUser);
+
     await preSignUp(req, res);
 
-    expect(PendingUser.findOne).toHaveBeenCalledWith({
-      email: validUserData.email,
-    });
     expect(PendingUser.create).toHaveBeenCalledWith({
-      ...validUserData,
+      ...req.body.user,
       dateOfBirth: expect.any(Date),
     });
     expect(logInfo).toHaveBeenCalledWith(
       expect.stringContaining("Created new pending user"),
     );
+    expect(sendVerificationEmail).toHaveBeenCalledWith(createdUser);
   });
 
-  it("handles database error when creating/updating pending user", async () => {
-    PendingUser.create.mockRejectedValueOnce(new Error("Database error"));
+  it("handles email verification service error and continues execution", async () => {
+    sendVerificationEmail.mockRejectedValueOnce(
+      new Error("Email verification failed"),
+    );
 
     await preSignUp(req, res);
 
     expect(logError).toHaveBeenCalledWith(
-      expect.stringContaining("Database error creating/updating pending user"),
+      "Error sending verification email: Email verification failed",
     );
-    expect(res.status).toHaveBeenCalledWith(500);
-    expect(res.json).toHaveBeenCalledWith({
-      success: false,
-      msg: "Unable to create your account. Please try again later.",
-    });
-  });
 
-  it("handles email sending error and continues execution", async () => {
-    const mockPendingUser = {
-      _id: "pending-user-id",
-      ...validUserData,
-      verificationToken: mockToken,
-    };
-
-    PendingUser.create.mockResolvedValueOnce(mockPendingUser);
-    sendEmail.mockRejectedValueOnce(new Error("Email sending failed"));
-
-    await preSignUp(req, res);
-
-    expect(logError).toHaveBeenCalledWith(
-      expect.stringContaining("Error sending verification email"),
-    );
+    // We still return 201 since we continue processing even after
+    // an email sending error (we just log it)
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       success: true,
       msg: "Verification email sent. Please check your inbox to complete the signup process.",
-      pendingUser: {
-        email: mockPendingUser.email,
-        firstName: mockPendingUser.firstName,
-        lastName: mockPendingUser.lastName,
-      },
+      pendingUser: expect.objectContaining({
+        email: expect.any(String),
+        firstName: expect.any(String),
+        lastName: expect.any(String),
+      }),
     });
-  });
-
-  it("selects the correct email template based on isSubscribed", async () => {
-    req.body.user.isSubscribed = true;
-
-    await preSignUp(req, res);
-
-    expect(path.resolve).toHaveBeenCalledWith(
-      expect.any(String),
-      "src/templates/verifyEmailForSignupWithNewsletterTemplate.html",
-    );
-
-    vi.clearAllMocks();
-    userModel.validateUser.mockReturnValue([]);
-    validateAllowedFields.mockReturnValue(null);
-    req.body.user.isSubscribed = false;
-
-    await preSignUp(req, res);
-
-    expect(path.resolve).toHaveBeenCalledWith(
-      expect.any(String),
-      "src/templates/verifyEmailForSignupTemplate.html",
-    );
   });
 
   it("successfully completes the pre-signup process", async () => {
     const mockPendingUser = {
       _id: "pending-user-id",
       ...validUserData,
-      verificationToken: mockToken,
     };
 
     PendingUser.create.mockResolvedValueOnce(mockPendingUser);
 
     await preSignUp(req, res);
 
-    // Verify email was sent with correct parameters
-    expect(sendEmail).toHaveBeenCalledWith(
-      validUserData.email,
-      "Verify your email address for Donna Vino",
-      expect.any(String),
-    );
+    // Verify verification email service was called with the pending user
+    expect(sendVerificationEmail).toHaveBeenCalledWith(mockPendingUser);
 
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
