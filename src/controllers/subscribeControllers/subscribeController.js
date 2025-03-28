@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
-import { sendEmail } from "../../util/emailUtils.js";
+import { sendEmail, addContactToResend } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
@@ -12,13 +12,11 @@ import {
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import path from "path";
 import fs from "fs";
-import { Resend } from "resend";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-const resendClient = new Resend(process.env.RESEND_API_KEY);
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
@@ -128,20 +126,8 @@ export const subscribeController = async (req, res) => {
 
     logInfo(`Deleting token: ${tokenId}`);
     await deleteToken(tokenId);
-    logInfo(`Audience token: ${process.env.RESEND_AUDIENCE_ID}`);
 
-    try {
-      const contactResult = await resendClient.contacts.create({
-        email: to,
-        unsubscribed: false,
-        audienceId: process.env.RESEND_AUDIENCE_ID,
-      });
-      logInfo(
-        `Contact added to Resend audience: ${JSON.stringify(contactResult)}`,
-      );
-    } catch (error) {
-      logError(`Error adding ${to} to Resend audience`, error);
-    }
+    await addContactToResend(to);
 
     const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
     const homeUrl = `${baseDonnaVinoWebUrl}`;
