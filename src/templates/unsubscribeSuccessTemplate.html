@@ -15,130 +15,113 @@
         font-family: Barlow, sans-serif;
         background-color: #ffffff;
         margin: 0;
-        padding: 30px;
+        padding: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         height: 100vh;
         flex-direction: column;
-        gap: 56px;
-        text-align: center;
+        width: 100%;
       }
 
       .container {
+        max-width: 530px;
+        width: 100%;
+        margin: auto;
         text-align: center;
-        max-width: 100%;
-        display: flex;
-        flex-direction: column;
-        gap: 24px;
+        color: #101010;
       }
 
       .header {
-        text-align: center;
-        padding-top: 40px;
+        margin-top: 48px;
+        margin-bottom: 20px;
       }
 
-      .header img {
+      .logo {
         width: 124px;
-        height: 86px;
-        margin-bottom: 30px;
+        margin-bottom: 56px;
       }
 
       .heading {
-        margin-bottom: 10px;
-        font-size: 24px;
+        margin-top: 0;
+        margin-bottom: 19px;
+        font-size: 22px;
+        line-height: 28px;
         font-weight: 700;
-        text-align: center;
       }
 
-      .content p {
-        text-align: center;
-        font-size: 16px;
-        line-height: 1.5;
-        margin: 0 20px;
-        padding: 20px;
+      .content {
+        margin-bottom: 24px;
+      }
+
+      .content-text {
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.4px;
+        margin: 0;
+        margin-bottom: 10px;
       }
 
       .footer {
-        text-align: center;
-        font-size: 12px;
-        color: #888;
-        padding: 15px;
-        margin-top: auto;
-        gap: 16px;
+        margin-top: 48px;
+        color: #6c6c6c;
       }
 
-      .glass {
+      .footer > p {
         font-size: 12px;
-        letter-spacing: 0.035px;
         line-height: 16px;
-        position: relative;
-        top: 5px;
       }
 
-      .content > .thanks {
-        font-size: 14px;
-        color: #101010;
-        font-weight: 700;
-        line-height: 20px;
-        letter-spacing: 0.035px;
-        margin-top: 10px;
+      .footer-links {
+        margin-top: 15px;
       }
 
-      .footer img {
-        filter: brightness(40%);
-        margin: 10px;
-        width: 20px;
+      .footer-link {
+        color: #007aff;
       }
 
       /* Responsiveness */
-      @media (max-width: 1024px) {
-        body {
-          padding: 100px 10%;
-        }
-
-        .container {
-          padding: 0 20px;
-        }
-
-        .content p {
-          margin: 0 15px;
-        }
-      }
-
-      @media (max-width: 600px) {
-        body {
-          padding: 50px 5%;
-        }
-
-        .header img {
-          width: 100px;
-          height: 70px;
-        }
-
+      @media (max-width: 768px) {
         .heading {
-          font-size: 22px;
+          font-size: 21px;
         }
 
-        .content p {
-          margin: 0 10px;
+        .content-text {
+          font-size: 13px;
+        }
+
+        .footer > p {
+          font-size: 11px;
         }
       }
 
-      @media (max-width: 400px) {
-        body {
-          padding: 30px 5%;
-        }
-
+      @media (max-width: 576px) {
         .heading {
           font-size: 20px;
         }
 
-        .content p {
-          margin: 0 5px;
+        .content-text {
+          font-size: 12px;
+        }
+      }
+
+      @media (max-width: 456px) {
+        .heading {
+          font-size: 19px;
         }
 
-        .footer {
+        .content-text {
+          font-size: 11px;
+        }
+      }
+
+      @media (max-width: 382px) {
+        .heading {
+          font-size: 18px;
+        }
+
+        .content-text {
           font-size: 10px;
         }
       }
@@ -156,7 +139,7 @@
       </div>
 
       <div class="content">
-        <p>
+        <p class="content-text">
           We're sorry to inform you that your subscription to our newsletter has
           been canceled. We understand that sometimes preferences change, and
           we're grateful for the time you spent with us. If you ever decide to
@@ -165,10 +148,10 @@
       </div>
 
       <div class="content">
-        <span class="glass"
-          >Thank you for being a part of our community! 🍷</span
-        >
-        <p class="thanks">Best regards,<br />Donna Vino Team</p>
+        <p class="content-text">
+          <strong>Thank you for being a part of our community! 🍷</strong>
+        </p>
+        <p class="content-text">Best regards,<br />Donna Vino Team</p>
       </div>
 
       <div class="footer">
