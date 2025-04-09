@@ -11,6 +11,7 @@ import {
   deleteToken,
 } from "../../services/token/tokenRepository.js";
 import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
+import { sendVerificationEmail } from "../../services/email/verificationEmailService.js";
 
 export const signUp = async (req, res) => {
   const { token } = req.query;
@@ -19,7 +20,7 @@ export const signUp = async (req, res) => {
   if (!token) {
     logError("Missing token in verification request");
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=missing_token`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=missing`,
     );
   }
 
@@ -31,18 +32,49 @@ export const signUp = async (req, res) => {
   } catch (error) {
     if (error.name === "TokenExpiredError") {
       logError(`Token expired: ${token}`);
+
+      // Handle expired token by extracting email and finding pending user
+      try {
+        const expiredTokenData = jwt.decode(token);
+        const email = expiredTokenData?.email;
+        const tokenId = expiredTokenData?.id;
+
+        if (email && tokenId) {
+          // Find the pending user by email
+          const pendingUser = await PendingUser.findOne({ email });
+
+          if (pendingUser) {
+            // Mark old token as used and delete it
+            await markTokenAsUsed(tokenId);
+            await deleteToken(tokenId);
+
+            // Resend verification email
+            await sendVerificationEmail(pendingUser);
+            logInfo(
+              `Verification email resent to ${email} due to expired token`,
+            );
+
+            return res.redirect(
+              `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired&resent=true`,
+            );
+          }
+        }
+      } catch (resendError) {
+        logError(`Error handling expired token: ${resendError.message}`);
+      }
+
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=token_expired`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=expired`,
       );
     } else if (error.name === "JsonWebTokenError") {
       logError(`Invalid token: ${token}, error: ${error.message}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=token_invalid`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
       );
     } else {
       logError(`Error verifying token: ${error.message}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
       );
     }
   }
@@ -52,13 +84,13 @@ export const signUp = async (req, res) => {
     if (await isTokenUsed(decoded.id)) {
       logError(`Token ${decoded.id} has already been used`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=token_used`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=invalid`,
       );
     }
   } catch (error) {
     logError(`Error checking if token is used: ${error.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -68,7 +100,7 @@ export const signUp = async (req, res) => {
   } catch (error) {
     logError(`Error marking token as used: ${error.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -80,13 +112,13 @@ export const signUp = async (req, res) => {
     if (!pendingUser) {
       logError(`No pending user found for email: ${decoded.email}`);
       return res.redirect(
-        `${baseDonnaVinoEcommerceWebUrl}/verification-failed?token=${token}&reason=no_pending_user`,
+        `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=not_found`,
       );
     }
   } catch (dbError) {
     logError(`Database error finding pending user: ${dbError.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -111,7 +143,7 @@ export const signUp = async (req, res) => {
   } catch (dbError) {
     logError(`Database error checking existing user: ${dbError.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 
@@ -132,7 +164,7 @@ export const signUp = async (req, res) => {
   } catch (dbError) {
     logError(`Error creating user: ${dbError.message}`);
     return res.redirect(
-      `${baseDonnaVinoEcommerceWebUrl}/verification-failed?reason=system_error`,
+      `${baseDonnaVinoEcommerceWebUrl}/signup/verification-failed?type=error`,
     );
   }
 

@@ -7,12 +7,14 @@ import {
   requestPasswordReset,
   resetPassword,
 } from "../controllers/authControllers/resetPasswordController.js";
+import { resendVerificationEmail } from "../controllers/authControllers/resendVerificationController.js";
 
 const authRouter = express.Router();
 
 authRouter.post("/pre-sign-up", preSignUp);
 authRouter.get("/sign-up", signUp);
 authRouter.post("/sign-in-with-google", signInWithGoogleController);
+authRouter.get("/resend-verification-email", resendVerificationEmail);
 authRouter.post("/log-in", login);
 authRouter.post("/request-password-reset", requestPasswordReset);
 authRouter.put("/update-user-data", resetPassword);
