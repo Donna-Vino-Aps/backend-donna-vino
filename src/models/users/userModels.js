@@ -32,6 +32,9 @@ const userSchema = new mongoose.Schema(
       enum: ["local", "google"],
       default: "local",
     },
+    // Optional fields for the user profile
+    address: { type: String },
+    country: { type: String },
     // Optional fields for future or Google sign-in
     googleId: { type: String },
     picture: { type: String },
