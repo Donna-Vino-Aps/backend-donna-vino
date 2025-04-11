@@ -1,5 +1,5 @@
 import express from "express";
-import { requireAuth } from "../middleware/authMiddleware.js";
+// import { requireAuth } from "../middleware/authMiddleware.js";
 
 import {
   getUsers,
@@ -11,8 +11,8 @@ import { logout } from "../controllers/authControllers/logoutController.js";
 const userRouter = express.Router();
 
 userRouter.get("/", getUsers);
-userRouter.get("/user/profile", requireAuth, getUserProfile);
-userRouter.put("/user/profile", requireAuth, updateUserProfile);
+userRouter.get("/profile", getUserProfile);
+userRouter.put("/profile", updateUserProfile);
 userRouter.post("/log-out", logout);
 
 export default userRouter;

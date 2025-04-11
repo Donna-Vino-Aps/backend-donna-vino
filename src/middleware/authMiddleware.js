@@ -1,5 +1,11 @@
 import jwt from "jsonwebtoken";
 import { logInfo, logError } from "../util/logging.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+if (!process.env.JWT_SECRET) {
+  throw new Error("Missing JWT_SECRET in environment variables");
+}
 
 export const requireAuth = (req, res, next) => {
   const session = req.cookies.session;
@@ -11,7 +17,7 @@ export const requireAuth = (req, res, next) => {
     (!session || session.trim() === "") &&
     (!authHeader || authHeader.trim() === "")
   ) {
-    logError("No session cookie found.");
+    logError("No session cookie (or authorization header) found.");
     return res.status(401).send({
       success: false,
       msg: "BAD REQUEST: Authentication required.",
