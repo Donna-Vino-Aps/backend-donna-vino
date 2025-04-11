@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
-import { sendEmail } from "../../util/emailUtils.js";
+import { sendEmail, updateContactStatus } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
@@ -132,10 +132,10 @@ export const unSubscribeController = async (req, res) => {
         message: "User does not exist in the subscribed list.",
       });
     }
-
+    //Update status in Resend
+    await updateContactStatus({ email: to, unsubscribed: true });
     // Remove the user from the subscription list
     await SubscribedUser.deleteOne({ email: to });
-
     logInfo(`User ${to} unsubscribed successfully.`);
 
     // Mark the token as used and delete it
