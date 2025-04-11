@@ -152,4 +152,18 @@ describe("loginController", () => {
     expect(response.status).toBe(200);
     expect(response.body.success).toBe(true);
   });
+
+  test("Should login successfully with uppercase email", async () => {
+    const userData = {
+      email: "JOHNDOE@EXAMPLE.COM",
+      password: "Password123!",
+    };
+
+    const response = await request
+      .post("/api/auth/log-in")
+      .send({ user: userData });
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe(true);
+  });
 });
