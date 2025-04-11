@@ -52,7 +52,7 @@ export const baseDonnaVinoWebUrl =
     : DONNA_VINO_WEB_LOCAL;
 
 export const baseDonnaVinoEcommerceWebUrl =
-  NODE_ENV === "production"
+  NODE_ENV === "production" || NODE_ENV === "staging"
     ? DONNA_VINO_ECOMMERCE_WEB_HEROKU
     : DONNA_VINO_ECOMMERCE_WEB_LOCAL;
 
