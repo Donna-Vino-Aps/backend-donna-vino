@@ -9,7 +9,10 @@ export const sendVerificationEmail = async (user) => {
   try {
     const token = await generateToken(user.email);
 
-    const verifyUrl = `${baseApiUrl}/api/auth/sign-up?token=${token}`;
+    const verifyUrl = `${baseApiUrl.replace(
+      /\/+$/,
+      "",
+    )}/api/auth/sign-up?token=${token}`;
 
     const templateName = user.isSubscribed
       ? "verifyEmailForSignupWithNewsletterTemplate.html"

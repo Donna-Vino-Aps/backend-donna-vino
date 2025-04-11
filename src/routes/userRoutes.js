@@ -1,4 +1,6 @@
 import express from "express";
+import { requireAuth } from "../middleware/authMiddleware.js";
+
 import {
   getUsers,
   getUserProfile,
@@ -9,8 +11,8 @@ import { logout } from "../controllers/authControllers/logoutController.js";
 const userRouter = express.Router();
 
 userRouter.get("/", getUsers);
-userRouter.get("/profile", protect, getUserProfile);
-userRouter.put("/user/profile", protect, updateUserProfile);
+userRouter.get("/user/profile", requireAuth, getUserProfile);
+userRouter.put("/user/profile", requireAuth, updateUserProfile);
 userRouter.post("/log-out", logout);
 
 export default userRouter;
