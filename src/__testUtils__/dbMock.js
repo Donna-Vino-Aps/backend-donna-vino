@@ -11,6 +11,12 @@ let mongoMemServer;
  * Connecting to the Database
  */
 export const connectToMockDB = async () => {
+  try {
+    await MongoMemoryServer.cleanup();
+  } catch (err) {
+    console.warn("Cleanup warning:", err.message);
+  }
+
   if (mongoMemServer !== null && mongoMemServer !== undefined) {
     // Prevent overwriting the database when tests are running
     throw new Error(
