@@ -3,9 +3,11 @@ import bcrypt from "bcrypt";
 import fs from "fs";
 import path from "path";
 import { sendEmail } from "../../util/emailUtils.js";
-import User from "../../models/users/userModels.js";
+import User, { validateUser } from "../../models/users/userModels.js";
 import { logError, logInfo } from "../../util/logging.js";
 import validationErrorMessage from "../../util/validationErrorMessage.js";
+import { validatePassword } from "../../util/authUtils.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
@@ -20,10 +22,6 @@ export const requestPasswordReset = async (req, res) => {
 
   const { email } = req.body;
 
-  if (!email) {
-    return res.status(400).json({ success: false, msg: "Email is required" });
-  }
-
   try {
     const user = await User.findOne({ email });
 
@@ -37,7 +35,7 @@ export const requestPasswordReset = async (req, res) => {
       { expiresIn: "1h" },
     );
 
-    const resetLink = `${process.env.DONNA_VINO_ECOMMERCE_WEB_LOCAL}/reset-password?token=${resetToken}`;
+    const resetLink = `${baseDonnaVinoEcommerceWebUrl}/reset-password?token=${resetToken}`;
 
     const templatePath = resolvePath(
       "src/templates/resetPasswordTemplate.html",
@@ -50,7 +48,7 @@ export const requestPasswordReset = async (req, res) => {
 
     return res.json({ success: true, msg: "Password reset email sent" });
   } catch (error) {
-    console.error("Error requesting password reset:", error);
+    logError("Error requesting password reset:", error);
     return res
       .status(500)
       .json({ success: false, msg: "Internal server error" });
@@ -91,6 +89,14 @@ export const resetPassword = async (req, res) => {
       });
     }
 
+    const { isValid, errors: passwordErrors } = validatePassword(newPassword);
+    if (!isValid) {
+      return res.status(400).json({
+        success: false,
+        message: passwordErrors.join(" "),
+      });
+    }
+
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -103,11 +109,20 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    const user = await User.findById(decoded.userId);
+    const user = await User.findOne({ email: decoded.email });
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "User not found",
+      });
+    }
+
+    // Check if user is logged in through local authentication
+    if (user.authProvider !== "local") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Password reset not available for accounts using external authentication",
       });
     }
 
@@ -120,13 +135,20 @@ export const resetPassword = async (req, res) => {
       });
     }
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    // Update password
+    user.password = newPassword;
 
-    // Update only the password field to avoid validation issues
-    await User.updateOne(
-      { _id: decoded.userId },
-      { $set: { password: hashedPassword } },
-    );
+    const validationErrors = validateUser({ password: newPassword });
+    if (validationErrors.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Password doesn't meet requirements",
+        errors: validationErrors,
+      });
+    }
+
+    // Save the updated user object
+    await user.save();
 
     logInfo(`Password updated for user ${user.email}`);
 
