@@ -49,7 +49,7 @@ export const requireAuth = (req, res, next) => {
       });
     }
 
-    req.user = { id: data.userId };
+    req.userId = data.userId;
     next();
   });
 };
