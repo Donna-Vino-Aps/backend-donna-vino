@@ -16,7 +16,7 @@ export const getUsers = async (req, res) => {
 export const getUserProfile = async (req, res) => {
   try {
     // Assuming you are storing the user's ID in the JWT token and using it to fetch the user
-    const user = await User.findById(req.user.id); // req.user.id comes from the 'protect' middleware (decoded JWT token)
+    const user = await User.findById(req.user.id).select("-password"); // req.user.id comes from the 'protect' middleware (decoded JWT token)
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -40,14 +40,13 @@ export const getUserProfile = async (req, res) => {
 export const updateUserProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { firstName, lastName, email, password, address, country } = req.body;
+    const { firstName, lastName, email, address, country } = req.body;
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {
         firstName,
         lastName,
         email,
-        password,
         address,
         country,
       },

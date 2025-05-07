@@ -8,15 +8,12 @@ if (!process.env.JWT_SECRET) {
 }
 
 export const requireAuth = (req, res, next) => {
-  const session = req.cookies.session;
-  const authHeader = req.headers["authorization"];
+  const session = req.cookies.session?.trim();
+  const authHeader = req.headers["authorization"]?.trim();
   let token;
 
   // If neither a session cookie nor an authorization header is provided, return 401
-  if (
-    (!session || session.trim() === "") &&
-    (!authHeader || authHeader.trim() === "")
-  ) {
+  if (!session && !authHeader) {
     logError("No session cookie (or authorization header) found.");
     return res.status(401).send({
       success: false,
@@ -25,10 +22,10 @@ export const requireAuth = (req, res, next) => {
   }
 
   // Use the session cookie if available; otherwise, extract the token from the Authorization header
-  if (session && session.trim() !== "") {
+  if (session) {
     token = session;
     logInfo("Verifying token from session cookie.");
-  } else if (authHeader && authHeader.trim() !== "") {
+  } else if (authHeader) {
     token = authHeader.startsWith("Bearer ")
       ? authHeader.split(" ")[1]
       : authHeader;
@@ -38,21 +35,21 @@ export const requireAuth = (req, res, next) => {
   jwt.verify(token, process.env.JWT_SECRET, (err, data) => {
     if (err) {
       logError("Error verifying token:", err);
-      return res.status(401).send({
+      return res.status(401).json({
         success: false,
-        msg: "BAD REQUEST: Authentication failed.",
+        msg: "Unauthorized: Invalid or expired token.",
       });
     }
 
     if (!data.userId) {
-      logError("User not found in token data.");
-      return res.status(401).send({
+      logError("JWT decoded but missing expected userId property:", data);
+      return res.status(401).json({
         success: false,
-        msg: "BAD REQUEST: Authentication failed.",
+        msg: "Unauthorized: Invalid or expired token.",
       });
     }
 
-    req.userId = data.userId;
+    req.user = { id: data.userId };
     next();
   });
 };
