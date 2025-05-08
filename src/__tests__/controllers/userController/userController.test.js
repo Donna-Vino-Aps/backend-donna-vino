@@ -103,10 +103,10 @@ describe("getUsers Controller", () => {
 
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe("BAD REQUEST: Authentication failed.");
+    expect(response.body.msg).toBe("Unauthorized: Invalid or expired token.");
   });
 
-  test("Should return 401 if userId is not found in session token", async () => {
+  test("Should return 401 if userId is not found in session token.", async () => {
     const loginUser = {
       email: "user1@example.com",
       password: "Password1!",
@@ -131,6 +131,6 @@ describe("getUsers Controller", () => {
 
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe("BAD REQUEST: Authentication failed.");
+    expect(response.body.msg).toBe("Unauthorized: Invalid or expired token.");
   });
 });
