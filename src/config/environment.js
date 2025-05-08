@@ -52,9 +52,9 @@ export const baseDonnaVinoWebUrl =
     : DONNA_VINO_WEB_LOCAL.replace(/\/+$/, "");
 
 export const baseDonnaVinoEcommerceWebUrl =
-  NODE_ENV === "production"
-    ? DONNA_VINO_ECOMMERCE_WEB_HEROKU.replace(/\/+$/, "")
-    : DONNA_VINO_ECOMMERCE_WEB_LOCAL.replace(/\/+$/, "");
+  NODE_ENV === "production" || NODE_ENV === "staging"
+    ? DONNA_VINO_ECOMMERCE_WEB_HEROKU
+    : DONNA_VINO_ECOMMERCE_WEB_LOCAL;
 
 logInfo(`🌐 Server API URL: ${baseApiUrl}`);
 logInfo(`🍷 Donna Vino Web URL: ${baseDonnaVinoWebUrl}`);

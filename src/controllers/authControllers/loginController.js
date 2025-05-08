@@ -27,7 +27,7 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, error: errorMessage });
     }
 
-    const userFound = await User.findOne({ email });
+    const userFound = await User.findOne({ email: email.toLowerCase() });
 
     if (!userFound) {
       return res.status(401).json({
