@@ -1,5 +1,6 @@
 import User from "../../models/users/userModels.js";
 import { logError } from "../../util/logging.js";
+import { validateUser } from "../../models/users/userModels.js";
 
 export const getUsers = async (req, res) => {
   try {
@@ -39,8 +40,30 @@ export const getUserProfile = async (req, res) => {
 
 export const updateUserProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.id; // Assuming you are storing the user's ID in the JWT token and using it to fetch the user
     const { firstName, lastName, email, address, country } = req.body;
+
+    const userToValidate = { ...req.body };
+    const errorList = validateUser(userToValidate, true);
+
+    if (errorList.length > 0) {
+      logError(`Validation errors: ${JSON.stringify(errorList)}`);
+      return res.status(400).json({
+        success: false,
+        msg: validationErrorMessage(errorList),
+      });
+    }
+
+    if (email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== userId) {
+        return res.status(400).json({
+          success: false,
+          msg: "Email is already in use by another account.",
+        });
+      }
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       {

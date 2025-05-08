@@ -41,6 +41,8 @@ export const requireAuth = (req, res, next) => {
       });
     }
 
+    logInfo("Decoded token data:", data);
+
     if (!data.userId) {
       logError("JWT decoded but missing expected userId property:", data);
       return res.status(401).json({
@@ -49,7 +51,8 @@ export const requireAuth = (req, res, next) => {
       });
     }
 
-    req.userId = data.userId;
+    // req.userId = data.userId;
+    req.user = { id: data.userId };
     next();
   });
 };
