@@ -9,6 +9,10 @@ import jwt from "jsonwebtoken";
 
 app.use(express.json());
 
+function buildUrl(base, path) {
+  return `${base.replace(/\/+$/, "")}/${path.replace(/^\/+/, "")}`;
+}
+
 export const createPendingUser = async (req, res) => {
   try {
     const userData = req.body;
@@ -115,7 +119,10 @@ export const resendVerificationEmail = async (req, res) => {
       templateData: {
         firstName: pendingUser.firstName,
         lastName: pendingUser.lastName,
-        verificationLink: `${process.env.API_URL_LOCAL}/verify?token=${verificationToken}`,
+        verificationLink: buildUrl(
+          process.env.API_URL_LOCAL,
+          `verify?token=${verificationToken}`,
+        ),
       },
     };
 

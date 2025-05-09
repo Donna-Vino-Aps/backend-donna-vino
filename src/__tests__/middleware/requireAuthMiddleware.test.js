@@ -68,7 +68,7 @@ describe("requireAuth Middleware Tests", () => {
       .set("Cookie", ["session=invalidToken"]);
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe("BAD REQUEST: Authentication failed.");
+    expect(response.body.msg).toBe("Unauthorized: Invalid or expired token.");
   });
 
   it("should return 401 if token lacks userId in payload", async () => {
@@ -78,7 +78,7 @@ describe("requireAuth Middleware Tests", () => {
       .set("Cookie", [`session=${tokenWithoutUserId}`]);
     expect(response.status).toBe(401);
     expect(response.body.success).toBe(false);
-    expect(response.body.msg).toBe("BAD REQUEST: Authentication failed.");
+    expect(response.body.msg).toBe("Unauthorized: Invalid or expired token.");
   });
 
   it("should allow access if token is valid and includes userId", async () => {
