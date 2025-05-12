@@ -28,7 +28,10 @@ export const requireAuth = (req, res, next) => {
     if (err || !decoded?.userId) {
       return res
         .status(401)
-        .json({ success: false, msg: "Invalid or expired token." });
+        .json({
+          success: false,
+          msg: "Unauthorized: Invalid or expired token.",
+        });
     }
 
     req.userId = decoded.userId;

@@ -9,6 +9,8 @@ import { sendEmail } from "../../util/emailUtils.js";
 // OAuth2 client
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+const secure = process.env.NODE_ENV === "production";
+
 const generateAndSetSession = (res, user) => {
   const jwtToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
     expiresIn: "72h",
@@ -16,7 +18,7 @@ const generateAndSetSession = (res, user) => {
 
   res.cookie("session", jwtToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: secure,
     sameSite: secure ? "none" : "lax",
     maxAge: 86400000, // 24 hr
   });

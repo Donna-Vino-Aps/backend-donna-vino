@@ -46,7 +46,9 @@ export const verifyPendingUser = async (req, res) => {
     });
 
     if (!pendingUser) {
-      return res.status(400).json({ message: "Invalid or expired token." });
+      return res
+        .status(400)
+        .json({ message: "Unauthorized: Invalid or expired token." });
     }
 
     const signupRequest = {

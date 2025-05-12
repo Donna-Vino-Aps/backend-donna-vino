@@ -51,10 +51,12 @@ export const login = async (req, res) => {
       { expiresIn: "1h" },
     );
 
+    const secure = process.env.NODE_ENV === "production";
+
     // Save token in cookie
     res.cookie("session", token, {
       maxAge: 86400000, // 1 day
-      secure: process.env.NODE_ENV === "production",
+      secure: secure,
       httpOnly: true,
       sameSite: secure ? "none" : "lax",
     });
