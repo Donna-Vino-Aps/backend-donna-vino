@@ -15,9 +15,18 @@ export const getUsers = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
+  const { id } = req.params;
+
+  if (req.userId.toString() !== id) {
+    return res.status(403).json({
+      success: false,
+      msg: "You are not authorized to view this profile.",
+    });
+  }
+
   try {
     // Assuming you are storing the user's ID in the JWT token and using it to fetch the user
-    const user = await User.findById(req.user.id).select("-password"); // req.user.id comes from the 'protect' middleware (decoded JWT token)
+    const user = await User.findById(id).select("-password"); // req.user.id comes from the 'protect' middleware (decoded JWT token)
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -39,8 +48,15 @@ export const getUserProfile = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
+  const { id } = req.params;
+  if (req.userId.toString() !== id) {
+    return res.status(403).json({
+      success: false,
+      msg: "You are not authorized to update this profile.",
+    });
+  }
+
   try {
-    const userId = req.user.id; // Assuming you are storing the user's ID in the JWT token and using it to fetch the user
     const { firstName, lastName, email, address, country } = req.body;
 
     const userToValidate = { ...req.body };
@@ -56,7 +72,7 @@ export const updateUserProfile = async (req, res) => {
 
     if (email) {
       const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== userId) {
+      if (existingUser && existingUser._id.toString() !== id) {
         return res.status(400).json({
           success: false,
           msg: "Email is already in use by another account.",
@@ -64,8 +80,21 @@ export const updateUserProfile = async (req, res) => {
       }
     }
 
+    if (
+      firstName === undefined &&
+      lastName === undefined &&
+      email === undefined &&
+      address === undefined &&
+      country === undefined
+    ) {
+      return res.status(400).json({
+        success: false,
+        msg: "No valid fields provided for update.",
+      });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
-      userId,
+      id,
       {
         firstName,
         lastName,

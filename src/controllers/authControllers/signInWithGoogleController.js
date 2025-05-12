@@ -17,7 +17,7 @@ const generateAndSetSession = (res, user) => {
   res.cookie("session", jwtToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: secure ? "none" : "lax",
     maxAge: 86400000, // 24 hr
   });
 

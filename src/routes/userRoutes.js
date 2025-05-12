@@ -11,8 +11,8 @@ import { logout } from "../controllers/authControllers/logoutController.js";
 const userRouter = express.Router();
 
 userRouter.get("/", requireAuth, getUsers);
-userRouter.get("/profile", requireAuth, getUserProfile);
-userRouter.put("/profile", requireAuth, updateUserProfile);
+userRouter.get("/profile/:id", requireAuth, getUserProfile);
+userRouter.put("/profile/:id", requireAuth, updateUserProfile);
 userRouter.post("/log-out", requireAuth, logout);
 
 export default userRouter;
