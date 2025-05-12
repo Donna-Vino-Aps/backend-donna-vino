@@ -13,6 +13,7 @@ import {
   contactLimiter,
   contactHourlyLimiter,
 } from "./middleware/rateLimitMiddleware.js";
+import cloudinaryRouter from "./routes/cloudinaryRoutes.js";
 
 dotenv.config();
 
@@ -24,13 +25,14 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-app.use(bodyParser.json());
-
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 const allowedOrigins = [
   "http://www.donnavino.dk",
   "https://www.donnavino.dk",
   "https://donnavino.dk",
   "http://localhost:3000",
+  "http://localhost:3002",
   "http://localhost:5000",
   "http://localhost:5001",
   "https://donna-vino-ecommerce-45b8fd279992.herokuapp.com",
@@ -71,5 +73,6 @@ app.use(
 );
 
 app.use("/api/subscribe", subscribeRouter);
+app.use("/api/upload", cloudinaryRouter);
 
 export default app;
