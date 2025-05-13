@@ -2,10 +2,12 @@ import cloudinary from "../../config/cloudinary.js";
 import { logError } from "../../util/logging.js";
 
 export const cloudinaryController = async (req, res) => {
-  const file = req.file; // multer saves the file in req.file
+  const file = req.file;
 
   if (!file) {
-    return res.status(400).json({ success: false, msg: "No file provided" });
+    return res
+      .status(400)
+      .json({ success: false, msg: "No file received by controller" });
   }
 
   try {
@@ -22,19 +24,20 @@ export const cloudinaryController = async (req, res) => {
           });
         }
 
-        res.status(200).json({
+        // ✅ Return Cloudinary result (URL, etc.)
+        return res.status(200).json({
           success: true,
-          msg: "Image uploaded successfully",
-          url: result.secure_url,
+          msg: "File uploaded!",
+          cloudinaryUrl: result.secure_url, // <-- most useful field
+          result, // optionally send the full object
         });
       },
     );
 
-    // Stream the buffer to Cloudinary
     uploadStream.end(file.buffer);
   } catch (error) {
     logError(error);
-    res.status(500).json({
+    return res.status(500).json({
       success: false,
       msg: "Unexpected server error during upload",
       error: error.message,
