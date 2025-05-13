@@ -25,8 +25,7 @@ export const getUserProfile = async (req, res) => {
   }
 
   try {
-    // Assuming you are storing the user's ID in the JWT token and using it to fetch the user
-    const user = await User.findById(id).select("-password"); // req.user.id comes from the 'protect' middleware (decoded JWT token)
+    const user = await User.findById(id);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
