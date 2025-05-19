@@ -1,26 +1,69 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import validateAllowedFields from "../../util/validateAllowedFields.js";
-import { logInfo } from "../../util/logging.js";
+import AccessToken from "../accessToken.js";
+import RefreshToken from "../refreshToken.js";
+import EmailVerificationToken from "../emailVerificationToken.js";
+import PasswordChangeToken from "../passwordChangeToken.js";
+
+const SALT_ROUNDS = 10;
+
+/**
+ * Mongoose schema for a User.
+ * @typedef {Object} UserDocument
+ * @property {string} email - Unique email address for login/identity
+ * @property {string} [password] - Hashed password string (optional for SSO users)
+ * @property {string} [firstName]
+ * @property {string} [lastName]
+ * @property {Date} createdAt - Date the user was created
+ */
+
+const nameRegex = /^[a-zA-ZÆØÅæøå0-9]+(?:[-\s][a-zA-ZÆØÅæøå0-9]+)*$/;
 
 // Updated user schema
 const userSchema = new mongoose.Schema(
   {
-    firstName: { type: String, required: true, trim: true },
-    lastName: { type: String, required: true, trim: true },
-    email: { type: String, required: true, unique: true, trim: true },
+    firstName: {
+      type: String,
+      required: [true, "First name is required."],
+      trim: true,
+      match: [
+        nameRegex,
+        "First name can only contain letters, numbers, and a single space between words.",
+      ],
+    },
+    lastName: {
+      type: String,
+      required: [true, "Last name is required."],
+      trim: true,
+      match: [
+        nameRegex,
+        "Last name can only contain letters, numbers, and a single space between words.",
+      ],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required."],
+      unique: true,
+      trim: true,
+      lowercase: true,
+      match: [nameRegex, "Email format is invalid."],
+    },
     password: {
       type: String,
-      trim: true,
-      // Required only for manual sign-up
       required: function () {
         return this.authProvider === "local";
+      },
+      minlength: [8, "Password must be at least 8 characters long."],
+      validate: {
+        validator: function (v) {
+          return nameRegex.test(v);
+        },
+        message:
+          "Password must contain at least one uppercase letter and one special character.",
       },
     },
     dateOfBirth: {
       type: Date,
-      trim: true,
-      // Required only for manual sign-up
       required: function () {
         return this.authProvider === "local";
       },
@@ -32,141 +75,111 @@ const userSchema = new mongoose.Schema(
       enum: ["local", "google"],
       default: "local",
     },
-    // Optional fields for future or Google sign-in
     googleId: { type: String },
     picture: { type: String },
   },
   {
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
+    timestamps: true,
   },
 );
 
-// Add _skipPasswordHashing as a virtual property (not stored in the database)
-userSchema
-  .virtual("_skipPasswordHashing")
-  .get(function () {
-    return this._skipPasswordHashingFlag;
-  })
-  .set(function (value) {
-    this._skipPasswordHashingFlag = value;
-  });
-
-// Pre-save hook to hash the password if modified and only for local sign-up
+/**
+ * Pre-save middleware to hash the password if it's not already hashed.
+ */
 userSchema.pre("save", async function (next) {
-  if (this._skipPasswordHashing) {
-    delete this._skipPasswordHashingFlag;
-    return next();
-  }
+  if (!this.isModified("password") || !this.password) return next();
 
-  if (this.isModified("password") && this.authProvider === "local") {
-    try {
-      const salt = await bcrypt.genSalt(10);
-      this.password = await bcrypt.hash(this.password, salt);
-      next();
-    } catch (error) {
-      next(error);
-    }
-  } else {
+  // Avoid double-hashing
+  if (this.password.startsWith("$2")) return next();
+
+  try {
+    this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
     next();
+  } catch (err) {
+    next(err);
   }
 });
 
-// Updated validation function
-export const validateUser = (userObject) => {
-  const errorList = [];
-  // Allowed keys now include firstName, lastName, email, password, dateOfBirth, and authProvider
-  const allowedKeys = [
-    "firstName",
-    "lastName",
-    "email",
-    "password",
-    "dateOfBirth",
-    "authProvider",
-    "isSubscribed",
-    "isVip",
-  ];
-  const validatedKeysMessage = validateAllowedFields(userObject, allowedKeys);
-  if (validatedKeysMessage.length > 0) {
-    errorList.push(validatedKeysMessage);
-  }
-
-  if (
-    userObject.isSubscribed !== undefined &&
-    typeof userObject.isSubscribed !== "boolean"
-  ) {
-    errorList.push("isSubscribed must be a boolean value (true/false).");
-  }
-
-  // Validate firstName
-  if (!userObject.firstName || userObject.firstName.trim() === "") {
-    errorList.push("First name is a required field.");
-  } else if (
-    !/^(?:[a-zA-Z0-9]+(?:\s+[a-zA-Z0-9]+)*)?$/.test(userObject.firstName)
-  ) {
-    errorList.push(
-      "First name can only contain letters, numbers, and a single space between words.",
-    );
-  }
-
-  // Validate lastName
-  if (!userObject.lastName || userObject.lastName.trim() === "") {
-    errorList.push("Last name is a required field.");
-  } else if (
-    !/^(?:[a-zA-Z0-9]+(?:\s+[a-zA-Z0-9]+)*)?$/.test(userObject.lastName)
-  ) {
-    errorList.push(
-      "Last name can only contain letters, numbers, and a single space between words.",
-    );
-  }
-
-  // Validate email
-  if (!userObject.email || userObject.email.trim() === "") {
-    errorList.push("Email is a required field.");
-    logInfo("User create Validation failed: Email is required field.");
-  } else if (
-    !/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(userObject.email)
-  ) {
-    errorList.push("Email is not in a valid format.");
-  }
-
-  // Determine the authentication provider (defaulting to "local" if not provided)
-  const authProvider = userObject.authProvider || "local";
-
-  // For local sign-up, enforce additional validations
-  if (authProvider === "local") {
-    // Validate password
-    if (!userObject.password || userObject.password.trim() === "") {
-      errorList.push("Password is a required field.");
-    } else {
-      if (userObject.password.length < 8) {
-        errorList.push("Password must be at least 8 characters long.");
-      }
-      if (!/[A-Z]/.test(userObject.password)) {
-        errorList.push("Password must contain at least one uppercase letter.");
-      }
-      if (!/[^A-Za-z0-9]/.test(userObject.password)) {
-        errorList.push("Password must contain at least one special character.");
-      }
-    }
-
-    // Validate dateOfBirth
-    if (!userObject.dateOfBirth || userObject.dateOfBirth.trim() === "") {
-      errorList.push("Date Of Birth is a required field.");
-    } else {
-      const isValidDateOfBirth = /^\d{4}-\d{2}-\d{2}$/.test(
-        userObject.dateOfBirth,
-      );
-      if (!isValidDateOfBirth) {
-        errorList.push(
-          "Date Of Birth must be in a valid format (YYYY-MM-DD, e.g., '2024-02-04').",
-        );
-      }
-    }
-  }
-
-  return errorList;
+/**
+ * Compares a plaintext password to the stored bcrypt hash.
+ *
+ * @param {string} password - Plaintext password to compare
+ * @returns {Promise<boolean>} True if matched, false otherwise
+ */
+userSchema.methods.verifyPassword = function (password) {
+  return bcrypt.compare(password, this.password);
 };
 
+/**
+ * Issues a new access token and corresponding refresh token for this user.
+ *
+ * @returns {Promise<{ accessToken: String, refreshToken: String }>} A pair of tokens
+ */
+userSchema.methods.issueAccessTokens = async function () {
+  const accessToken = await AccessToken.issueToken({ userId: this._id });
+  const refreshToken = await RefreshToken.issueToken({
+    userId: this._id,
+    accessToken: accessToken.token,
+  });
+  return { accessToken: accessToken.token, refreshToken: refreshToken.token };
+};
+
+/**
+ * Issues an email verification token tied to the user's email.
+ *
+ * @returns {Promise<String>} The email verification token
+ */
+userSchema.methods.issueEmailVerificationToken = function () {
+  return EmailVerificationToken.issueToken({
+    userId: this._id,
+    email: this.email,
+  }).token;
+};
+
+/**
+ * Issues a short-lived token that allows the user to reset their password.
+ *
+ * @returns {Promise<String>} The password reset token
+ */
+userSchema.methods.issueResetPasswordToken = function () {
+  return PasswordChangeToken.issueToken({ userId: this._id }).token;
+};
+
+// // Add _skipPasswordHashing as a virtual property (not stored in the database)
+// userSchema
+//   .virtual("_skipPasswordHashing")
+//   .get(function () {
+//     return this._skipPasswordHashingFlag;
+//   })
+//   .set(function (value) {
+//     this._skipPasswordHashingFlag = value;
+//   });
+//
+// // Pre-save hook to hash the password if modified and only for local sign-up
+// userSchema.pre("save", async function (next) {
+//   if (this._skipPasswordHashing) {
+//     delete this._skipPasswordHashingFlag;
+//     return next();
+//   }
+//
+//   if (this.isModified("password") && this.authProvider === "local") {
+//     try {
+//       const salt = await bcrypt.genSalt(10);
+//       this.password = await bcrypt.hash(this.password, salt);
+//       next();
+//     } catch (error) {
+//       next(error);
+//     }
+//   } else {
+//     next();
+//   }
+// });
+
+/**
+ * User model representing both local and SSO users (if applicable).
+ */
 const User = mongoose.model("User", userSchema);
+
 export default User;
