@@ -43,18 +43,27 @@ tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 /**
  * Issues and saves a signed JWT token tied to a user.
  *
- * @param {Object} options
- * @param {mongoose.Types.ObjectId} options.userId - User ID the token belongs to
- * @param {string} [options.expiresIn='15m'] - JWT expiration time (e.g., '15m', '2h')
- * @param {Object} [options.payload={}] - Additional claims to include in the JWT
- * @param {string} [options.secret=process.env.API_SECRET] - Secret key for signing
- * @returns {Promise<TokenDocument>} The saved token document
+ * This method is typically used to generate verification or access tokens for a specific
+ * user. The generated token is stored in the database and can later be validated or revoked.
+ *
+ * Can be used standalone or integrated into higher-level token classes (e.g., EmailVerificationToken).
+ *
+ * @param {Object} options - Configuration options
+ * @param {mongoose.Types.ObjectId} options.userId - User ID the token is associated with
+ * @param {string} [options.expiresIn='15m'] - Expiration time (e.g., '15m', '2h')
+ * @param {Object} [options.payload={}] - Additional JWT claims (e.g., { email, role })
+ * @param {string} [options.secret=process.env.API_SECRET] - Secret key used for signing the token
+ * @param {Object} [options.extras={}] - Additional fields to include in the Token document (e.g., type, targetClass)
+ *
+ * @returns {Promise<TokenDocument>} A Mongoose document containing the issued token
  */
+
 tokenSchema.statics.issueToken = async function ({
   userId,
   expiresIn = "15m",
   payload = {},
   secret = process.env.JWT_SECRET,
+  extras = {},
 }) {
   const exp = Math.floor(Date.now() / 1000 + ms(expiresIn));
   const jwtPayload = {
@@ -67,6 +76,7 @@ tokenSchema.statics.issueToken = async function ({
   const token = jwt.sign(jwtPayload, secret);
 
   const tokenDoc = new this({
+    ...extras,
     user: userId,
     token,
     expiresAt: new Date(exp * 1000),
@@ -114,7 +124,7 @@ tokenSchema.methods.isExpired = function () {
  * @returns {Promise<void>}
  */
 tokenSchema.methods.revoke = async function () {
-  await this.delete();
+  await this.constructor.findByIdAndDelete(this._id);
 };
 
 /**

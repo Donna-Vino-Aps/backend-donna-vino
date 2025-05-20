@@ -18,7 +18,8 @@ const SALT_ROUNDS = 10;
  */
 
 const nameRegex = /^[a-zA-ZÆØÅæøå0-9]+(?:[-\s][a-zA-ZÆØÅæøå0-9]+)*$/;
-
+const emailRegex =
+  /^[a-zA-ZÆØÅæøå0-9](?:[\wÆØÅæøå.-]*[a-zA-ZÆØÅæøå0-9])?@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
 // Updated user schema
 const userSchema = new mongoose.Schema(
   {
@@ -46,7 +47,7 @@ const userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: [nameRegex, "Email format is invalid."],
+      match: [emailRegex, "Email format is invalid."],
     },
     password: {
       type: String,
@@ -56,7 +57,14 @@ const userSchema = new mongoose.Schema(
       minlength: [8, "Password must be at least 8 characters long."],
       validate: {
         validator: function (v) {
-          return nameRegex.test(v);
+          // if special character included
+          if (!/[\wÆØÅæøå]/.test(v)) return false;
+          // if digits included
+          if (!/[0-9]/.test(v)) return false;
+          // if uppercase letter included
+          if (!/[A-ZÆØÅ]/.test(v)) return false;
+          // if lowercase letter included
+          return /[a-zæøå]/.test(v);
         },
         message:
           "Password must contain at least one uppercase letter and one special character.",
@@ -131,11 +139,12 @@ userSchema.methods.issueAccessTokens = async function () {
  *
  * @returns {Promise<String>} The email verification token
  */
-userSchema.methods.issueEmailVerificationToken = function () {
-  return EmailVerificationToken.issueToken({
+userSchema.methods.issueEmailVerificationToken = async function () {
+  const token = await EmailVerificationToken.issueToken({
     userId: this._id,
     email: this.email,
-  }).token;
+  });
+  return token.token;
 };
 
 /**
@@ -143,39 +152,10 @@ userSchema.methods.issueEmailVerificationToken = function () {
  *
  * @returns {Promise<String>} The password reset token
  */
-userSchema.methods.issueResetPasswordToken = function () {
-  return PasswordChangeToken.issueToken({ userId: this._id }).token;
+userSchema.methods.issueResetPasswordToken = async function () {
+  const token = await PasswordChangeToken.issueToken({ userId: this._id });
+  return token.token;
 };
-
-// // Add _skipPasswordHashing as a virtual property (not stored in the database)
-// userSchema
-//   .virtual("_skipPasswordHashing")
-//   .get(function () {
-//     return this._skipPasswordHashingFlag;
-//   })
-//   .set(function (value) {
-//     this._skipPasswordHashingFlag = value;
-//   });
-//
-// // Pre-save hook to hash the password if modified and only for local sign-up
-// userSchema.pre("save", async function (next) {
-//   if (this._skipPasswordHashing) {
-//     delete this._skipPasswordHashingFlag;
-//     return next();
-//   }
-//
-//   if (this.isModified("password") && this.authProvider === "local") {
-//     try {
-//       const salt = await bcrypt.genSalt(10);
-//       this.password = await bcrypt.hash(this.password, salt);
-//       next();
-//     } catch (error) {
-//       next(error);
-//     }
-//   } else {
-//     next();
-//   }
-// });
 
 /**
  * User model representing both local and SSO users (if applicable).

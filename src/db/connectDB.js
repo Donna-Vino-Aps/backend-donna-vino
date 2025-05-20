@@ -32,6 +32,7 @@
 // export default connectDB;
 
 import mongoose from "mongoose";
+import { logError, logInfo } from "../util/logging.js";
 
 const connectDB = async () => {
   try {
@@ -46,9 +47,9 @@ const connectDB = async () => {
       authSource: "admin",
     });
 
-    console.log("MongoDB connected successfully");
+    logInfo("MongoDB connected successfully");
   } catch (error) {
-    console.error("MongoDB connection failed:", error.message);
+    logError("MongoDB connection failed:", error.message);
     process.exit(1);
   }
 };

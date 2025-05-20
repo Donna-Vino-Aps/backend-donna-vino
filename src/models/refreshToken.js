@@ -3,7 +3,7 @@
  *
  * This model tracks renewable tokens (e.g., refresh tokens) and holds a reference
  * to the last access token issued. It supports issuing new access tokens as long
- * as the current one matches and the refresh token hasn't expired or been revoked.
+ * as the current one matches, and the refresh token hasn't expired or been revoked.
  */
 
 import Token from "./token.js";
@@ -42,12 +42,12 @@ refreshTokenSchema.statics.issueToken = async function ({
   payload = {},
   secret = process.env.API_SECRET,
 }) {
-  return Token.issueToken.call(this, {
+  return await Token.issueToken.call(this, {
     userId,
     expiresIn,
     payload,
     secret,
-    lastAccessToken: accessToken,
+    extras: { lastAccessToken: accessToken },
   });
 };
 

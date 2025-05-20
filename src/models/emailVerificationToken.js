@@ -43,15 +43,16 @@ emailVerificationTokenSchema.statics.issueToken = async function ({
 }) {
   const extendedPayload = {
     ...payload,
-    email,
+    email: email,
   };
 
   // Delegate to base Token logic while preserving this discriminator context
-  return Token.issueToken.call(this, {
+  return await Token.issueToken.call(this, {
     userId,
     expiresIn,
     payload: extendedPayload,
     secret,
+    extras: { email: email },
   });
 };
 

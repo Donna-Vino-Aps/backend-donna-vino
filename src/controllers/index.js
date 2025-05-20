@@ -24,3 +24,4 @@
  * using the `as` syntax (`export * as auth`) allows clean namespacing and clarity.
  */
 export * as auth from "./auth/index.js";
+export * as register from "./register/index.js";

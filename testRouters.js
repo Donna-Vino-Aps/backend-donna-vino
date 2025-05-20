@@ -29,21 +29,21 @@ testRouter.post("/seed", async (req, res) => {
       ],
     };
 
-    // // Validate users to the database
-    // data.users.forEach((user) => {
-    //   const errorList = validateUser(user);
-    //
-    //   if (errorList.length > 0) {
-    //     const err = new Error(
-    //       `Invalid user in seed data. Errors: ${validationErrorMessage(
-    //         errorList,
-    //       )}. User attempting to be inserted: ${JSON.stringify(user)}`,
-    //     );
-    //
-    //     logError(err);
-    //     throw err;
-    //   }
-    // });
+    // Validate users to the database
+    data.users.forEach((user) => {
+      const errorList = validateUser(user);
+
+      if (errorList.length > 0) {
+        const err = new Error(
+          `Invalid user in seed data. Errors: ${validationErrorMessage(
+            errorList,
+          )}. User attempting to be inserted: ${JSON.stringify(user)}`,
+        );
+
+        logError(err);
+        throw err;
+      }
+    });
 
     // Add users to the database
     await User.create(data.users);

@@ -7,6 +7,7 @@ const passwordChangeTokenSchema = new mongoose.Schema({
 
 passwordChangeTokenSchema.statics.issueToken = async function ({
   userId,
+  email,
   expiresIn = "30m",
   payload = {},
   secret = process.env.API_SECRET,
@@ -17,6 +18,7 @@ passwordChangeTokenSchema.statics.issueToken = async function ({
     expiresIn,
     payload,
     secret,
+    extras: { email: email },
   });
 };
 

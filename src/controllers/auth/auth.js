@@ -1,23 +1,6 @@
-import { providersUserinfoMap } from "./providers/index.js";
+import { selectProviderVerificationMethod } from "./providers/index.js";
 import { AccessToken, RefreshToken, User } from "../../models/index.js";
-
-/**
- * Dynamically selects a verification method for an authentication provider.
- *
- * - If the provider is found in `providersVerificationMethodsMap`, its method is returned.
- * - Otherwise, it falls back to the default method using `AccessToken.fromJWT()`,
- *   which resolves the token from the database and verifies expiration.
- *
- * Note: The fallback ensures local tokens can be verified when no external provider is defined.
- */
-function selectProviderVerificationMethod(req) {
-  const providerName = req.params.provider;
-  const method = providersUserinfoMap[providerName];
-  if (method) return method;
-
-  // Fallback to internal access token verification (returns token from DB or null)
-  return (token) => AccessToken.fromJWT(token);
-}
+import { logInfo } from "../../util/logging.js";
 
 /**
  * Handles login using local credentials (email + password).
@@ -28,21 +11,21 @@ function selectProviderVerificationMethod(req) {
 export async function login(req, res) {
   const { email, password } = req.body;
 
-  console.log("LOGIN REQUEST:", { email, password });
+  logInfo("LOGIN REQUEST:", { email, password });
 
   const user = await User.findOne({ email });
-  console.log("USER FOUND:", user);
+  logInfo("USER FOUND:", user);
 
   if (!user) {
-    console.log("NO USER FOUND!");
+    logInfo("NO USER FOUND!");
     return res.status(401).json({ message: "Authentication failed" });
   }
 
   const passwordValid = await user.verifyPassword(password);
-  console.log("PASSWORD VALID:", passwordValid);
+  logInfo("PASSWORD VALID:", passwordValid);
 
   if (!passwordValid) {
-    console.log("INVALID PASSWORD!");
+    logInfo("INVALID PASSWORD!");
     return res.status(401).json({ message: "Authentication failed" });
   }
 
@@ -55,7 +38,7 @@ export async function login(req, res) {
  *
  * - Selects a provider-specific verification strategy (or falls back to JWT).
  * - Extracts user info from the verified payload (email or userId).
- * - If user exists, returns a new access + refresh token pair.
+ * - If a user exists, returns a new access + refresh token pair.
  */
 export async function providerLogin(req, res) {
   const token = req.body.token;
