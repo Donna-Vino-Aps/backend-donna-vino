@@ -75,7 +75,6 @@ export async function confirm(req, res) {
  *
  */
 export async function decline(req, res) {
-  const email = req.params.email;
   const token = req.query.token;
 
   const emailToken = await EmailVerificationToken.fromJWT(token);
@@ -92,6 +91,6 @@ export async function decline(req, res) {
  * Placeholder for changing the user's email during pre-signup or verification.
  * Implementation TBD.
  */
-export async function changeEmail(req, res) {
+export async function changeEmail(_req, _res) {
   // To be implemented: update pre-user email + reissue verification token
 }
