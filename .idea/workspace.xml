@@ -6,11 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a05bfbc7-7d7a-426c-92e7-01cecc0bcde0" name="Changes" comment="Minor fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/__tests__/middleware/requireAuthMiddleware.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/__tests__/models/users/validateUser.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/__tests__/services/token/tokenGenerator.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/__tests__/services/token/tokenRepository.test.js" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/routes/router.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/routes/router.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/subscribeControllers/preSubscribeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/subscribeControllers/preSubscribeController.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -166,7 +162,7 @@
       <workItem from="1746784671914" duration="2360000" />
       <workItem from="1746787396288" duration="85931000" />
       <workItem from="1747748291699" duration="9364000" />
-      <workItem from="1747807241362" duration="6671000" />
+      <workItem from="1747807241362" duration="7875000" />
     </task>
     <task id="LOCAL-00001" summary="feat(auth): initial implementation of OIDC provider for NextAuth.js">
       <option name="closed" value="true" />
@@ -224,7 +220,31 @@
       <option name="project" value="LOCAL" />
       <updated>1747815004478</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Minor fix">
+      <option name="closed" value="true" />
+      <created>1747815565455</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1747815565455</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Delete redundant files">
+      <option name="closed" value="true" />
+      <created>1747815710386</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1747815710386</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Minor fix">
+      <option name="closed" value="true" />
+      <created>1747815812720</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1747815812720</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -245,7 +265,19 @@
     <MESSAGE value="feat(auth): initial implementation of OIDC provider for NextAuth.js" />
     <MESSAGE value="feat(auth): implement custom authentication logic" />
     <MESSAGE value="Delete deprecation tests" />
+    <MESSAGE value="Delete redundant files" />
     <MESSAGE value="Minor fix" />
     <option name="LAST_COMMIT_MESSAGE" value="Minor fix" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/src/controllers/subscribeControllers/preSubscribeController.js</url>
+          <properties lambdaOrdinal="-1" />
+          <option name="timeStamp" value="10" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
