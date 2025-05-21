@@ -15,7 +15,7 @@ import {
   clearMockDatabase,
 } from "../../__testUtils__/dbMock.js";
 import app from "../../app.js";
-import User from "../../models/users/userModels.js";
+import User from "../../models/userModels.js";
 
 const request = supertest(app);
 

@@ -1,7 +1,7 @@
 import { logError, logInfo } from "../../util/logging.js";
 import validationErrorMessage from "../../util/validationErrorMessage.js";
-import { validateUser } from "../../models/users/userModels.js";
-import User from "../../models/users/userModels.js";
+import { validateUser } from "../../models/userModels.js";
+import User from "../../models/userModels.js";
 import PendingUser from "../../models/users/pendingUserModel.js";
 import validateAllowedFields from "../../util/validateAllowedFields.js";
 import { sendVerificationEmail } from "../../services/email/verificationEmailService.js";

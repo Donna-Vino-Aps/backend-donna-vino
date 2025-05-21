@@ -4,10 +4,31 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a05bfbc7-7d7a-426c-92e7-01cecc0bcde0" name="Changes" comment="feat(auth): implement custom authentication logic">
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources/23e3c21c-6947-43da-b3ec-1aacc1679f7f.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources/23e3c21c-6947-43da-b3ec-1aacc1679f7f.xml" afterDir="false" />
+    <list default="true" id="a05bfbc7-7d7a-426c-92e7-01cecc0bcde0" name="Changes" comment="Minor fix">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/controllers/register/emailVerification.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/register/emailVerification.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/loginController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/loginController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/logoutController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/logoutController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/preSignUpController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/preSignUpController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/signInWithGoogleController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/signInWithGoogleController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/signupController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/authControllers/signupController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/subscribeControllers/preSubscribeController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/subscribeControllers/preSubscribeController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/controllers/userController/userController.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/controllers/userController/userController.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/middleware/requireAuthMiddleware.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/middleware/requireAuthMiddleware.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/models/users/userModels.presave.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/models/users/userModels.presave.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/__tests__/models/users/validateUser.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/__tests__/models/users/validateUser.test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/authControllers/loginController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authControllers/loginController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/authControllers/preSignUpController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authControllers/preSignUpController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/authControllers/signInWithGoogleController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authControllers/signInWithGoogleController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/authControllers/signupController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/authControllers/signupController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/subscribeControllers/preSubscribeController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/subscribeControllers/preSubscribeController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/controllers/userController/userController.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/controllers/userController/userController.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/db/connectDB.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/db/connectDB.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/token/tokensModel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/userPre.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/userPre.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/users/pendingUserModel.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/users/userModels.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/userModels.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/testRouters.js" beforeDir="false" afterPath="$PROJECT_DIR$/testRouters.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,42 +66,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Node.js.userController.js.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "Task__186__Authentication",
-    "last_opened_file_path": "/Users/galinabondar/Documents/DonnaVino/backend-donna-vino",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "npm.dev.executor": "Run",
-    "npm.lint:fix.executor": "Run",
-    "npm.prettier:fix.executor": "Run",
-    "npm.start.executor": "Run",
-    "prettierjs.PrettierConfiguration.Package": "/Users/galinabondar/Documents/DonnaVino/backend-donna-vino/node_modules/prettier",
-    "settings.editor.selected.configurable": "configurable.group.language",
-    "ts.external.directory.path": "/Applications/WebStorm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Node.js.userController.js.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;Task__186__Authentication&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/galinabondar/Documents/DonnaVino/backend-donna-vino&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.dev.executor&quot;: &quot;Run&quot;,
+    &quot;npm.lint:fix.executor&quot;: &quot;Run&quot;,
+    &quot;npm.prettier:fix.executor&quot;: &quot;Run&quot;,
+    &quot;npm.start.executor&quot;: &quot;Run&quot;,
+    &quot;prettierjs.PrettierConfiguration.Package&quot;: &quot;/Users/galinabondar/Documents/DonnaVino/backend-donna-vino/node_modules/prettier&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.language&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/Applications/WebStorm.app/Contents/plugins/javascript-plugin/jsLanguageServicesImpl/external&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "DatabaseDriversLRU": [
-      "mongo"
+  &quot;keyToStringList&quot;: {
+    &quot;DatabaseDriversLRU&quot;: [
+      &quot;mongo&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/models" />
       <recent name="$PROJECT_DIR$/src/routes" />
       <recent name="$PROJECT_DIR$/src" />
       <recent name="$PROJECT_DIR$/src/OAuth2/middleware" />
     </key>
   </component>
-  <component name="RunManager" selected="npm.dev">
+  <component name="RunManager" selected="npm.prettier:fix">
     <configuration name="userController.js" type="NodeJSConfigurationType" temporary="true" nameIsGenerated="true" path-to-js-file="$PROJECT_DIR$/src/controllers/userController/userController.js" working-dir="$PROJECT_DIR$/src/controllers/userController">
       <method v="2" />
     </configuration>
@@ -126,9 +148,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="npm.dev" />
-        <item itemvalue="npm.lint:fix" />
         <item itemvalue="npm.prettier:fix" />
+        <item itemvalue="npm.lint:fix" />
+        <item itemvalue="npm.dev" />
         <item itemvalue="npm.start" />
         <item itemvalue="Node.js.userController.js" />
       </list>
@@ -161,7 +183,8 @@
       <workItem from="1746531647297" duration="28591000" />
       <workItem from="1746784671914" duration="2360000" />
       <workItem from="1746787396288" duration="85931000" />
-      <workItem from="1747748291699" duration="8358000" />
+      <workItem from="1747748291699" duration="9364000" />
+      <workItem from="1747807241362" duration="2968000" />
     </task>
     <task id="LOCAL-00001" summary="feat(auth): initial implementation of OIDC provider for NextAuth.js">
       <option name="closed" value="true" />
@@ -187,7 +210,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747756103018</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="Minor fix">
+      <option name="closed" value="true" />
+      <created>1747767727731</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1747767727731</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -207,18 +238,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat(auth): initial implementation of OIDC provider for NextAuth.js" />
     <MESSAGE value="feat(auth): implement custom authentication logic" />
-    <option name="LAST_COMMIT_MESSAGE" value="feat(auth): implement custom authentication logic" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="javascript">
-          <url>file://$PROJECT_DIR$/src/controllers/auth/auth.js</url>
-          <line>13</line>
-          <properties lambdaOrdinal="-1" />
-          <option name="timeStamp" value="8" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Minor fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor fix" />
   </component>
 </project>

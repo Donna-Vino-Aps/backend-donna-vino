@@ -1,5 +1,5 @@
 import { logError, logInfo } from "../../util/logging.js";
-import User from "../../models/users/userModels.js";
+import User from "../../models/userModels.js";
 import PendingUser from "../../models/users/pendingUserModel.js";
 import path from "path";
 import fs from "fs";

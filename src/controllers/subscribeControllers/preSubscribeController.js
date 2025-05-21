@@ -4,7 +4,7 @@ import { sendEmail } from "../../util/emailUtils.js";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { logInfo, logError } from "../../util/logging.js";
-import User from "../../models/users/userModels.js";
+import User from "../../models/userModels.js";
 import validator from "validator";
 import { generateToken } from "../../services/token/tokenGenerator.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";

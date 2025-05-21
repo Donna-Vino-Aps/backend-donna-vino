@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
-import AccessToken from "../accessToken.js";
-import RefreshToken from "../refreshToken.js";
-import EmailVerificationToken from "../emailVerificationToken.js";
-import PasswordChangeToken from "../passwordChangeToken.js";
+import AccessToken from "./accessToken.js";
+import RefreshToken from "./refreshToken.js";
+import EmailVerificationToken from "./emailVerificationToken.js";
+import PasswordChangeToken from "./passwordChangeToken.js";
 
 const SALT_ROUNDS = 10;
 

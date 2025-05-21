@@ -7,7 +7,7 @@ import path from "path";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../../../util/emailUtils.js";
 import PendingUser from "../../../models/users/pendingUserModel.js";
-import User from "../../../models/users/userModels.js";
+import User from "../../../models/userModels.js";
 import {
   isTokenUsed,
   markTokenAsUsed,

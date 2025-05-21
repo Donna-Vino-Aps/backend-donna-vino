@@ -1,4 +1,4 @@
-export { default as User } from "../models/users/userModels.js";
+export { default as User } from "./userModels.js";
 export { default as UserPre } from "./userPre.js";
 
 export { default as AccessToken } from "./accessToken.js";

@@ -8,7 +8,7 @@
  */
 
 import mongoose from "mongoose";
-import User from "../models/users/userModels.js"; // base model
+import User from "./userModels.js"; // base model
 import ms from "ms";
 
 const userPreSchema = new mongoose.Schema({

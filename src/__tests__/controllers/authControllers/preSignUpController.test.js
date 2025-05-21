@@ -3,9 +3,9 @@ dotenv.config({ path: ".env.test" });
 import { describe, it, beforeEach, afterEach, expect, vi } from "vitest";
 import { preSignUp } from "../../../controllers/authControllers/preSignUpController.js";
 import PendingUser from "../../../models/users/pendingUserModel.js";
-import User from "../../../models/users/userModels.js";
+import User from "../../../models/userModels.js";
 import { logError, logInfo } from "../../../util/logging.js";
-import * as userModel from "../../../models/users/userModels.js";
+import * as userModel from "../../../models/userModels.js";
 import validateAllowedFields from "../../../util/validateAllowedFields.js";
 import { sendVerificationEmail } from "../../../services/email/verificationEmailService.js";
 

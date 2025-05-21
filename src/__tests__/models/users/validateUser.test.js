@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { validateUser } from "../../../models/users/userModels.js";
+import { validateUser } from "../../../models/userModels.js";
 
 describe("validateUser function", () => {
   it("should return an empty array if all required fields are provided", () => {
