@@ -10,14 +10,15 @@ import { logError } from "../util/logging.js";
  * @param {string} path - The request path (e.g., "/api/user/123")
  * @returns {boolean} True if the path requires authentication
  */
-const checkIfProtected = (path) => protectedAPIs.some((rule) => {
-  if (typeof rule === "string") {
-    return path.startsWith(rule);
-  } else if (rule instanceof RegExp) {
-    return rule.test(path);
-  }
-  return false;
-});
+const checkIfProtected = (path) =>
+  protectedAPIs.some((rule) => {
+    if (typeof rule === "string") {
+      return path.startsWith(rule);
+    } else if (rule instanceof RegExp) {
+      return rule.test(path);
+    }
+    return false;
+  });
 
 /**
  * Sends a 401 Unauthorized response with a consistent error format.

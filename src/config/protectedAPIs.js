@@ -1,5 +1,3 @@
-const protectedAPIs = [
-  "/api/user"
-];
+const protectedAPIs = ["/api/user"];
 
 export default protectedAPIs;
