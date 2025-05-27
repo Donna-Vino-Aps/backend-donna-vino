@@ -1,6 +1,6 @@
 import { auth } from "../controllers/index.js";
 import express from "express";
-import { resendVerificationEmail } from "../controllers/authControllers/resendVerificationController.js";
+// import { resendVerificationEmail } from "../controllers/authControllers/resendVerificationController.js";
 
 const authRouter = express.Router();
 
@@ -18,6 +18,6 @@ authRouter.post("/reset/finalize", (req, res) =>
   res.status(404).json({ message: "Not implemented yet" }),
 );
 
-authRouter.get("/resend-verification-email", resendVerificationEmail);
+// authRouter.get("/resend-verification-email", resendVerificationEmail);
 
 export default authRouter;
