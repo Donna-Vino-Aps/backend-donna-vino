@@ -1,6 +1,6 @@
 import express from "express";
 import mongoose from "mongoose";
-import User, { validateUser } from "./src/models/users/userModels.js";
+import User from "./src/models/userModels.js";
 
 import { logError } from "./src/util/logging.js";
 import validationErrorMessage from "./src/util/validationErrorMessage.js";
@@ -58,6 +58,10 @@ testRouter.post("/seed", async (req, res) => {
       },
     });
   }
+});
+
+testRouter.get("/", (req, res) => {
+  res.json({ message: "Test route is working!" });
 });
 
 const emptyDatabase = async () => {

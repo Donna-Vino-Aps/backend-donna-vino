@@ -1,75 +1,37 @@
-import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import { requireAuth } from "./middleware/authMiddleware.js";
-import bodyParser from "body-parser";
-import userRouter from "./routes/userRoutes.js";
-import authRouter from "./routes/authRoutes.js";
-import reviewRouter from "./routes/reviewRoutes.js";
-import contactUsRouter from "./routes/contactUsRoutes.js";
-import subscribeRouter from "./routes/subscribeRoutes.js";
-import {
-  contactLimiter,
-  contactHourlyLimiter,
-} from "./middleware/rateLimitMiddleware.js";
+import morgan from "morgan";
 
-dotenv.config();
+/**
+ * Even though `index.js` is traditionally associated with CommonJS-style `require` usage,
+ * I still recommend using it to encapsulate the internal structure of the routes directory
+ * and simplify imports — treating it like a self-contained module or package.
+ *
+ * While this pattern may not be idiomatic for some JavaScript developers,
+ * it promotes a clean, modular architecture that's engineer-friendly and easy to scale.
+ */
+
+import { router } from "./routes/index.js";
+
+import cookieParser from "cookie-parser";
+import { corsConfig } from "./config/index.js";
 
 // Create an express server
 const app = express();
 
-// Tell express to use the json middleware
-app.use(express.json());
+// Debug-only middleware used to log HTTP requests in development.
+// Helps visualize real-time data exchange and is especially useful for demoing
+// how routes are triggered and how automatic Swagger documentation is generated.
+app.use(morgan("dev")); // Logs method, URL, status, and response time
 
+// Register only global/common middlewares here
+
+// No request-handling logic or route-specific middleware belongs in this file
+app.use(express.json());
+app.use(corsConfig);
 app.use(cookieParser());
 
-app.use(bodyParser.json());
-
-const allowedOrigins = [
-  "http://www.donnavino.dk",
-  "https://www.donnavino.dk",
-  "https://donnavino.dk",
-  "http://localhost:3000",
-  "http://localhost:5000",
-  "http://localhost:5001",
-  "https://donna-vino-ecommerce-45b8fd279992.herokuapp.com",
-  "https://donna-vino-aps-corporate-03ca98a66972.herokuapp.com",
-  "https://donna-vino-aps-corporate-prod-365809e9340a.herokuapp.com",
-];
-
-// CORS configuration
-app.use(
-  cors({
-    credentials: true,
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, origin);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-  }),
-);
-
-/****** Attach routes ******/
-/**
- * We use /api/ at the start of every route!
- * As we also host our client code on heroku we want to separate the API endpoints.
- */
-
-app.use("/api/auth", authRouter);
-app.use("/api/user", requireAuth, userRouter);
-app.use("/api/reviews", reviewRouter);
-
-// web endpoints
-app.use(
-  "/api/contact-us",
-  contactLimiter,
-  contactHourlyLimiter,
-  contactUsRouter,
-);
-
-app.use("/api/subscribe", subscribeRouter);
+// Mount the top-level router
+// All routing logic must be implemented in ./routes and its children — none should be defined here
+app.use(router);
 
 export default app;

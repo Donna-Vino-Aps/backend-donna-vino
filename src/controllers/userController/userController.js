@@ -1,4 +1,4 @@
-import User from "../../models/users/userModels.js";
+import User from "../../models/userModels.js";
 import { logError } from "../../util/logging.js";
 import { validateUser } from "../../models/users/userModels.js";
 
