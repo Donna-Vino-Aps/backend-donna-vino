@@ -26,12 +26,10 @@ export const requireAuth = (req, res, next) => {
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err || !decoded?.userId) {
-      return res
-        .status(401)
-        .json({
-          success: false,
-          msg: "Unauthorized: Invalid or expired token.",
-        });
+      return res.status(401).json({
+        success: false,
+        msg: "Unauthorized: Invalid or expired token.",
+      });
     }
 
     req.userId = decoded.userId;
