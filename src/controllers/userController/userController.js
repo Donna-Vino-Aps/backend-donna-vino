@@ -61,7 +61,14 @@ export const updateUserProfile = async (req, res) => {
   }
 
   try {
-    const { firstName, lastName, email, address, country } = req.body;
+    const { firstName, lastName, address, country } = req.body;
+
+    if (req.body.email) {
+      return res.status(400).json({
+        success: false,
+        msg: "Email updates are not allowed via this endpoint.",
+      });
+    }
 
     const userToValidate = { ...req.body };
     const errorList = validateUser(userToValidate, true);
@@ -74,20 +81,9 @@ export const updateUserProfile = async (req, res) => {
       });
     }
 
-    if (email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== userIdFromParam) {
-        return res.status(400).json({
-          success: false,
-          msg: "Email is already in use by another account.",
-        });
-      }
-    }
-
     if (
       firstName === undefined &&
       lastName === undefined &&
-      email === undefined &&
       address === undefined &&
       country === undefined
     ) {
@@ -102,7 +98,6 @@ export const updateUserProfile = async (req, res) => {
       {
         firstName,
         lastName,
-        email,
         address,
         country,
       },
