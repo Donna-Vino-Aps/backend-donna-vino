@@ -32,13 +32,15 @@ export const getUserProfile = async (req, res) => {
     }
 
     // Send the necessary user details as a response
-    res.json({
-      firstName: user.firstName,
-      lastName: user.lastName,
-      email: user.email,
-      address: user.address,
-      country: user.country,
-      // Add any other necessary fields here
+    res.status(200).json({
+      success: true,
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        address: user.address,
+        country: user.country,
+      },
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
