@@ -15,9 +15,10 @@ export const getUsers = async (req, res) => {
 };
 
 export const getUserProfile = async (req, res) => {
-  const { id } = req.params;
+  const userIdFromToken = req.accessToken.userId;
+  const { id: userIdFromParam } = req.params;
 
-  if (req.userId.toString() !== id) {
+  if (userIdFromToken.toString() !== userIdFromParam) {
     return res.status(403).json({
       success: false,
       msg: "You are not authorized to view this profile.",
@@ -25,7 +26,7 @@ export const getUserProfile = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(id);
+    const user = await User.findById(userIdFromParam);
 
     if (!user) {
       return res.status(404).json({ msg: "User not found" });
@@ -49,8 +50,10 @@ export const getUserProfile = async (req, res) => {
 };
 
 export const updateUserProfile = async (req, res) => {
-  const { id } = req.params;
-  if (req.userId.toString() !== id) {
+  const userIdFromToken = req.accessToken.userId;
+  const { id: userIdFromParam } = req.params;
+
+  if (userIdFromToken.toString() !== userIdFromParam) {
     return res.status(403).json({
       success: false,
       msg: "You are not authorized to update this profile.",
@@ -73,7 +76,7 @@ export const updateUserProfile = async (req, res) => {
 
     if (email) {
       const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== id) {
+      if (existingUser && existingUser._id.toString() !== userIdFromParam) {
         return res.status(400).json({
           success: false,
           msg: "Email is already in use by another account.",
@@ -95,7 +98,7 @@ export const updateUserProfile = async (req, res) => {
     }
 
     const updatedUser = await User.findByIdAndUpdate(
-      id,
+      userIdFromParam,
       {
         firstName,
         lastName,
