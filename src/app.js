@@ -14,6 +14,7 @@ import { router } from "./routes/index.js";
 
 import cookieParser from "cookie-parser";
 import { corsConfig } from "./config/index.js";
+import { authMiddleware } from "./middleware/authMiddleware.js";
 
 // Create an express server
 const app = express();
@@ -29,6 +30,7 @@ app.use(morgan("dev")); // Logs method, URL, status, and response time
 app.use(express.json());
 app.use(corsConfig);
 app.use(cookieParser());
+app.use(authMiddleware);
 
 // Mount the top-level router
 // All routing logic must be implemented in ./routes and its children — none should be defined here
