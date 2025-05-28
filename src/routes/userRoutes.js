@@ -12,7 +12,7 @@ const userRouter = express.Router();
 
 userRouter.get("/", requireAuth, getUsers);
 userRouter.get("/profile/:id", requireAuth, getUserProfile);
-userRouter.put("/profile/:id", requireAuth, updateUserProfile);
+userRouter.patch("/profile/:id", requireAuth, updateUserProfile);
 userRouter.post("/log-out", requireAuth, logout);
 
 export default userRouter;
