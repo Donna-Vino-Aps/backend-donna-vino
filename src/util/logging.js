@@ -8,30 +8,30 @@
 /**
  * logInfo should be used to log anything that can be used for debugging but is not a problem
  */
-export const logInfo = (message) => {
+export const logInfo = (...args) => {
   // eslint-disable-next-line no-console
-  console.log(message);
+  console.log(...args);
 };
 
 /**
  * logWarning should be used to log anything that signals a problem that is not app breaking
  */
-export const logWarning = (message) => {
+export const logWarning = (...args) => {
   // eslint-disable-next-line no-console
-  console.warn(message);
+  console.warn(...args);
 };
 
 /**
  * logError should be used to log anything that is app breaking
  */
-export const logError = (errorMessage) => {
+export const logError = (errorMessage, ...additionalInfo) => {
   if (errorMessage instanceof Error) {
     // You can pass an Error to this function and we will post the stack
     // eslint-disable-next-line no-console
-    console.error(errorMessage.message, errorMessage.stack);
+    console.error(errorMessage.message, errorMessage.stack, ...additionalInfo);
   } else {
     // eslint-disable-next-line no-console
-    console.error("ERROR: ", errorMessage);
+    console.error("ERROR: ", errorMessage, ...additionalInfo);
   }
 };
 
