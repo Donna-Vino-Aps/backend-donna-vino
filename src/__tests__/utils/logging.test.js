@@ -40,6 +40,10 @@ describe("logging", () => {
     logError("Some message");
 
     expect(consoleErrorMock).toHaveBeenCalledTimes(1);
+    expect(consoleErrorMock).toHaveBeenLastCalledWith(
+      "ERROR: ",
+      "Some message",
+    );
 
     consoleErrorMock.mockRestore();
   });
@@ -57,6 +61,44 @@ describe("logging", () => {
 
     expect(consoleErrorMock).toHaveBeenCalledTimes(1);
     expect(consoleErrorMock).toHaveBeenLastCalledWith(errMessage, err.stack);
+
+    consoleErrorMock.mockRestore();
+  });
+
+  it("logError should support multiple arguments", () => {
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const additionalInfo = { code: 500, details: "Server error" };
+    logError("Connection failed", additionalInfo);
+
+    expect(consoleErrorMock).toHaveBeenCalledTimes(1);
+    expect(consoleErrorMock).toHaveBeenLastCalledWith(
+      "ERROR: ",
+      "Connection failed",
+      additionalInfo,
+    );
+
+    consoleErrorMock.mockRestore();
+  });
+
+  it("logError should support multiple arguments with Error objects", () => {
+    const consoleErrorMock = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
+
+    const err = new Error("Database error");
+    const additionalInfo = { table: "users", operation: "insert" };
+
+    logError(err, additionalInfo);
+
+    expect(consoleErrorMock).toHaveBeenCalledTimes(1);
+    expect(consoleErrorMock).toHaveBeenLastCalledWith(
+      err.message,
+      err.stack,
+      additionalInfo,
+    );
 
     consoleErrorMock.mockRestore();
   });
