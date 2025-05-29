@@ -62,6 +62,41 @@ describe("logging", () => {
     consoleWarnMock.mockRestore();
   });
 
+  it("logWarning should support multiple arguments", () => {
+    const consoleWarnMock = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
+
+    const limit = { current: 95, max: 100 };
+    logWarning("API rate limit approaching:", limit);
+
+    expect(consoleWarnMock).toHaveBeenCalledTimes(1);
+    expect(consoleWarnMock).toHaveBeenLastCalledWith(
+      "API rate limit approaching:",
+      limit,
+    );
+
+    consoleWarnMock.mockRestore();
+  });
+
+  it("logWarning should support mixed argument types", () => {
+    const consoleWarnMock = vi
+      .spyOn(console, "warn")
+      .mockImplementation(() => {});
+
+    logWarning("Database connection slow", 1500, "ms", { action: "retry" });
+
+    expect(consoleWarnMock).toHaveBeenCalledTimes(1);
+    expect(consoleWarnMock).toHaveBeenLastCalledWith(
+      "Database connection slow",
+      1500,
+      "ms",
+      { action: "retry" },
+    );
+
+    consoleWarnMock.mockRestore();
+  });
+
   it("logError should log simple messages to the console.error", () => {
     const consoleErrorMock = vi
       .spyOn(console, "error")
