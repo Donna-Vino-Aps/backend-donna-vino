@@ -16,6 +16,38 @@ describe("logging", () => {
     consoleLogMock.mockRestore();
   });
 
+  it("logInfo should support multiple arguments", () => {
+    const consoleLogMock = vi
+      .spyOn(console, "log")
+      .mockImplementation(() => {});
+
+    const user = { id: 123, name: "John Doe" };
+    logInfo("User logged in:", user);
+
+    expect(consoleLogMock).toHaveBeenCalledTimes(1);
+    expect(consoleLogMock).toHaveBeenLastCalledWith("User logged in:", user);
+
+    consoleLogMock.mockRestore();
+  });
+
+  it("logInfo should support object and primitive arguments", () => {
+    const consoleLogMock = vi
+      .spyOn(console, "log")
+      .mockImplementation(() => {});
+
+    logInfo("Request processed in", 250, "ms", { status: "success" });
+
+    expect(consoleLogMock).toHaveBeenCalledTimes(1);
+    expect(consoleLogMock).toHaveBeenLastCalledWith(
+      "Request processed in",
+      250,
+      "ms",
+      { status: "success" },
+    );
+
+    consoleLogMock.mockRestore();
+  });
+
   it("logWarning should log to the console.warn", () => {
     const consoleWarnMock = vi
       .spyOn(console, "warn")
