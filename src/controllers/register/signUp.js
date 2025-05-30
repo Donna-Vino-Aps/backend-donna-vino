@@ -76,11 +76,11 @@ export async function providerSignUp(req, res) {
     // TODO: make as a separate function for provider specific user creation data processing when something other than Google added
     user = await User.create({
       email: data.email,
-      firstName: data.given_name,
-      lastName: data.family_name,
+      firstName: data.given_name || "User",
+      lastName: data.family_name || "",
       isSubscribed: false,
       authProvider: "google",
-      picture: data.picture,
+      picture: data.picture || null,
     });
   }
 
