@@ -21,8 +21,10 @@ export async function signUp(req, res) {
   const { email, password, firstName, lastName, dateOfBirth, isSubscribed } =
     req.body;
 
-  const existingUser = await UserPre.findOne({ email });
-  if (existingUser) res.status(409).json({ message: "User already exists" });
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({ message: "User already exists" });
+  }
 
   const user = await UserPre.create({
     email,
