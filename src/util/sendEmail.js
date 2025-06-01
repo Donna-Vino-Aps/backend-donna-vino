@@ -27,7 +27,7 @@ async function sendEmail(to, subject, template, params) {
       from: `"Donna Vino" <${process.env.NO_REPLY_EMAIL}>`,
       to,
       subject,
-      body,
+      html: body,
     });
   } catch (error) {
     logInfo(error);
