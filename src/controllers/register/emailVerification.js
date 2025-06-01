@@ -13,7 +13,7 @@ import jwt from "jsonwebtoken";
  *   - `_id`, `__v`, `__t`, and TTL field (`expiresAt`)
  * - Creates the permanent user entry in the database
  * - Issues access and refresh tokens
- * - Redirects to `/signUp/complete` on the frontend, passing tokens as URL parameters
+ * - Redirects to `/signUp/verification-completed` on the frontend, passing tokens as URL parameters
  *
  */
 export async function confirm(req, res) {
@@ -53,12 +53,9 @@ export async function confirm(req, res) {
   await emailToken.revoke();
   const tokens = await user.issueAccessTokens();
 
-  const url = new URL("/signup/complete", frontedUrl);
+  const url = new URL("/signup/verification-completed", frontedUrl);
   url.searchParams.set("accessToken", tokens.accessToken);
-  url.searchParams.set(
-    "refreshToken",
-    tokens.refreshToken || tokens.refreshToken,
-  );
+  url.searchParams.set("refreshToken", tokens.refreshToken);
 
   return res.redirect(url.toString());
 }
