@@ -1,21 +1,13 @@
-import jwt from "jsonwebtoken";
+import fs from "fs";
+import path from "path";
 import dotenv from "dotenv";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
-import {
-  isTokenUsed,
-  markTokenAsUsed,
-  deleteToken,
-} from "../../services/token/tokenRepository.js";
-import { generateToken } from "../../services/token/tokenGenerator.js";
-import path from "path";
-import fs from "fs";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
+import AccessToken from "../../models/accessToken.js";
 
 dotenv.config();
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
@@ -42,9 +34,13 @@ try {
   logError("Error reading email templates", error);
 }
 
+if (!emailSuccessTemplate || !unsubscribeConfirmationTemplate) {
+  throw new Error("Email templates not loaded properly");
+}
+
 const createUnsubscribeUrl = async (email) => {
   try {
-    const unsubscribeRequestToken = await generateToken(email);
+    const unsubscribeRequestToken = await AccessToken.issueToken({ email });
     return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
   } catch (error) {
     logError("Error generating unsubscribe URL", error);
@@ -63,36 +59,38 @@ export const unSubscribeController = async (req, res) => {
       });
     }
 
-    let decoded;
-    try {
-      // Verify token validity
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      logError("Invalid or expired token.", error);
+    // Validate token format
+    const tokenDoc = await AccessToken.fromJWT(token);
 
-      // Attempt to decode the token to retrieve email and token ID
-      const expiredTokenData = jwt.decode(token);
-      const email = expiredTokenData?.email;
-      const tokenId = expiredTokenData?.id;
+    if (!tokenDoc) {
+      // Token invalid or revoked — try to decode to send new confirmation email
+      const decoded = AccessToken.decodeJWT(token);
+      const email = decoded?.email;
+      const tokenId = decoded?._id || decoded?.id;
 
       if (email && tokenId) {
-        // 1. Mark the expired token as used
-        await markTokenAsUsed(tokenId);
+        // 1. Delete old token doc if it exists
+        try {
+          const oldTokenDoc = await AccessToken.findById(tokenId);
+          if (oldTokenDoc) {
+            logInfo(`Revoking expired token with ID: ${tokenId}`);
+            await oldTokenDoc.revoke();
+          }
+        } catch (err) {
+          logError("Error revoking old token", err);
+        }
 
-        // 2. Delete the expired token
-        await deleteToken(tokenId);
-
-        // 3. Generate a new unsubscribe token
+        // 2. Generate a new unsubscribe token
         const newUnsubscribeUrl = await createUnsubscribeUrl(email);
 
-        // 4. Replace the placeholder in the confirmation email template
+        // 3. Replace the placeholder in the confirmation email template
         const updatedConfirmationEmail =
           unsubscribeConfirmationTemplate.replace(
             "{{CONFIRM_UNSUBSCRIBE_URL}}",
             newUnsubscribeUrl,
           );
 
-        // 5. Send the new confirmation email with the updated token
+        // 4. Send the new confirmation email with the updated token
         await sendEmail(
           email,
           "Your unsubscribe request has expired",
@@ -106,22 +104,14 @@ export const unSubscribeController = async (req, res) => {
           message: "Token expired. A new confirmation email has been sent.",
         });
       }
-
       return res.status(400).json({
         success: false,
         message: "Invalid token structure.",
       });
     }
 
-    const { email: to, id: tokenId } = decoded;
-
-    // Check if the token has already been used
-    if (await isTokenUsed(tokenId)) {
-      return res.status(400).json({
-        success: false,
-        message: "This unsubscribe request has already been processed.",
-      });
-    }
+    // If token is valid and not revoked
+    const { email: to } = tokenDoc;
 
     // Verify if the user exists in the subscribed list
     const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
@@ -135,12 +125,10 @@ export const unSubscribeController = async (req, res) => {
 
     // Remove the user from the subscription list
     await SubscribedUser.deleteOne({ email: to });
-
     logInfo(`User ${to} unsubscribed successfully.`);
 
     // Mark the token as used and delete it
-    await markTokenAsUsed(tokenId);
-    await deleteToken(tokenId);
+    await tokenDoc.revoke();
 
     // Send the success email (no token included)
     await sendEmail(
