@@ -21,7 +21,7 @@ const createConfirmSubscriptionUrl = async (email) => {
       throw new Error("Pre-subscribed user not found");
     }
 
-    // Generate a token document (with metadata) for the user in the DB
+    // Generate a token document in MongoDB (with metadata) for the user in the tokens collection
     // This token will be used to verify the user's email for subscription confirmation
     // In order to get the actual JWT token, use tokenDoc.token
     const tokenDoc = await EmailVerificationToken.issueToken({
