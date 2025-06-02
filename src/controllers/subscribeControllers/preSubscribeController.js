@@ -6,7 +6,6 @@ import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/userModels.js";
 import validator from "validator";
-// import { generateToken } from "../../services/token/tokenGenerator.js";
 import EmailVerificationToken from "../../models/tokens/emailVerificationTokenModel.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
