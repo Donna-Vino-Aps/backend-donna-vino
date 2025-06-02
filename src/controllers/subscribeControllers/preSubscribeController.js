@@ -7,6 +7,7 @@ import { logInfo, logError } from "../../util/logging.js";
 import User from "../../models/userModels.js";
 import validator from "validator";
 // import { generateToken } from "../../services/token/tokenGenerator.js";
+import EmailVerificationToken from "../../models/tokens/emailVerificationTokenModel.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
@@ -14,8 +15,21 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 // Helper function to generate subscription confirmation URL
 const createConfirmSubscriptionUrl = async (email) => {
   try {
-    const token = await generateToken(email);
-    return `${baseDonnaVinoWebUrl}/subscription/verify?token=${token}`;
+    const preUser = await PreSubscribedUser.findOne({ email });
+
+    if (!preUser) {
+      throw new Error("Pre-subscribed user not found");
+    }
+
+    // Generate a token document (with metadata) for the user in the DB
+    // This token will be used to verify the user's email for subscription confirmation
+    // In order to get the actual JWT token, use tokenDoc.token
+    const tokenDoc = await EmailVerificationToken.issueToken({
+      userId: preUser._id,
+      email: email,
+    });
+
+    return `${baseDonnaVinoWebUrl}/subscription/verify?token=${tokenDoc.token}`;
   } catch (error) {
     throw new Error("Error generating confirmation URL: " + error.message);
   }
