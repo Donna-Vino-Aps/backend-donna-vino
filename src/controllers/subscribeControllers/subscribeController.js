@@ -1,29 +1,22 @@
-import jwt from "jsonwebtoken";
+import fs from "fs";
+import path from "path";
 import dotenv from "dotenv";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
-import {
-  isTokenUsed,
-  markTokenAsUsed,
-  deleteToken,
-} from "../../services/token/tokenRepository.js";
-import { generateToken } from "../../services/token/tokenGenerator.js";
-import path from "path";
-import fs from "fs";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
+import AccessToken from "../../models/accessToken.js";
+import EmailVerificationToken from "../../models/emailVerificationToken.js";
 
 dotenv.config();
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
 const createUnsubscribeUrl = async (email) => {
   try {
-    const unsubscribeRequestToken = await generateToken(email);
-    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
+    const unsubscribeToken = await EmailVerificationToken.issueToken({ email });
+    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeToken}`;
   } catch (error) {
     logError("Error generating unsubscribe URL", error);
     throw new Error("Failed to generate unsubscribe URL");
@@ -61,40 +54,33 @@ export const subscribeController = async (req, res) => {
       emailTemplate = fs.readFileSync(templatePath, "utf-8");
     } catch (error) {
       logError(`Error reading email template: ${error.message}`);
-      return res.status(500).json({
+      return res.status(404).json({
         success: false,
         message: "Internal server error: Failed to read template",
       });
     }
 
     // Replace template variables with the provided data
-    if (templateData && typeof templateData === "object") {
+    if (
+      templateData &&
+      typeof templateData === "object" &&
+      !Array.isArray(templateData)
+    ) {
       Object.keys(templateData).forEach((key) => {
         const regex = new RegExp(`{{${key}}}`, "g");
         emailTemplate = emailTemplate.replace(regex, templateData[key]);
       });
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      logError("Invalid or expired token.", error);
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired token.",
-      });
+    // Logic for validatíng that the token is present in the database (i.e has not been revoked or expired)
+    const tokenDoc = await AccessToken.fromJWT(token);
+    if (!tokenDoc) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid or expired token." });
     }
 
-    const { email: to, id: tokenId } = decoded;
-
-    const tokenUsed = await isTokenUsed(tokenId);
-    if (tokenUsed) {
-      return res.status(400).json({
-        success: false,
-        message: "This token has already been used.",
-      });
-    }
+    const { email: to } = tokenDoc;
 
     const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
     if (!preSubscribedUser) {
@@ -112,21 +98,19 @@ export const subscribeController = async (req, res) => {
       });
     }
 
-    const newSubscribedUser = new SubscribedUser({ email: to });
-    await newSubscribedUser.save();
-
+    // Save new user to SubscribedUser collection and remove from PreSubscribedUser
+    await new SubscribedUser({ email: to }).save();
     await PreSubscribedUser.deleteOne({ email: to });
 
     logInfo(
       `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
     );
 
-    logInfo(`Marking token as used: ${tokenId}`);
-    await markTokenAsUsed(tokenId);
+    // Deleting the token
+    logInfo(`Deleting token: ${tokenDoc._id}`);
+    await tokenDoc.revoke();
 
-    logInfo(`Deleting token: ${tokenId}`);
-    await deleteToken(tokenId);
-
+    // Generate unsubscribe URL
     const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
     const homeUrl = `${baseDonnaVinoWebUrl}`;
 
@@ -135,7 +119,6 @@ export const subscribeController = async (req, res) => {
       .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
     await sendEmail(to, subject, emailTemplate);
-
     logInfo(`Welcome email with unsubscribe option sent to ${to}`);
 
     return res.status(200).json({
