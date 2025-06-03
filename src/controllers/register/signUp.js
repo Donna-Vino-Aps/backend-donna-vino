@@ -21,8 +21,10 @@ export async function signUp(req, res) {
   const { email, password, firstName, lastName, dateOfBirth, isSubscribed } =
     req.body;
 
-  const existingUser = await UserPre.findOne({ email });
-  if (existingUser) res.status(409).json({ message: "User already exists" });
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({ message: "User already exists" });
+  }
 
   const user = await UserPre.create({
     email,
@@ -76,11 +78,11 @@ export async function providerSignUp(req, res) {
     // TODO: make as a separate function for provider specific user creation data processing when something other than Google added
     user = await User.create({
       email: data.email,
-      firstName: data.given_name,
-      lastName: data.family_name,
+      firstName: data.given_name || "User",
+      lastName: data.family_name || "",
       isSubscribed: false,
       authProvider: "google",
-      picture: data.picture,
+      picture: data.picture || null,
     });
   }
 
