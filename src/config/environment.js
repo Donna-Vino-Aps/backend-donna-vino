@@ -39,17 +39,17 @@ if (!DONNA_VINO_ECOMMERCE_WEB_HEROKU || !DONNA_VINO_ECOMMERCE_WEB_LOCAL) {
 
 export const baseApiUrl =
   NODE_ENV === "production"
-    ? API_URL_PRODUCTION.replace(/\/+$/, "")
+    ? API_URL_PRODUCTION
     : NODE_ENV === "staging"
-    ? API_URL_STAGING.replace(/\/+$/, "")
-    : API_URL_LOCAL.replace(/\/+$/, "");
+    ? API_URL_STAGING
+    : API_URL_LOCAL;
 
 export const baseDonnaVinoWebUrl =
   NODE_ENV === "production"
-    ? DONNA_VINO_WEB_PRODUCTION.replace(/\/+$/, "")
+    ? DONNA_VINO_WEB_PRODUCTION
     : NODE_ENV === "staging"
-    ? DONNA_VINO_WEB_STAGING.replace(/\/+$/, "")
-    : DONNA_VINO_WEB_LOCAL.replace(/\/+$/, "");
+    ? DONNA_VINO_WEB_STAGING
+    : DONNA_VINO_WEB_LOCAL;
 
 export const baseDonnaVinoEcommerceWebUrl =
   NODE_ENV === "production" || NODE_ENV === "staging"
