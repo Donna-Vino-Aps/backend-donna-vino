@@ -31,7 +31,7 @@
       background-color: #102a1a; } .button:link, .button:visited {
       text-decoration: none; color: #ffffff; } .info { font-size: 12px;
       line-height: 16px; font-style: italic; margin-bottom: 26px; } .thanks {
-      font-size: 14px; font-weight: 700; line-height: 20px; } .footer {
+      font-size: 14px; font-weight: 400; line-height: 20px; } .footer {
       margin-bottom: 48px; color: #6c6c6c; } .footer > p { font-size: 12px;
       line-height: 16px; } .socials { text-align: center; margin-bottom: 6px; }
       .social-heading { font-size: 12px; margin-bottom: 6px; } img.social-icon {
@@ -71,8 +71,11 @@
             Hello
             {{name}},
           </p>
-          <p class="content-text">Thank you for signing up. Please confirm your
-            email address by clicking the button below:</p>
+          <p class="content-text">
+            Verify your email address to complete the signup and log into your
+            account.
+          </p>
+          <p class="content-text">The link expires in <b>24 hours</b>.</p>
         </div>
         <div class="button-container">
           <a
@@ -80,15 +83,8 @@
             class="button"
           >Confirm Email</a>
         </div>
-        <div class="button-container">
-          <a
-            href="{{baseUrl}}/api/register/email/confirm?token={{token}}&email={{email}}"
-            class="button"
-          >Decline</a>
-        </div>
         <p class="info">
-          (If you did not subscribe for our newsletter, you can ignore this
-          email)
+          (If you did not sign up for this account, you can ignore this email or click <a href="{{baseUrl}}/api/register/email/decline?token={{token}}&email={{email}}">here</a> to remove this email address.)
         </p>
         <p class="thanks">Thank you,<br />Donna Vino Team</p>
       </div>
