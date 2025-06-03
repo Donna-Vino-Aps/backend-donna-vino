@@ -19,10 +19,7 @@ import jwt from "jsonwebtoken";
 export async function confirm(req, res) {
   const email = req.query.email;
   const token = req.query.token;
-  const frontedUrl =
-    process.env.DONNA_VINO_WEB_LOCAL ||
-    process.env.DONNA_VINO_WEB_STAGING ||
-    process.env.DONNA_VINO_WEB_PRODUCTION;
+  const frontedUrl = baseDonnaVinoEcommerceWebUrl;
   const errorPageUrl = `${frontedUrl}/signup/verification-failed`;
 
   const emailToken = await EmailVerificationToken.fromJWT(token);
