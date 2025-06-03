@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
@@ -23,14 +22,16 @@ const createUnsubscribeUrl = async (email) => {
   }
 };
 
+// Controller to handle subscription confirmation and initial subscription requests
 export const subscribeController = async (req, res) => {
   try {
-    const { token, subject, templateName, templateData } = req.body;
+    const { email, token, subject, templateName, templateData } = req.body;
 
-    if (!token || !subject || !templateName) {
+    // Validate required fields
+    if (!subject || !templateName) {
       return res.status(400).json({
         success: false,
-        message: "Token, subject, and templateName are required.",
+        message: "Subject and templateName are required.",
       });
     }
 
@@ -38,6 +39,7 @@ export const subscribeController = async (req, res) => {
       return res.status(400).json({ message: "Invalid template name." });
     }
 
+    // Load and prepare the email template
     const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
     // Check if the template exists
@@ -61,76 +63,85 @@ export const subscribeController = async (req, res) => {
     }
 
     // Replace template variables with the provided data
-    if (
-      templateData &&
-      typeof templateData === "object" &&
-      !Array.isArray(templateData)
-    ) {
+    if (templateData && typeof templateData === "object") {
       Object.keys(templateData).forEach((key) => {
         const regex = new RegExp(`{{${key}}}`, "g");
         emailTemplate = emailTemplate.replace(regex, templateData[key]);
       });
     }
 
-    // Logic for validatíng that the token is present in the database (i.e has not been revoked or expired)
-    const tokenDoc = await AccessToken.fromJWT(token);
-    if (!tokenDoc) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid or expired token." });
-    }
+    // FLOW 1: token-based subscription confirmation
+    if (token) {
+      const tokenDoc = await AccessToken.fromJWT(token);
+      if (!tokenDoc) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid or expired token." });
+      }
 
-    const { email: to } = tokenDoc;
-
-    const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
-    if (!preSubscribedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found in PreSubscribedUser",
+      const confirmedEmail = tokenDoc.email;
+      const existingSubscribedUser = await SubscribedUser.findOne({
+        email: confirmedEmail,
       });
-    }
+      if (existingSubscribedUser) {
+        return res
+          .status(200)
+          .json({ success: true, message: "User is already subscribed." });
+      }
 
-    const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
-    if (existingSubscribedUser) {
+      await new SubscribedUser({ email: confirmedEmail }).save();
+      await tokenDoc.revoke();
+
+      const unsubscribeRequestUrl = await createUnsubscribeUrl(confirmedEmail);
+      const homeUrl = `${baseDonnaVinoWebUrl}`;
+
+      emailTemplate = emailTemplate
+        .replace("{{RE_DIRECT_URL}}", homeUrl)
+        .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
+
+      await sendEmail(confirmedEmail, subject, emailTemplate);
+      logInfo(
+        `User ${confirmedEmail} confirmed subscription and received welcome email.`,
+      );
+
       return res.status(200).json({
         success: true,
-        message: "User is already subscribed.",
+        message: "Subscription confirmed. Email sent.",
       });
     }
 
-    // Save new user to SubscribedUser collection and remove from PreSubscribedUser
-    await new SubscribedUser({ email: to }).save();
-    await PreSubscribedUser.deleteOne({ email: to });
+    // FLOW 2: Initial subscription request (no token)
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required when no token is provided.",
+      });
+    }
 
-    logInfo(
-      `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
-    );
+    const alreadySubscribed = await SubscribedUser.findOne({ email });
+    if (alreadySubscribed) {
+      return res
+        .status(200)
+        .json({ success: true, message: "You are already subscribed." });
+    }
 
-    // Deleting the token
-    logInfo(`Deleting token: ${tokenDoc._id}`);
-    await tokenDoc.revoke();
+    const verificationToken = await AccessToken.issueToken({ email });
+    const verifyUrl = `${baseDonnaVinoWebUrl}/subscription/confirm?token=${verificationToken}`;
 
-    // Generate unsubscribe URL
-    const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
-    const homeUrl = `${baseDonnaVinoWebUrl}`;
+    emailTemplate = emailTemplate.replace("{{RE_DIRECT_URL}}", verifyUrl);
 
-    emailTemplate = emailTemplate
-      .replace("{{RE_DIRECT_URL}}", homeUrl)
-      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
-
-    await sendEmail(to, subject, emailTemplate);
-    logInfo(`Welcome email with unsubscribe option sent to ${to}`);
+    await sendEmail(email, subject, emailTemplate);
+    logInfo(`Verification email sent to ${email} with confirmation link.`);
 
     return res.status(200).json({
       success: true,
       message:
-        "Subscription confirmed. An email has been sent with unsubscribe options.",
+        "Verification email sent. Please check your inbox to confirm subscription.",
     });
   } catch (error) {
     logError("Error in subscribeController", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
