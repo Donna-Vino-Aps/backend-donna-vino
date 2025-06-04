@@ -1,6 +1,7 @@
 import { selectProviderVerificationMethod } from "../auth/providers/index.js";
 import { UserPre, User } from "../../models/index.js";
 import { sendEmail } from "../../util/index.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
 /**
  * @description
@@ -44,7 +45,12 @@ export async function signUp(req, res) {
     baseUrl: baseUrl,
     name: user.firstName,
   };
-  await sendEmail(email, "Sign up", "emailConfirmation", params);
+  await sendEmail(
+    email,
+    "Verify your email address for Donna Vino",
+    "emailConfirmation",
+    params,
+  );
   return res.status(201).json({ message: "Pre-Sign up successfully" });
 }
 
@@ -85,6 +91,19 @@ export async function providerSignUp(req, res) {
       picture: data.picture || null,
     });
   }
+
+  const welcomeParams = {
+    name: user.firstName,
+    email: user.email,
+    baseUrl: baseDonnaVinoEcommerceWebUrl,
+  };
+
+  await sendEmail(
+    user.email,
+    "Welcome to Donna Vino!",
+    "emailWelcome",
+    welcomeParams,
+  );
 
   const tokens = await user.issueAccessTokens();
   // HTTP 201: Session created (token pair issued)
