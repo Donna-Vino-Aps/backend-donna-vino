@@ -5,7 +5,7 @@ import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
-import AccessToken from "../../models/accessToken.js";
+import SubscriptionVerificationToken from "../../models/subscribe/subscriptionVerificationToken.js";
 import EmailVerificationToken from "../../models/emailVerificationToken.js";
 
 dotenv.config();
@@ -79,9 +79,9 @@ export const subscribeController = async (req, res) => {
 
     // FLOW 1: Subscription confirmation using token
     if (token) {
-      // Verify token
-      const tokenDoc = await AccessToken.fromJWT(token);
-      if (!tokenDoc) {
+      // Verify SubscriptionVerificationToken
+      const tokenDoc = await SubscriptionVerificationToken.findOne({ token });
+      if (!tokenDoc || tokenDoc.used || tokenDoc.expiresAt < new Date()) {
         return res
           .status(401)
           .json({ success: false, message: "Invalid or expired token." });
@@ -103,8 +103,9 @@ export const subscribeController = async (req, res) => {
       // Create a new subscribed user in DB
       await new SubscribedUser({ email: confirmedEmail }).save();
 
-      // Revoke the token after successful subscription
-      await tokenDoc.revoke();
+      // Mark token as used after successful subscription
+      tokenDoc.used = true;
+      await tokenDoc.save();
 
       // Generate unsubscribe URL
       const unsubscribeRequestUrl = await createUnsubscribeUrl(confirmedEmail);
@@ -144,10 +145,11 @@ export const subscribeController = async (req, res) => {
     }
 
     // Create token for e-mail verification
-    const verificationToken = await AccessToken.issueToken({ email });
+    const verificationToken = new SubscriptionVerificationToken({ email });
+    await verificationToken.save();
 
     // Createa verification link
-    const verifyUrl = `${baseDonnaVinoWebUrl}/subscription/confirm?token=${verificationToken}`;
+    const verifyUrl = `${baseDonnaVinoWebUrl}/subscription/confirm?token=${verificationToken.token}`;
 
     // Replace placeholder with verification link in the email template
     emailTemplate = emailTemplate.replace("{{RE_DIRECT_URL}}", verifyUrl);

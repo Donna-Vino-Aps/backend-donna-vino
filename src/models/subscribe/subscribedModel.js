@@ -31,7 +31,7 @@ const subscribedUserSchema = new mongoose.Schema({
 // Automatically generate an unsubscribeToken (random hex string) using crypto if not present
 subscribedUserSchema.pre("save", function (next) {
   if (!this.unsubscribeToken) {
-    this.unsubscribeToken = crypto.randomBytes(20).toString("hex");
+    this.unsubscribeToken = crypto.randomBytes(32).toString("hex");
   }
   next();
 });
