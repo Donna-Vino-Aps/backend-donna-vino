@@ -12,8 +12,10 @@ const SALT_ROUNDS = 10;
  * @typedef {Object} UserDocument
  * @property {string} email - Unique email address for login/identity
  * @property {string} [password] - Hashed password string (optional for SSO users)
- * @property {string} [firstName]
- * @property {string} [lastName]
+ * @property {string} [firstName] - User's first name
+ * @property {string} [lastName] - User's last name
+ * @property {string} [address] - User's address
+ * @property {string} [country] - User's country
  * @property {Date} createdAt - Date the user was created
  */
 
@@ -41,6 +43,8 @@ const userSchema = new mongoose.Schema(
         "Last name can only contain letters, numbers, and a single space between words.",
       ],
     },
+    address: { type: String },
+    country: { type: String },
     email: {
       type: String,
       required: [true, "Email is required."],
