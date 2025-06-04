@@ -1,6 +1,7 @@
 import { selectProviderVerificationMethod } from "../auth/providers/index.js";
 import { UserPre, User } from "../../models/index.js";
 import { sendEmail } from "../../util/index.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
 /**
  * @description
@@ -44,7 +45,12 @@ export async function signUp(req, res) {
     baseUrl: baseUrl,
     name: user.firstName,
   };
-  await sendEmail(email, "Sign up", "emailConfirmation", params);
+  await sendEmail(
+    email,
+    "Verify your email address for Donna Vino",
+    "emailConfirmation",
+    params,
+  );
   return res.status(201).json({ message: "Pre-Sign up successfully" });
 }
 
