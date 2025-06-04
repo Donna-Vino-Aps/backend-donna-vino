@@ -86,6 +86,19 @@ export async function providerSignUp(req, res) {
     });
   }
 
+  const welcomeParams = {
+    name: user.firstName,
+    email: user.email,
+    baseUrl: baseDonnaVinoEcommerceWebUrl,
+  };
+
+  await sendEmail(
+    user.email,
+    "Welcome to Donna Vino!",
+    "emailWelcome",
+    welcomeParams,
+  );
+
   const tokens = await user.issueAccessTokens();
   // HTTP 201: Session created (token pair issued)
   return res.status(201).json(tokens);

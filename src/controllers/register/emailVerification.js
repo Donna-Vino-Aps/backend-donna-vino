@@ -1,5 +1,7 @@
 import { User, UserPre, EmailVerificationToken } from "../../models/index.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../../util/index.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
 /**
  * Handles the email confirmation flow.
@@ -49,6 +51,19 @@ export async function confirm(req, res) {
   const user = await User.create(userData);
   await emailToken.revoke();
   const tokens = await user.issueAccessTokens();
+
+  const welcomeParams = {
+    name: user.firstName,
+    email: user.email,
+    baseUrl: frontedUrl,
+  };
+
+  await sendEmail(
+    user.email,
+    "Welcome to Donna Vino!",
+    "emailWelcome",
+    welcomeParams,
+  );
 
   const url = new URL("/signup/verification-completed", frontedUrl);
   url.searchParams.set("accessToken", tokens.accessToken);
