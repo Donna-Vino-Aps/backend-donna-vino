@@ -9,8 +9,8 @@ import {
 
 const userRouter = express.Router();
 
-userRouter.get("/profile/:id", authMiddleware, getUserProfile);
-userRouter.patch("/profile/:id", authMiddleware, updateUserProfile);
-userRouter.delete("/profile/:id", authMiddleware, deleteUser);
+userRouter.get("/:id", authMiddleware, getUserProfile);
+userRouter.patch("/:id", authMiddleware, updateUserProfile);
+userRouter.delete("/:id", authMiddleware, deleteUser);
 
 export default userRouter;

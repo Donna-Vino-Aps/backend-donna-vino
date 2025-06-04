@@ -1,6 +1,5 @@
 import User from "../../models/userModels.js";
 import { logError } from "../../util/logging.js";
-import { validateUser } from "../../models/users/userModels.js";
 
 export const getUserProfile = async (req, res) => {
   const userIdFromToken = req.accessToken.userId;
@@ -17,7 +16,7 @@ export const getUserProfile = async (req, res) => {
     const user = await User.findById(userIdFromParam);
 
     if (!user) {
-      return res.status(404).json({ msg: "User not found" });
+      return res.status(404).json({ success: false, msg: "User not found" });
     }
 
     // Send the necessary user details as a response
@@ -32,13 +31,13 @@ export const getUserProfile = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Error fetching user profile:", error);
-    res.status(500).json({ msg: "Server error" });
+    logError("Error fetching user profile:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
   }
 };
 
 export const updateUserProfile = async (req, res) => {
-  const userIdFromToken = req.accessToken.userId;
+  const userIdFromToken = req.accessToken.user;
   const { id: userIdFromParam } = req.params;
 
   if (userIdFromToken.toString() !== userIdFromParam) {
@@ -58,16 +57,19 @@ export const updateUserProfile = async (req, res) => {
       });
     }
 
-    const userToValidate = { ...req.body };
-    const errorList = validateUser(userToValidate, true);
+    // const userToValidate = { ...req.body };
 
-    if (errorList.length > 0) {
-      logError(`Validation errors: ${JSON.stringify(errorList)}`);
-      return res.status(400).json({
-        success: false,
-        msg: validationErrorMessage(errorList),
-      });
-    }
+    // New validateUser-function can be used here
+
+    // const errorList = validateUser(userToValidate, true);
+
+    // if (errorList.length > 0) {
+    //   logError(`Validation errors: ${JSON.stringify(errorList)}`);
+    //   return res.status(400).json({
+    //     success: false,
+    //     msg: validationErrorMessage(errorList),
+    //   });
+    // }
 
     if (
       firstName === undefined &&
@@ -95,7 +97,19 @@ export const updateUserProfile = async (req, res) => {
     if (!updatedUser) {
       return res.status(404).json({ success: false, msg: "User not found" });
     }
-    res.status(200).json({ success: true, result: updatedUser });
+    res.status(200).json({
+      success: true,
+      result: {
+        result: {
+          email: updatedUser.email,
+          firstName: updatedUser.firstName,
+          lastName: updatedUser.lastName,
+          address: updatedUser.address,
+          country: updatedUser.country,
+        },
+      },
+      msg: "User profile updated successfully",
+    });
   } catch (error) {
     logError(error);
     res
@@ -105,18 +119,26 @@ export const updateUserProfile = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  const { id } = req.params;
+  const userIdFromToken = req.accessToken.user;
+  const { id: userIdFromParam } = req.params;
+
+  if (userIdFromToken.toString() !== userIdFromParam) {
+    return res.status(403).json({
+      success: false,
+      msg: "You are not authorized to delete this profile.",
+    });
+  }
 
   try {
     const deletedUser = await User.findByIdAndDelete(id);
 
     if (!deletedUser) {
-      return res.status(404).json({ message: "User not found" });
+      return res.status(404).json({ success: false, msg: "User not found" });
     }
 
-    res.status(200).json({ message: "User deleted successfully" });
+    res.status(200).json({ success: true, msg: "User deleted successfully" });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ message: "Server error" });
+    logError("Error deleting user:", error);
+    res.status(500).json({ success: false, msg: "Server error" });
   }
 };
