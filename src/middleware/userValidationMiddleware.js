@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
+import User from "../models/User.js";
 
-export const userValidationMiddleware = (req, res, next) => {
+export const userValidationMiddleware = async (req, res, next) => {
   const { id } = req.params;
-  const { firstName, lastName, address, country } = req.body;
 
   // Validate that id is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -12,33 +12,25 @@ export const userValidationMiddleware = (req, res, next) => {
     });
   }
 
-  const errors = [];
+  try {
+    // Create a dummy User instance with only the updated fields
+    const updates = req.body;
+    const tempUser = new User(updates);
 
-  // input validation
-  if (firstName !== undefined && typeof firstName !== "string") {
-    errors.push("firstName must be a string.");
-  }
+    // Validate only the provided fields
+    await tempUser.validate(); // Full validation (optional: restrict to only provided fields)
 
-  if (lastName !== undefined && typeof lastName !== "string") {
-    errors.push("lastName must be a string.");
-  }
+    // Attach the clean, validated data to the request
+    req.validatedUpdateData = updates;
 
-  if (address !== undefined && typeof address !== "string") {
-    errors.push("address must be a string.");
-  }
-
-  if (country !== undefined && typeof country !== "string") {
-    errors.push("country must be a string.");
-  }
-
-  if (errors.length > 0) {
+    next();
+  } catch (err) {
     return res.status(400).json({
       success: false,
-      message: "Invalid request body.",
-      errors,
+      message: "Validation failed.",
+      errors: err.errors
+        ? Object.values(err.errors).map((e) => e.message)
+        : [err.message],
     });
   }
-
-  // If all validations pass, proceed to the next middleware
-  next();
 };
