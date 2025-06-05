@@ -97,6 +97,8 @@ export async function decline(req, res) {
     return res.redirect(errorPageUrl);
   }
 
+  await UserPre.findOneAndDelete({ email });
+
   await emailToken.revoke();
 
   return res.redirect(`${process.env.FRONTEND_URI}/signUp/canceled`);
