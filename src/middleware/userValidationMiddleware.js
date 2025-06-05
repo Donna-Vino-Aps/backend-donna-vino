@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import User from "../../models/userModels.js";
+import User from "../models/userModels.js";
 
 export const userValidationMiddleware = async (req, res, next) => {
   const { id } = req.params;
