@@ -2,7 +2,7 @@ import User from "../../models/userModels.js";
 import { logError } from "../../util/logging.js";
 
 export const getUserProfile = async (req, res) => {
-  const userIdFromToken = req.accessToken.userId;
+  const userIdFromToken = req.accessToken.user;
   const { id: userIdFromParam } = req.params;
 
   if (userIdFromToken.toString() !== userIdFromParam) {
@@ -56,20 +56,6 @@ export const updateUserProfile = async (req, res) => {
         msg: "Email updates are not allowed via this endpoint.",
       });
     }
-
-    // const userToValidate = { ...req.body };
-
-    // New validateUser-function can be used here
-
-    // const errorList = validateUser(userToValidate, true);
-
-    // if (errorList.length > 0) {
-    //   logError(`Validation errors: ${JSON.stringify(errorList)}`);
-    //   return res.status(400).json({
-    //     success: false,
-    //     msg: validationErrorMessage(errorList),
-    //   });
-    // }
 
     if (
       firstName === undefined &&
