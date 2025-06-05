@@ -84,11 +84,17 @@ export async function confirm(req, res) {
  *
  */
 export async function decline(req, res) {
+  const email = req.query.email;
   const token = req.query.token;
 
   const emailToken = await EmailVerificationToken.fromJWT(token);
   if (!emailToken) {
-    return res.redirect(`${process.env.FRONTEND_URI}/signUp/error`);
+    return res.redirect(errorPageUrl);
+  }
+
+  const decoded = jwt.decode(token);
+  if (decoded.email !== email) {
+    return res.redirect(errorPageUrl);
   }
 
   await emailToken.revoke();
