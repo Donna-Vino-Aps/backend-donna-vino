@@ -78,9 +78,11 @@ export async function confirm(req, res) {
  *
  * Steps:
  * - Validates the token using EmailVerificationToken.fromJWT()
- * - If invalid or expired, redirects to `/signUp/error`
- * - Deletes the token record (optional: you could also delete the `UserPre` record here)
- * - Redirects to `/signUp/canceled` on the frontend
+ * - Validates that the token email matches the provided email
+ * - If invalid or expired, redirects to `/signup/decline-error`
+ * - Deletes the UserPre record for this email
+ * - Deletes the token record
+ * - Redirects to `/signup/canceled` on the frontend
  *
  */
 export async function decline(req, res) {
