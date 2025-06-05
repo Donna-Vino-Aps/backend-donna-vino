@@ -43,8 +43,8 @@ const userSchema = new mongoose.Schema(
         "Last name can only contain letters, numbers, and a single space between words.",
       ],
     },
-    address: { type: String },
-    country: { type: String },
+    address: { type: String, trim: true },
+    country: { type: String, trim: true },
     email: {
       type: String,
       required: [true, "Email is required."],

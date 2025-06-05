@@ -48,35 +48,12 @@ export const updateUserProfile = async (req, res) => {
   }
 
   try {
-    const { firstName, lastName, address, country } = req.body;
-
-    if (req.body.email) {
-      return res.status(400).json({
-        success: false,
-        msg: "Email updates are not allowed via this endpoint.",
-      });
-    }
-
-    if (
-      firstName === undefined &&
-      lastName === undefined &&
-      address === undefined &&
-      country === undefined
-    ) {
-      return res.status(400).json({
-        success: false,
-        msg: "No valid fields provided for update.",
-      });
-    }
+    // Use pre-validated data (all validation already handled)
+    const updateData = req.validatedUpdateData;
 
     const updatedUser = await User.findByIdAndUpdate(
       userIdFromParam,
-      {
-        firstName,
-        lastName,
-        address,
-        country,
-      },
+      updateData,
       { new: true, runValidators: true },
     );
 
@@ -86,13 +63,11 @@ export const updateUserProfile = async (req, res) => {
     res.status(200).json({
       success: true,
       result: {
-        result: {
-          email: updatedUser.email,
-          firstName: updatedUser.firstName,
-          lastName: updatedUser.lastName,
-          address: updatedUser.address,
-          country: updatedUser.country,
-        },
+        email: updatedUser.email,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        address: updatedUser.address,
+        country: updatedUser.country,
       },
       msg: "User profile updated successfully",
     });
@@ -116,7 +91,7 @@ export const deleteUser = async (req, res) => {
   }
 
   try {
-    const deletedUser = await User.findByIdAndDelete(id);
+    const deletedUser = await User.findByIdAndDelete(userIdFromParam);
 
     if (!deletedUser) {
       return res.status(404).json({ success: false, msg: "User not found" });
