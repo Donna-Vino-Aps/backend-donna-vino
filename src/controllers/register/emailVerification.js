@@ -86,6 +86,8 @@ export async function confirm(req, res) {
 export async function decline(req, res) {
   const email = req.query.email;
   const token = req.query.token;
+  const frontedUrl = baseDonnaVinoEcommerceWebUrl;
+  const errorPageUrl = `${frontedUrl}/signup/decline-error`;
 
   const emailToken = await EmailVerificationToken.fromJWT(token);
   if (!emailToken) {
@@ -101,7 +103,8 @@ export async function decline(req, res) {
 
   await emailToken.revoke();
 
-  return res.redirect(`${process.env.FRONTEND_URI}/signUp/canceled`);
+  const url = new URL("/signup/canceled", frontedUrl);
+  return res.redirect(url.toString());
 }
 
 /**
