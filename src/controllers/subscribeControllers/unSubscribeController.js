@@ -35,11 +35,11 @@ if (!emailSuccessTemplate || !unsubscribeConfirmationTemplate) {
 
 export const unSubscribeController = async (req, res) => {
   try {
-    const { token, subject } = req.body;
-    if (!token || !subject) {
+    const { token } = req.query;
+    if (!token) {
       return res.status(400).json({
         success: false,
-        message: "Token and subject are required.",
+        message: "Token is required.",
       });
     }
     // Validate token format
