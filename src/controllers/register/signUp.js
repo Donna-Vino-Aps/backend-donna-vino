@@ -1,6 +1,7 @@
 import { selectProviderVerificationMethod } from "../auth/providers/index.js";
 import { UserPre, User } from "../../models/index.js";
 import { sendEmail } from "../../util/index.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
 /**
  * @description
@@ -21,8 +22,10 @@ export async function signUp(req, res) {
   const { email, password, firstName, lastName, dateOfBirth, isSubscribed } =
     req.body;
 
-  const existingUser = await UserPre.findOne({ email });
-  if (existingUser) res.status(409).json({ message: "User already exists" });
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    return res.status(409).json({ message: "User already exists" });
+  }
 
   const user = await UserPre.create({
     email,
@@ -42,7 +45,12 @@ export async function signUp(req, res) {
     baseUrl: baseUrl,
     name: user.firstName,
   };
-  await sendEmail(email, "Sign up", "emailConfirmation", params);
+  await sendEmail(
+    email,
+    "Verify your email address for Donna Vino",
+    "emailConfirmation",
+    params,
+  );
   return res.status(201).json({ message: "Pre-Sign up successfully" });
 }
 
@@ -76,13 +84,26 @@ export async function providerSignUp(req, res) {
     // TODO: make as a separate function for provider specific user creation data processing when something other than Google added
     user = await User.create({
       email: data.email,
-      firstName: data.given_name,
-      lastName: data.family_name,
+      firstName: data.given_name || "User",
+      lastName: data.family_name || "",
       isSubscribed: false,
       authProvider: "google",
-      picture: data.picture,
+      picture: data.picture || null,
     });
   }
+
+  const welcomeParams = {
+    name: user.firstName,
+    email: user.email,
+    baseUrl: baseDonnaVinoEcommerceWebUrl,
+  };
+
+  await sendEmail(
+    user.email,
+    "Welcome to Donna Vino!",
+    "emailWelcome",
+    welcomeParams,
+  );
 
   const tokens = await user.issueAccessTokens();
   // HTTP 201: Session created (token pair issued)

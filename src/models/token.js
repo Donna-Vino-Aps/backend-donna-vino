@@ -65,7 +65,7 @@ tokenSchema.statics.issueToken = async function ({
   secret = process.env.JWT_SECRET,
   extras = {},
 }) {
-  const exp = Math.floor(Date.now() / 1000 + ms(expiresIn));
+  const exp = Math.floor((Date.now() + ms(expiresIn)) / 1000);
   const jwtPayload = {
     sub: userId.toString(),
     exp,

@@ -1,5 +1,7 @@
 import { User, UserPre, EmailVerificationToken } from "../../models/index.js";
 import jwt from "jsonwebtoken";
+import { sendEmail } from "../../util/index.js";
+import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
 
 /**
  * Handles the email confirmation flow.
@@ -13,16 +15,13 @@ import jwt from "jsonwebtoken";
  *   - `_id`, `__v`, `__t`, and TTL field (`expiresAt`)
  * - Creates the permanent user entry in the database
  * - Issues access and refresh tokens
- * - Redirects to `/signUp/complete` on the frontend, passing tokens as URL parameters
+ * - Redirects to `/signUp/verification-completed` on the frontend, passing tokens as URL parameters
  *
  */
 export async function confirm(req, res) {
   const email = req.query.email;
   const token = req.query.token;
-  const frontedUrl =
-    process.env.DONNA_VINO_WEB_LOCAL ||
-    process.env.DONNA_VINO_WEB_STAGING ||
-    process.env.DONNA_VINO_WEB_PRODUCTION;
+  const frontedUrl = baseDonnaVinoEcommerceWebUrl;
   const errorPageUrl = `${frontedUrl}/signup/verification-failed`;
 
   const emailToken = await EmailVerificationToken.fromJWT(token);
@@ -53,12 +52,22 @@ export async function confirm(req, res) {
   await emailToken.revoke();
   const tokens = await user.issueAccessTokens();
 
-  const url = new URL("/signup/complete", frontedUrl);
-  url.searchParams.set("accessToken", tokens.accessToken);
-  url.searchParams.set(
-    "refreshToken",
-    tokens.refreshToken || tokens.refreshToken,
+  const welcomeParams = {
+    name: user.firstName,
+    email: user.email,
+    baseUrl: frontedUrl,
+  };
+
+  await sendEmail(
+    user.email,
+    "Welcome to Donna Vino!",
+    "emailWelcome",
+    welcomeParams,
   );
+
+  const url = new URL("/signup/verification-completed", frontedUrl);
+  url.searchParams.set("accessToken", tokens.accessToken);
+  url.searchParams.set("refreshToken", tokens.refreshToken);
 
   return res.redirect(url.toString());
 }

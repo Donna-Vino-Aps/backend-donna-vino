@@ -2,7 +2,7 @@ import fs from "fs/promises";
 import path from "path";
 import handlebars from "handlebars";
 import { Resend } from "resend";
-import { logInfo } from "./logging.js";
+import { logError, logInfo } from "./logging.js";
 
 async function renderTemplate(templateName, params) {
   const templatePath = path.join(
@@ -27,10 +27,10 @@ async function sendEmail(to, subject, template, params) {
       from: `"Donna Vino" <${process.env.NO_REPLY_EMAIL}>`,
       to,
       subject,
-      body,
+      html: body,
     });
   } catch (error) {
-    logInfo(error);
+    logError(error);
   }
 }
 
