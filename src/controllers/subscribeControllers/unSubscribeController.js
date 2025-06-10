@@ -81,7 +81,7 @@ export const unSubscribeController = async (req, res) => {
     await SubscribedUser.deleteOne({ email: to });
     logInfo(`User ${to} unsubscribed successfully.`);
 
-    // Mark the token as used and delete it
+    // Mark the token as used and save it
     tokenDoc.used = true;
     await tokenDoc.save();
 
