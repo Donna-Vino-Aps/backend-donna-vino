@@ -4,8 +4,9 @@ import dotenv from "dotenv";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
-import { baseDonnaVinoWebUrl } from "../../config/environment.js";
-import AccessToken from "../../models/accessToken.js";
+// import { baseDonnaVinoWebUrl } from "../../config/environment.js";
+import SubscriptionVerificationToken from "../../models/subscriptionVerificationToken.js";
+// import crypto from "crypto";
 
 dotenv.config();
 
@@ -38,15 +39,31 @@ if (!emailSuccessTemplate || !unsubscribeConfirmationTemplate) {
   throw new Error("Email templates not loaded properly");
 }
 
-const createUnsubscribeUrl = async (email) => {
-  try {
-    const unsubscribeRequestToken = await AccessToken.issueToken({ email });
-    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
-  } catch (error) {
-    logError("Error generating unsubscribe URL", error);
-    throw new Error("Failed to generate unsubscribe URL");
-  }
-};
+// export const createUnsubscribeUrl = async (email) => {
+//   try {
+//     // clean up old tokens
+//     await SubscriptionVerificationToken.deleteMany({
+//       email,
+//       used: false,
+//       expiresAt: { $gt: new Date() },
+//     });
+
+//     const unsubscribeRequestToken = crypto.randomBytes(32).toString("hex");
+//     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
+
+//     await SubscriptionVerificationToken.create({
+//       email,
+//       token: unsubscribeRequestToken,
+//       expiresAt,
+//     });
+//     logInfo(`Generated new unsubscribe token for ${email}`);
+
+//     return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
+//   } catch (error) {
+//     logError("Error generating unsubscribe URL", error);
+//     throw new Error("Failed to generate unsubscribe URL");
+//   }
+// };
 
 export const unSubscribeController = async (req, res) => {
   try {
@@ -60,53 +77,18 @@ export const unSubscribeController = async (req, res) => {
     }
 
     // Validate token format
-    const tokenDoc = await AccessToken.fromJWT(token);
+    const tokenDoc = await SubscriptionVerificationToken.findOne({
+      token,
+      expiresAt: { $gt: new Date() },
+      used: false,
+    });
 
     if (!tokenDoc) {
-      // Token invalid or revoked — try to decode to send new confirmation email
-      const decoded = AccessToken.decodeJWT(token);
-      const email = decoded?.email;
-      const tokenId = decoded?._id || decoded?.id;
-
-      if (email && tokenId) {
-        // 1. Delete old token doc if it exists
-        try {
-          const oldTokenDoc = await AccessToken.findById(tokenId);
-          if (oldTokenDoc) {
-            logInfo(`Revoking expired token with ID: ${tokenId}`);
-            await oldTokenDoc.revoke();
-          }
-        } catch (err) {
-          logError("Error revoking old token", err);
-        }
-
-        // 2. Generate a new unsubscribe token
-        const newUnsubscribeUrl = await createUnsubscribeUrl(email);
-
-        // 3. Replace the placeholder in the confirmation email template
-        const updatedConfirmationEmail =
-          unsubscribeConfirmationTemplate.replace(
-            "{{CONFIRM_UNSUBSCRIBE_URL}}",
-            newUnsubscribeUrl,
-          );
-
-        // 4. Send the new confirmation email with the updated token
-        await sendEmail(
-          email,
-          "Your unsubscribe request has expired",
-          updatedConfirmationEmail,
-        );
-
-        logInfo(`Token expired. Sent new unsubscribe email to ${email}`);
-
-        return res.status(401).json({
-          success: false,
-          message: "Token expired. A new confirmation email has been sent.",
-        });
-      }
-      return res.status(400).json({
+      logInfo("Invalid or expired token. Unable to unsubscribe.");
+      return res.status(401).json({
         success: false,
-        message: "Invalid token structure.",
+        message:
+          "Token expired or invalid. Please request a new unsubscribe link.",
       });
     }
 
@@ -128,7 +110,8 @@ export const unSubscribeController = async (req, res) => {
     logInfo(`User ${to} unsubscribed successfully.`);
 
     // Mark the token as used and delete it
-    await tokenDoc.revoke();
+    tokenDoc.used = true;
+    await tokenDoc.save();
 
     // Send the success email (no token included)
     await sendEmail(

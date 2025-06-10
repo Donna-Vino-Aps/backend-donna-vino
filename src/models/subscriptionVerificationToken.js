@@ -9,6 +9,12 @@ const subscriptionVerificationTokenSchema = new mongoose.Schema({
   used: { type: Boolean, default: false },
 });
 
+// Index to ensure tokens expire after a certain time
+subscriptionVerificationTokenSchema.index(
+  { expiresAt: 1 },
+  { expireAfterSeconds: 0 },
+);
+
 subscriptionVerificationTokenSchema.pre("save", function (next) {
   if (!this.token) {
     this.token = crypto.randomBytes(64).toString("hex"); // 128-char hex token

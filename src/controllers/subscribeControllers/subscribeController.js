@@ -144,6 +144,13 @@ export const subscribeController = async (req, res) => {
         .json({ success: true, message: "You are already subscribed." });
     }
 
+    // Clean up old unused & unexpired tokens before creating a new one
+    await SubscriptionVerificationToken.deleteMany({
+      email,
+      used: false,
+      expiresAt: { $gt: new Date() },
+    });
+
     // Create token for e-mail verification
     const verificationToken = new SubscriptionVerificationToken({ email });
     await verificationToken.save();
