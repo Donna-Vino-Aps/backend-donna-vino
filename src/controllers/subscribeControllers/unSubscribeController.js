@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
-import EmailVerificationToken from "../../models/emailVerificationToken.js";
+import UnsubscribeToken from "../../models/UnsubscribeToken.js";
 
 dotenv.config();
 
@@ -43,7 +43,7 @@ export const unSubscribeController = async (req, res) => {
       });
     }
     // Validate token format
-    const tokenDoc = await EmailVerificationToken.findOne({
+    const tokenDoc = await UnsubscribeToken.findOne({
       token,
       used: false,
     });

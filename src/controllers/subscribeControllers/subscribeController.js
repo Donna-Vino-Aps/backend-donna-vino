@@ -5,7 +5,8 @@ import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
-import SubscriptionVerificationToken from "../../models/subscribe/subscriptionVerificationToken.js";
+import UnsubscribeToken from "../../models/subscribe/unsubscribeToken.js";
+import EmailVerificationToken from "../../models/emailVerificationToken.js";
 
 dotenv.config();
 
@@ -14,7 +15,7 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 // Generates a one-time unsubscribe URL with a token
 const createUnsubscribeUrl = async (email) => {
   try {
-    const unsubscribeToken = await SubscriptionVerificationToken.issueToken({
+    const unsubscribeToken = await UnsubscribeToken.issueToken({
       email,
     });
     return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeToken}`;
@@ -80,8 +81,8 @@ export const subscribeController = async (req, res) => {
 
     // FLOW 1: Subscription confirmation using token
     if (token) {
-      // Verify SubscriptionVerificationToken
-      const tokenDoc = await SubscriptionVerificationToken.findOne({ token });
+      // Verify EmailVerificationToken
+      const tokenDoc = await EmailVerificationToken.findOne({ token });
       if (!tokenDoc || tokenDoc.used || tokenDoc.expiresAt < new Date()) {
         return res
           .status(401)
@@ -146,14 +147,14 @@ export const subscribeController = async (req, res) => {
     }
 
     // Clean up old unused tokens before creating a new one
-    await SubscriptionVerificationToken.deleteMany({
+    await EmailVerificationToken.deleteMany({
       email,
       used: false,
       expiresAt: null,
     });
 
     // Create token for e-mail verification
-    const verificationToken = new SubscriptionVerificationToken({ email });
+    const verificationToken = new EmailVerificationToken({ email });
     await verificationToken.save();
 
     // Createa verification link
