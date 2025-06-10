@@ -4,9 +4,7 @@ import dotenv from "dotenv";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
-// import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 import SubscriptionVerificationToken from "../../models/subscriptionVerificationToken.js";
-// import crypto from "crypto";
 
 dotenv.config();
 
@@ -38,32 +36,6 @@ try {
 if (!emailSuccessTemplate || !unsubscribeConfirmationTemplate) {
   throw new Error("Email templates not loaded properly");
 }
-
-// export const createUnsubscribeUrl = async (email) => {
-//   try {
-//     // clean up old tokens
-//     await SubscriptionVerificationToken.deleteMany({
-//       email,
-//       used: false,
-//       expiresAt: { $gt: new Date() },
-//     });
-
-//     const unsubscribeRequestToken = crypto.randomBytes(32).toString("hex");
-//     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins
-
-//     await SubscriptionVerificationToken.create({
-//       email,
-//       token: unsubscribeRequestToken,
-//       expiresAt,
-//     });
-//     logInfo(`Generated new unsubscribe token for ${email}`);
-
-//     return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
-//   } catch (error) {
-//     logError("Error generating unsubscribe URL", error);
-//     throw new Error("Failed to generate unsubscribe URL");
-//   }
-// };
 
 export const unSubscribeController = async (req, res) => {
   try {
