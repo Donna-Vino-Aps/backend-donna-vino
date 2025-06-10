@@ -6,7 +6,6 @@ import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 import SubscriptionVerificationToken from "../../models/subscribe/subscriptionVerificationToken.js";
-import EmailVerificationToken from "../../models/emailVerificationToken.js";
 
 dotenv.config();
 
@@ -15,7 +14,9 @@ const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 // Generates a one-time unsubscribe URL with a token
 const createUnsubscribeUrl = async (email) => {
   try {
-    const unsubscribeToken = await EmailVerificationToken.issueToken({ email });
+    const unsubscribeToken = await SubscriptionVerificationToken.issueToken({
+      email,
+    });
     return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeToken}`;
   } catch (error) {
     logError("Error generating unsubscribe URL", error);
@@ -144,11 +145,11 @@ export const subscribeController = async (req, res) => {
         .json({ success: true, message: "You are already subscribed." });
     }
 
-    // Clean up old unused & unexpired tokens before creating a new one
+    // Clean up old unused tokens before creating a new one
     await SubscriptionVerificationToken.deleteMany({
       email,
       used: false,
-      expiresAt: { $gt: new Date() },
+      expiresAt: null,
     });
 
     // Create token for e-mail verification
