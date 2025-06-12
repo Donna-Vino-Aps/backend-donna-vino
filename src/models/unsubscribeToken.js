@@ -9,10 +9,7 @@ import mongoose from "mongoose";
 
 const UnsubscribeToken = Token.discriminator(
   "UnsubscribeToken",
-  new mongoose.Schema(
-    { expiresAt: { type: Date, default: null } }, // No Expiry date by default
-    { discriminatorKey: "kind" },
-  ),
+  new mongoose.Schema({ discriminatorKey: "kind" }),
 );
 
 export default UnsubscribeToken;
