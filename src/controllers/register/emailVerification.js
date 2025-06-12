@@ -78,22 +78,35 @@ export async function confirm(req, res) {
  *
  * Steps:
  * - Validates the token using EmailVerificationToken.fromJWT()
- * - If invalid or expired, redirects to `/signUp/error`
- * - Deletes the token record (optional: you could also delete the `UserPre` record here)
- * - Redirects to `/signUp/canceled` on the frontend
+ * - Validates that the token email matches the provided email
+ * - If invalid or expired, redirects to `/signup/decline-error`
+ * - Deletes the UserPre record for this email
+ * - Deletes the token record
+ * - Redirects to `/signup/canceled` on the frontend
  *
  */
 export async function decline(req, res) {
+  const email = req.query.email;
   const token = req.query.token;
+  const frontedUrl = baseDonnaVinoEcommerceWebUrl;
+  const errorPageUrl = `${frontedUrl}/signup/decline-error`;
 
   const emailToken = await EmailVerificationToken.fromJWT(token);
   if (!emailToken) {
-    return res.redirect(`${process.env.FRONTEND_URI}/signUp/error`);
+    return res.redirect(errorPageUrl);
   }
+
+  const decoded = jwt.decode(token);
+  if (decoded.email !== email) {
+    return res.redirect(errorPageUrl);
+  }
+
+  await UserPre.findOneAndDelete({ email });
 
   await emailToken.revoke();
 
-  return res.redirect(`${process.env.FRONTEND_URI}/signUp/canceled`);
+  const url = new URL("/signup/canceled", frontedUrl);
+  return res.redirect(url.toString());
 }
 
 /**
