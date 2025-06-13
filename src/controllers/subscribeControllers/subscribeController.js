@@ -5,25 +5,11 @@ import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
-import UnsubscribeToken from "../../models/subscribe/unsubscribeToken.js";
 import EmailVerificationToken from "../../models/emailVerificationToken.js";
 
 dotenv.config();
 
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
-
-// Generates a one-time unsubscribe URL with a token
-const createUnsubscribeUrl = async (email) => {
-  try {
-    const unsubscribeToken = await UnsubscribeToken.issueToken({
-      email,
-    });
-    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeToken}`;
-  } catch (error) {
-    logError("Error generating unsubscribe URL", error);
-    throw new Error("Failed to generate unsubscribe URL");
-  }
-};
 
 /**
  * Controller to handle both:
@@ -110,7 +96,9 @@ export const subscribeController = async (req, res) => {
       await tokenDoc.save();
 
       // Generate unsubscribe URL
-      const unsubscribeRequestUrl = await createUnsubscribeUrl(confirmedEmail);
+      const unsubscribeRequestUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?email=${encodeURIComponent(
+        confirmedEmail,
+      )}`;
       const homeUrl = `${baseDonnaVinoWebUrl}`;
 
       // Replace placeholders for unsubscribe and redirect in the email template

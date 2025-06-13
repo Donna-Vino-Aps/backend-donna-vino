@@ -5,6 +5,13 @@ import { unSubscribeController } from "../controllers/subscribeControllers/unSub
 const subscribeRouter = express.Router();
 
 subscribeRouter.post("/confirm-subscription", subscribeController);
-subscribeRouter.post("/unsubscribe-request", unSubscribeController);
+subscribeRouter.get(
+  "/unsubscribe-request",
+  unSubscribeController.showUnsubscribePage,
+);
+subscribeRouter.post(
+  "/unsubscribe-request",
+  unSubscribeController.handleUnsubscribeRequest,
+);
 
 export default subscribeRouter;
