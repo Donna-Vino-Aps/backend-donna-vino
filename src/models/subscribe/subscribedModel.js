@@ -17,11 +17,6 @@ const subscribedUserSchema = new mongoose.Schema({
     type: Date,
     default: null,
   },
-  unsubscribeToken: {
-    type: String,
-    unique: true,
-    sparse: true, // allow null/undefined values
-  },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",

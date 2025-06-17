@@ -6,6 +6,8 @@ import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
 import EmailVerificationToken from "../../models/emailVerificationToken.js";
+import { generateUnsubscribeSignature } from "../../util/hmac.js";
+// import crypto from "crypto";
 
 dotenv.config();
 
@@ -89,16 +91,18 @@ export const subscribeController = async (req, res) => {
       }
 
       // Create a new subscribed user in DB
-      await new SubscribedUser({ email: confirmedEmail }).save();
+      const newSubscribedUser = await new SubscribedUser({
+        email: confirmedEmail,
+      }).save();
 
       // Mark token as used after successful subscription
       tokenDoc.used = true;
       await tokenDoc.save();
 
-      // Generate unsubscribe URL
-      const unsubscribeRequestUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?email=${encodeURIComponent(
-        confirmedEmail,
-      )}`;
+      // Generate unsubscribe URL with correct parameters
+      const uid = newSubscribedUser._id.toString();
+      const sig = generateUnsubscribeSignature(uid);
+      const unsubscribeRequestUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?uid=${uid}&sig=${sig}`;
       const homeUrl = `${baseDonnaVinoWebUrl}`;
 
       // Replace placeholders for unsubscribe and redirect in the email template
