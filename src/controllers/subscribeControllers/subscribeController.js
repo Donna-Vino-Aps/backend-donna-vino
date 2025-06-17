@@ -1,53 +1,44 @@
-import jwt from "jsonwebtoken";
+import fs from "fs";
+import path from "path";
 import dotenv from "dotenv";
-import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
 import { sendEmail } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
-import {
-  isTokenUsed,
-  markTokenAsUsed,
-  deleteToken,
-} from "../../services/token/tokenRepository.js";
-import { generateToken } from "../../services/token/tokenGenerator.js";
-import path from "path";
-import fs from "fs";
 import { baseDonnaVinoWebUrl } from "../../config/environment.js";
+import EmailVerificationToken from "../../models/emailVerificationToken.js";
+import { generateUnsubscribeSignature } from "../../util/hmac.js";
+// import crypto from "crypto";
 
 dotenv.config();
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 const resolvePath = (relativePath) => path.resolve(process.cwd(), relativePath);
 
-const createUnsubscribeUrl = async (email) => {
-  try {
-    const unsubscribeRequestToken = await generateToken(email);
-    return `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?token=${unsubscribeRequestToken}`;
-  } catch (error) {
-    logError("Error generating unsubscribe URL", error);
-    throw new Error("Failed to generate unsubscribe URL");
-  }
-};
-
+/**
+ * Controller to handle both:
+ * 1. Initial subscription requests (sends a verification email)
+ * 2. Confirming subscription (via a token from the verification email)
+ */
 export const subscribeController = async (req, res) => {
   try {
-    const { token, subject, templateName, templateData } = req.body;
+    const { email, token, subject, templateName, templateData } = req.body;
 
-    if (!token || !subject || !templateName) {
+    // Validate required fields
+    if (!subject || !templateName) {
       return res.status(400).json({
         success: false,
-        message: "Token, subject, and templateName are required.",
+        message: "Subject and templateName are required.",
       });
     }
 
+    // Validate Template Filename
     if (!/^[a-zA-Z0-9_-]+$/.test(templateName)) {
       return res.status(400).json({ message: "Invalid template name." });
     }
 
+    // Load the email template
     const templatePath = resolvePath(`src/templates/${templateName}.html`);
 
-    // Check if the template exists
+    // Check if the template file exists
     if (!fs.existsSync(templatePath)) {
       logError(`Email template not found at: ${templatePath}`);
       return res.status(404).json({
@@ -56,18 +47,19 @@ export const subscribeController = async (req, res) => {
       });
     }
 
+    // Read the email template content
     let emailTemplate;
     try {
       emailTemplate = fs.readFileSync(templatePath, "utf-8");
     } catch (error) {
       logError(`Error reading email template: ${error.message}`);
-      return res.status(500).json({
+      return res.status(404).json({
         success: false,
         message: "Internal server error: Failed to read template",
       });
     }
 
-    // Replace template variables with the provided data
+    // Replace template placeholders with the provided data from templateData
     if (templateData && typeof templateData === "object") {
       Object.keys(templateData).forEach((key) => {
         const regex = new RegExp(`{{${key}}}`, "g");
@@ -75,79 +67,107 @@ export const subscribeController = async (req, res) => {
       });
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, JWT_SECRET);
-    } catch (error) {
-      logError("Invalid or expired token.", error);
-      return res.status(401).json({
-        success: false,
-        message: "Invalid or expired token.",
+    // FLOW 1: Subscription confirmation using token
+    if (token) {
+      // Verify EmailVerificationToken
+      const tokenDoc = await EmailVerificationToken.findOne({ token });
+      if (!tokenDoc || tokenDoc.used || tokenDoc.expiresAt < new Date()) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Invalid or expired token." });
+      }
+
+      // Get the email from the token
+      const confirmedEmail = tokenDoc.email;
+
+      // Check if the email is already subscribed
+      const existingSubscribedUser = await SubscribedUser.findOne({
+        email: confirmedEmail,
       });
-    }
+      if (existingSubscribedUser) {
+        return res
+          .status(200)
+          .json({ success: true, message: "User is already subscribed." });
+      }
 
-    const { email: to, id: tokenId } = decoded;
+      // Create a new subscribed user in DB
+      const newSubscribedUser = await new SubscribedUser({
+        email: confirmedEmail,
+      }).save();
 
-    const tokenUsed = await isTokenUsed(tokenId);
-    if (tokenUsed) {
-      return res.status(400).json({
-        success: false,
-        message: "This token has already been used.",
-      });
-    }
+      // Mark token as used after successful subscription
+      tokenDoc.used = true;
+      await tokenDoc.save();
 
-    const preSubscribedUser = await PreSubscribedUser.findOne({ email: to });
-    if (!preSubscribedUser) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found in PreSubscribedUser",
-      });
-    }
+      // Generate unsubscribe URL with correct parameters
+      const uid = newSubscribedUser._id.toString();
+      const sig = generateUnsubscribeSignature(uid);
+      const unsubscribeRequestUrl = `${baseDonnaVinoWebUrl}/subscription/unsubscribe-request?uid=${uid}&sig=${sig}`;
+      const homeUrl = `${baseDonnaVinoWebUrl}`;
 
-    const existingSubscribedUser = await SubscribedUser.findOne({ email: to });
-    if (existingSubscribedUser) {
+      // Replace placeholders for unsubscribe and redirect in the email template
+      emailTemplate = emailTemplate
+        .replace("{{RE_DIRECT_URL}}", homeUrl)
+        .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
+
+      // Send the welcome e-mail
+      await sendEmail(confirmedEmail, subject, emailTemplate);
+      logInfo(
+        `User ${confirmedEmail} confirmed subscription and received welcome email.`,
+      );
+
       return res.status(200).json({
         success: true,
-        message: "User is already subscribed.",
+        message: "Subscription confirmed. Email sent.",
       });
     }
 
-    const newSubscribedUser = new SubscribedUser({ email: to });
-    await newSubscribedUser.save();
+    // FLOW 2: Initial subscription request (no token)
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: "Email is required when no token is provided.",
+      });
+    }
 
-    await PreSubscribedUser.deleteOne({ email: to });
+    // Check if already subscribed
+    const alreadySubscribed = await SubscribedUser.findOne({ email });
+    if (alreadySubscribed) {
+      return res
+        .status(200)
+        .json({ success: true, message: "You are already subscribed." });
+    }
 
-    logInfo(
-      `User ${to} moved to SubscribedUser and removed from PreSubscribedUser.`,
-    );
+    // Clean up old unused tokens before creating a new one
+    await EmailVerificationToken.deleteMany({
+      email,
+      used: false,
+      expiresAt: null,
+    });
 
-    logInfo(`Marking token as used: ${tokenId}`);
-    await markTokenAsUsed(tokenId);
+    // Create token for e-mail verification
+    const verificationToken = new EmailVerificationToken({ email });
+    await verificationToken.save();
 
-    logInfo(`Deleting token: ${tokenId}`);
-    await deleteToken(tokenId);
+    // Createa verification link
+    const verifyUrl = `${baseDonnaVinoWebUrl}/subscription/confirm?token=${verificationToken.token}`;
 
-    const unsubscribeRequestUrl = await createUnsubscribeUrl(to);
-    const homeUrl = `${baseDonnaVinoWebUrl}`;
+    // Replace placeholder with verification link in the email template
+    emailTemplate = emailTemplate.replace("{{RE_DIRECT_URL}}", verifyUrl);
 
-    emailTemplate = emailTemplate
-      .replace("{{RE_DIRECT_URL}}", homeUrl)
-      .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
-
-    await sendEmail(to, subject, emailTemplate);
-
-    logInfo(`Welcome email with unsubscribe option sent to ${to}`);
+    // Send verification email
+    await sendEmail(email, subject, emailTemplate);
+    logInfo(`Verification email sent to ${email} with confirmation link.`);
 
     return res.status(200).json({
       success: true,
       message:
-        "Subscription confirmed. An email has been sent with unsubscribe options.",
+        "Verification email sent. Please check your inbox to confirm subscription.",
     });
   } catch (error) {
     logError("Error in subscribeController", error);
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
