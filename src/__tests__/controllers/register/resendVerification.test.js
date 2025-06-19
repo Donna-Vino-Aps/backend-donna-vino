@@ -94,5 +94,17 @@ describe("Resend Verification Email Controller", () => {
       );
       expect(logError).not.toHaveBeenCalled();
     });
+
+    it("should return 400 if email is not provided", async () => {
+      const response = await request(app).post("/test-resend").send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        success: false,
+        message: "Email is required.",
+      });
+      expect(UserPre.findOne).not.toHaveBeenCalled();
+      expect(mockedSendEmail).not.toHaveBeenCalled();
+    });
   });
 });
