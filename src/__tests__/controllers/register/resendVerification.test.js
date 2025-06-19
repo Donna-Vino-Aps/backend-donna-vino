@@ -20,7 +20,6 @@ const createApp = () => {
 
 let app;
 
-// Mock data
 const mockUserPreData = {
   _id: "preUserId123",
   email: "test@example.com",
@@ -34,23 +33,18 @@ describe("Resend Verification Email Controller", () => {
   beforeEach(() => {
     app = createApp();
 
-    // Reset mocks for UserPre
     UserPre.findOne = vi.fn();
     mockUserPreData.issueEmailVerificationToken.mockClear();
     mockUserPreData.issueEmailVerificationToken.mockResolvedValue(
       mockEmailToken,
-    ); // Default happy path
+    );
 
-    // Reset mocks for EmailVerificationToken
     EmailVerificationToken.deleteMany = vi
       .fn()
       .mockResolvedValue({ deletedCount: 1 });
-
-    // Reset mocks for sendEmail (imported as mockedSendEmail)
     mockedSendEmail.mockClear();
     mockedSendEmail.mockResolvedValue(true);
 
-    // Reset mocks for logError
     logError.mockClear();
   });
 
