@@ -106,5 +106,33 @@ describe("Resend Verification Email Controller", () => {
       expect(UserPre.findOne).not.toHaveBeenCalled();
       expect(mockedSendEmail).not.toHaveBeenCalled();
     });
+
+    it("should return 200 with generic message if pre-registered user not found", async () => {
+      UserPre.findOne.mockResolvedValue(null);
+      const requestBody = { email: "nonexistent@example.com" };
+
+      const response = await request(app)
+        .post("/test-resend")
+        .send(requestBody);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({
+        success: true,
+        message:
+          "If an account with this email exists, a new verification link has been sent.",
+      });
+
+      expect(UserPre.findOne).toHaveBeenCalledWith({
+        email: requestBody.email,
+      });
+      expect(logError).toHaveBeenCalledWith(
+        `Resend verification attempt for non-existent pre-user email: ${requestBody.email}`,
+      );
+      expect(EmailVerificationToken.deleteMany).not.toHaveBeenCalled();
+      expect(
+        mockUserPreData.issueEmailVerificationToken,
+      ).not.toHaveBeenCalled();
+      expect(mockedSendEmail).not.toHaveBeenCalled();
+    });
   });
 });
