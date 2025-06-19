@@ -134,5 +134,103 @@ describe("Resend Verification Email Controller", () => {
       ).not.toHaveBeenCalled();
       expect(mockedSendEmail).not.toHaveBeenCalled();
     });
+
+    it("should return 500 if UserPre.findOne throws an error", async () => {
+      const errorMessage = "Database connection error";
+      UserPre.findOne.mockRejectedValue(new Error(errorMessage));
+      const requestBody = { email: "test@example.com" };
+
+      const response = await request(app)
+        .post("/test-resend")
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        success: false,
+        message: "An internal server error occurred. Please try again later.",
+      });
+
+      expect(UserPre.findOne).toHaveBeenCalledWith({
+        email: requestBody.email,
+      });
+      expect(logError).toHaveBeenCalledWith(
+        expect.any(Error),
+        "Error resending verification email",
+      );
+      expect(EmailVerificationToken.deleteMany).not.toHaveBeenCalled();
+      expect(mockedSendEmail).not.toHaveBeenCalled();
+    });
+
+    it("should return 500 if EmailVerificationToken.deleteMany throws an error", async () => {
+      UserPre.findOne.mockResolvedValue(mockUserPreData);
+      const errorMessage = "DeleteMany failed";
+      EmailVerificationToken.deleteMany.mockRejectedValue(
+        new Error(errorMessage),
+      );
+      const requestBody = { email: "test@example.com" };
+
+      const response = await request(app)
+        .post("/test-resend")
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        success: false,
+        message: "An internal server error occurred. Please try again later.",
+      });
+      expect(logError).toHaveBeenCalledWith(
+        expect.any(Error),
+        "Error resending verification email",
+      );
+      expect(
+        mockUserPreData.issueEmailVerificationToken,
+      ).not.toHaveBeenCalled();
+      expect(mockedSendEmail).not.toHaveBeenCalled();
+    });
+
+    it("should return 500 if user.issueEmailVerificationToken throws an error", async () => {
+      UserPre.findOne.mockResolvedValue(mockUserPreData);
+      const errorMessage = "Token issuance failed";
+      mockUserPreData.issueEmailVerificationToken.mockRejectedValue(
+        new Error(errorMessage),
+      );
+      const requestBody = { email: "test@example.com" };
+
+      const response = await request(app)
+        .post("/test-resend")
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        success: false,
+        message: "An internal server error occurred. Please try again later.",
+      });
+      expect(logError).toHaveBeenCalledWith(
+        expect.any(Error),
+        "Error resending verification email",
+      );
+      expect(mockedSendEmail).not.toHaveBeenCalled();
+    });
+
+    it("should return 500 if sendEmail throws an error", async () => {
+      UserPre.findOne.mockResolvedValue(mockUserPreData);
+      const errorMessage = "Email sending failed";
+      mockedSendEmail.mockRejectedValue(new Error(errorMessage));
+      const requestBody = { email: "test@example.com" };
+
+      const response = await request(app)
+        .post("/test-resend")
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        success: false,
+        message: "An internal server error occurred. Please try again later.",
+      });
+      expect(logError).toHaveBeenCalledWith(
+        expect.any(Error),
+        "Error resending verification email",
+      );
+    });
   });
 });
