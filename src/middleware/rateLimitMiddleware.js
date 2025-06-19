@@ -18,11 +18,11 @@ export const globalLimiter = rateLimit({
 
 /**
  * Email verification rate limiter - limits by email address
- * Allows 5 verification emails per email address per hour
+ * Allows 3 verification emails per email address per hour
  */
 export const resendVerificationLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  limit: 5,
+  limit: 3,
 
   keyGenerator: (req, _res) => {
     const email = req.body?.email;
