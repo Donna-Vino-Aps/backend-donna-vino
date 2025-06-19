@@ -15,6 +15,7 @@ import { router } from "./routes/index.js";
 import cookieParser from "cookie-parser";
 import { corsConfig } from "./config/index.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
+import { globalLimiter } from "./middleware/rateLimitMiddleware.js";
 
 // Create an express server
 const app = express();
@@ -31,6 +32,7 @@ app.use(express.json());
 app.use(corsConfig);
 app.use(cookieParser());
 app.use(authMiddleware);
+app.use(globalLimiter);
 
 // Mount the top-level router
 // All routing logic must be implemented in ./routes and its children — none should be defined here

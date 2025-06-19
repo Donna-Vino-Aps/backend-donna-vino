@@ -1,25 +1,49 @@
 import rateLimit from "express-rate-limit";
+import { logError } from "../util/logging.js";
 
-// Limit to 3 requests per minute (short-term protection against spam)
-export const contactLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 3, // Maximum of 3 requests per IP
+/**
+ * Global rate limiter - applies to all routes
+ * Limits each IP to 200 requests per 15 minutes
+ */
+export const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 200,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
   message: {
     success: false,
-    message: "Too many contact requests. Please try again later.",
+    message: "Too many requests, please try again later.",
   },
-  standardHeaders: true, // Return rate limit info in headers
-  legacyHeaders: false, // Disable deprecated X-RateLimit headers
 });
 
-// Limit to 10 requests per hour (long-term protection against persistent abuse)
-export const contactHourlyLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // Maximum of 10 requests per IP
+/**
+ * Email verification rate limiter - limits by email address
+ * Allows 3 verification emails per email address per hour
+ */
+export const resendVerificationLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+
+  keyGenerator: (req, _res) => {
+    const email = req.body?.email;
+    if (!email) {
+      logError("Rate limiting attempted with missing email. Using IP instead.");
+      return req.ip;
+    }
+    return email;
+  },
+
   message: {
     success: false,
-    message: "Too many contact requests. Try again in an hour.",
+    message:
+      "You have requested too many verification emails. Please try again in an hour.",
   },
-  standardHeaders: true, // Return rate limit info in headers
-  legacyHeaders: false, // Disable deprecated X-RateLimit headers
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+
+  handler: (req, res, _next, options) => {
+    const key = options.keyGenerator(req, res);
+    logError(`Rate limit exceeded for email verification: ${key}`);
+    res.status(options.statusCode).json(options.message);
+  },
 });
