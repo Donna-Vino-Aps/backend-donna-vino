@@ -33,6 +33,9 @@ export async function resendVerificationEmail(req, res) {
   try {
     const user = await UserPre.findOne({ email });
     if (!user) {
+      logError(
+        `Resend verification attempt for non-existent pre-user email: ${email}`,
+      );
       return res.status(200).json({
         success: true,
         message:
