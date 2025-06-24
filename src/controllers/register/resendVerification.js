@@ -43,7 +43,13 @@ export async function resendVerificationEmail(req, res) {
       });
     }
 
-    await EmailVerificationToken.deleteMany({ user: user._id });
+    const existingToken = await EmailVerificationToken.findOne({
+      user: user._id,
+    });
+
+    if (existingToken) {
+      await existingToken.revoke();
+    }
 
     const emailVerificationToken = await user.issueEmailVerificationToken();
 
