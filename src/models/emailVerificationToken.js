@@ -31,7 +31,7 @@ const emailVerificationTokenSchema = new mongoose.Schema({
  * @param {string|string[]} options.email - One or more email addresses to verify
  * @param {string} [options.expiresIn='1d'] - Duration string like '1d', '2h'
  * @param {Object} [options.payload={}] - Additional JWT claims to include
- * @param {string} [options.secret=process.env.API_SECRET] - JWT signing secret
+ * @param {string} [options.secret=process.env.JWT_SECRET] - JWT signing secret
  * @returns {Promise<EmailVerificationTokenDocument>} A new, saved verification token document
  */
 emailVerificationTokenSchema.statics.issueToken = async function ({
@@ -39,7 +39,7 @@ emailVerificationTokenSchema.statics.issueToken = async function ({
   email,
   expiresIn = "1d",
   payload = {},
-  secret = process.env.API_SECRET,
+  secret = process.env.JWT_SECRET,
 }) {
   const extendedPayload = {
     ...payload,

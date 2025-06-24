@@ -32,7 +32,7 @@ const accessTokenSchema = new mongoose.Schema({
  * @param {string} [options.expiresIn='15m'] - Duration string like '15m', '1h'
  * @param {Object} [options.payload={}] - Custom JWT claims to include
  * @param {string[]} [options.scope=['sub', 'email', 'profile']] - Scopes to embed in payload
- * @param {string} [options.secret=process.env.API_SECRET] - JWT signing secret
+ * @param {string} [options.secret=process.env.JWT_SECRET] - JWT signing secret
  * @returns {Promise<AccessTokenDocument>} A new, persisted access token document
  */
 accessTokenSchema.statics.issueToken = async function ({
@@ -40,7 +40,7 @@ accessTokenSchema.statics.issueToken = async function ({
   expiresIn = "15m",
   payload = {},
   scope = ["sub", "email", "profile"],
-  secret = process.env.API_SECRET,
+  secret = process.env.JWT_SECRET,
 }) {
   // Add scope into the JWT payload
   const extendedPayload = {

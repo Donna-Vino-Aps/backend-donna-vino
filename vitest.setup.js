@@ -1,5 +1,11 @@
 import dotenv from "dotenv";
-import { logInfo } from "./src/util/logging";
+import { vi } from "vitest";
+
 dotenv.config({ path: ".env.test" });
 
-logInfo("Loaded RESEND_API_KEY:", process.env.RESEND_API_KEY);
+// Mock the logging utility for all tests
+vi.mock("./src/util/logging.js", () => ({
+  logInfo: vi.fn(),
+  logWarning: vi.fn(),
+  logError: vi.fn(),
+}));

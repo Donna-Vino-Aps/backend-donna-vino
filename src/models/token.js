@@ -52,7 +52,7 @@ tokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
  * @param {mongoose.Types.ObjectId} options.userId - User ID the token is associated with
  * @param {string} [options.expiresIn='15m'] - Expiration time (e.g., '15m', '2h')
  * @param {Object} [options.payload={}] - Additional JWT claims (e.g., { email, role })
- * @param {string} [options.secret=process.env.API_SECRET] - Secret key used for signing the token
+ * @param {string} [options.secret=process.env.JWT_SECRET] - Secret key used for signing the token
  * @param {Object} [options.extras={}] - Additional fields to include in the Token document (e.g., type, targetClass)
  *
  * @returns {Promise<TokenDocument>} A Mongoose document containing the issued token
@@ -92,7 +92,7 @@ tokenSchema.statics.issueToken = async function ({
  *
  * @param {string} token - The JWT token string
  * @param {boolean} [ignoreExpiration=false] - Whether to ignore expiration check
- * @param {string} [secret=process.env.API_SECRET] - Secret used to verify token
+ * @param {string} [secret=process.env.JWT_SECRET] - Secret used to verify token
  * @returns {Promise<(TokenDocument & { decoded?: Object }) | null>} The token document with decoded payload or null
  */
 tokenSchema.statics.fromJWT = async function (
