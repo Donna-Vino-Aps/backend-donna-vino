@@ -29,6 +29,10 @@ const mockUserPreData = {
 
 const mockEmailToken = "newGeneratedToken123";
 
+const mockToken = {
+  revoke: vi.fn().mockResolvedValue(undefined),
+};
+
 describe("Resend Verification Email Controller", () => {
   beforeEach(() => {
     app = createApp();
@@ -39,9 +43,9 @@ describe("Resend Verification Email Controller", () => {
       mockEmailToken,
     );
 
-    EmailVerificationToken.deleteMany = vi
-      .fn()
-      .mockResolvedValue({ deletedCount: 1 });
+    EmailVerificationToken.findOne = vi.fn().mockResolvedValue(mockToken);
+    mockToken.revoke.mockClear();
+
     mockedSendEmail.mockClear();
     mockedSendEmail.mockResolvedValue(true);
 
@@ -55,6 +59,7 @@ describe("Resend Verification Email Controller", () => {
   describe("POST /test-resend", () => {
     it("should successfully resend verification email if user exists", async () => {
       UserPre.findOne.mockResolvedValue(mockUserPreData);
+      EmailVerificationToken.findOne.mockResolvedValue(mockToken);
 
       const requestBody = { email: "test@example.com" };
 
@@ -71,9 +76,10 @@ describe("Resend Verification Email Controller", () => {
       expect(UserPre.findOne).toHaveBeenCalledWith({
         email: requestBody.email,
       });
-      expect(EmailVerificationToken.deleteMany).toHaveBeenCalledWith({
+      expect(EmailVerificationToken.findOne).toHaveBeenCalledWith({
         user: mockUserPreData._id,
       });
+      expect(mockToken.revoke).toHaveBeenCalled();
       expect(mockUserPreData.issueEmailVerificationToken).toHaveBeenCalled();
       expect(mockedSendEmail).toHaveBeenCalledWith(
         requestBody.email,
@@ -122,7 +128,7 @@ describe("Resend Verification Email Controller", () => {
       expect(logError).toHaveBeenCalledWith(
         `Resend verification attempt for non-existent pre-user email: ${requestBody.email}`,
       );
-      expect(EmailVerificationToken.deleteMany).not.toHaveBeenCalled();
+      expect(EmailVerificationToken.findOne).not.toHaveBeenCalled();
       expect(
         mockUserPreData.issueEmailVerificationToken,
       ).not.toHaveBeenCalled();
@@ -151,16 +157,40 @@ describe("Resend Verification Email Controller", () => {
         expect.any(Error),
         "Error resending verification email",
       );
-      expect(EmailVerificationToken.deleteMany).not.toHaveBeenCalled();
+      expect(EmailVerificationToken.findOne).not.toHaveBeenCalled();
       expect(mockedSendEmail).not.toHaveBeenCalled();
     });
 
-    it("should return 500 if EmailVerificationToken.deleteMany throws an error", async () => {
+    it("should return 500 if EmailVerificationToken.findOne throws an error", async () => {
       UserPre.findOne.mockResolvedValue(mockUserPreData);
-      const errorMessage = "DeleteMany failed";
-      EmailVerificationToken.deleteMany.mockRejectedValue(
-        new Error(errorMessage),
+      const errorMessage = "Find token failed";
+      EmailVerificationToken.findOne.mockRejectedValue(new Error(errorMessage));
+      const requestBody = { email: "test@example.com" };
+
+      const response = await request(app)
+        .post("/test-resend")
+        .send(requestBody);
+
+      expect(response.status).toBe(500);
+      expect(response.body).toEqual({
+        success: false,
+        message: "An internal server error occurred. Please try again later.",
+      });
+      expect(logError).toHaveBeenCalledWith(
+        expect.any(Error),
+        "Error resending verification email",
       );
+      expect(
+        mockUserPreData.issueEmailVerificationToken,
+      ).not.toHaveBeenCalled();
+      expect(mockedSendEmail).not.toHaveBeenCalled();
+    });
+
+    it("should return 500 if token.revoke throws an error", async () => {
+      UserPre.findOne.mockResolvedValue(mockUserPreData);
+      EmailVerificationToken.findOne.mockResolvedValue(mockToken);
+      const errorMessage = "Token revoke failed";
+      mockToken.revoke.mockRejectedValue(new Error(errorMessage));
       const requestBody = { email: "test@example.com" };
 
       const response = await request(app)
