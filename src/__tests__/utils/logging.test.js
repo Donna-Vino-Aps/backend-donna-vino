@@ -1,3 +1,4 @@
+vi.unmock("../../util/logging.js");
 import { describe, it, expect, vi } from "vitest";
 import { logInfo, logWarning, logError } from "../../util/logging.js";
 

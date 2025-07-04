@@ -10,7 +10,7 @@ passwordChangeTokenSchema.statics.issueToken = async function ({
   email,
   expiresIn = "30m",
   payload = {},
-  secret = process.env.API_SECRET,
+  secret = process.env.JWT_SECRET,
 }) {
   // Delegate to base Token logic while preserving this discriminator context
   return Token.issueToken.call(this, {

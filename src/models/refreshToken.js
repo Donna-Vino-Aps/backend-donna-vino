@@ -32,7 +32,7 @@ const refreshTokenSchema = new mongoose.Schema({
  * @param {string} options.accessToken - Last access token issued (JWT string)
  * @param {string} [options.expiresIn='30d'] - Token TTL string
  * @param {Object} [options.payload={}] - Additional claims to embed in the JWT
- * @param {string} [options.secret=process.env.API_SECRET] - JWT signing secret
+ * @param {string} [options.secret=process.env.JWT_SECRET] - JWT signing secret
  * @returns {Promise<RefreshTokenDocument>} A new, saved refresh token document
  */
 refreshTokenSchema.statics.issueToken = async function ({
@@ -40,7 +40,7 @@ refreshTokenSchema.statics.issueToken = async function ({
   accessToken,
   expiresIn = "30d",
   payload = {},
-  secret = process.env.API_SECRET,
+  secret = process.env.JWT_SECRET,
 }) {
   return await Token.issueToken.call(this, {
     userId,

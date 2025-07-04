@@ -5,7 +5,6 @@ import { logInfo, logError } from "../../util/logging.js";
 
 // Mock dependencies
 vi.mock("mongoose");
-vi.mock("../../util/logging.js");
 
 describe("connectDB", () => {
   beforeEach(() => {
