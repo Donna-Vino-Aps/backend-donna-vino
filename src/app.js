@@ -20,6 +20,8 @@ import { globalLimiter } from "./middleware/rateLimitMiddleware.js";
 // Create an express server
 const app = express();
 
+app.use("/api/upload", cloudinaryRouter);
+
 // Debug-only middleware used to log HTTP requests in development.
 // Helps visualize real-time data exchange and is especially useful for demoing
 // how routes are triggered and how automatic Swagger documentation is generated.
