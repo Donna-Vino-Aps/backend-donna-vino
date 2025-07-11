@@ -20,6 +20,8 @@ dotenv.config();
 // Create an express server
 const app = express();
 
+app.use("/api/upload", cloudinaryRouter);
+
 // Tell express to use the json middleware
 app.use(express.json());
 
@@ -73,6 +75,5 @@ app.use(
 );
 
 app.use("/api/subscribe", subscribeRouter);
-app.use("/api/upload", cloudinaryRouter);
 
 export default app;
