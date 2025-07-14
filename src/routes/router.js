@@ -6,6 +6,7 @@ import registerRouter from "./register.js";
 import userRouter from "./userRoutes.js";
 import testRouter from "../../testRouters.js";
 import reviewRouter from "./reviewRoutes.js";
+import cloudinaryRouter from "./cloudinaryRoutes.js";
 // import subscribeRouter from "./subscribeRoutes.js";
 // import contactUsRouter from "./contactUsRoutes.js";
 // import {
@@ -23,6 +24,7 @@ apiRouter.use("/register", registerRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/test", testRouter);
 apiRouter.use("/reviews", reviewRouter);
+apiRouter.use("/upload", cloudinaryRouter);
 // apiRouter.use(
 //   "/contact-us",
 //   contactLimiter,
