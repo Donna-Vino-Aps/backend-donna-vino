@@ -1,9 +1,16 @@
 import cloudinary from "../../config/cloudinary.js";
 import { logError, logInfo } from "../../util/logging.js";
 import User from "../../models/userModels.js";
+import { AccessToken } from "../../models/index.js";
 
 export const cloudinaryController = async (req, res) => {
   const file = req.file;
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+  const token = authHeader.split(" ")[1];
 
   if (!file) {
     return res
@@ -23,11 +30,23 @@ export const cloudinaryController = async (req, res) => {
       uploadStream.end(file.buffer);
     });
 
-    logInfo("Access Token on req:", req.accessToken);
+    // logInfo("Access Token on req:", req.accessToken);
 
-    await User.findByIdAndUpdate(req.accessToken.userId, {
+    const decodedToken = await AccessToken.fromJWT(token);
+    if (!decodedToken) {
+      return res.status(401).json({ message: "Invalid or expired token" });
+    }
+
+    logInfo("Decoded user ID:", decodedToken.user);
+
+    req.decodedToken = decodedToken;
+
+    const updateResult = await User.findByIdAndUpdate(decodedToken.user, {
       picture: result.secure_url,
+      new: true,
     });
+
+    logInfo("Updated user document:", updateResult);
 
     return res.status(200).json({
       success: true,
