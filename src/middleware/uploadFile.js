@@ -3,11 +3,14 @@ import multer from "multer";
 // Set up storage in memory
 const storage = multer.memoryStorage();
 
+// Set max file size to 5MB
+const MAX_FILE_SIZE_MB = 5 * 1024 * 1024; // 5 MB;
+
 // Configure multer with file size limit (5MB)
 const upload = multer({
   storage,
   limits: {
-    fileSize: 5 * 1024 * 1024, // 5 MB
+    fileSize: MAX_FILE_SIZE_MB,
   },
 }).single("file"); // Expecting a single file with field name "file"
 

@@ -1,6 +1,6 @@
 import protectedAPIs from "../config/protectedAPIs.js";
 import { AccessToken } from "../models/index.js";
-import { logError } from "../util/logging.js";
+import { logError, logInfo } from "../util/logging.js";
 
 /**
  * Checks whether a given request path is protected.
@@ -45,7 +45,8 @@ export const sendUnauthorized = (res, message = "Access denied.") => {
  * @param {import("express").NextFunction} next - Callback to pass control to next middleware
  */
 export const authMiddleware = async (req, res, next) => {
-  const path = req.path;
+  const path = req.originalUrl;
+  logInfo("Auth middleware triggered for path:", path);
 
   const isProtected = checkIfProtected(path);
 

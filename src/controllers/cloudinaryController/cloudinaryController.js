@@ -1,5 +1,6 @@
 import cloudinary from "../../config/cloudinary.js";
-import { logError } from "../../util/logging.js";
+import { logError, logInfo } from "../../util/logging.js";
+import User from "../../models/userModels.js";
 
 export const cloudinaryController = async (req, res) => {
   const file = req.file;
@@ -11,30 +12,29 @@ export const cloudinaryController = async (req, res) => {
   }
 
   try {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "user_profiles",
-      },
-      (error, result) => {
-        if (error) {
-          return res.status(500).json({
-            success: false,
-            msg: "Image upload failed",
-            error: error.message,
-          });
-        }
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "user_profiles" },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+      uploadStream.end(file.buffer);
+    });
 
-        // ✅ Return Cloudinary result (URL, etc.)
-        return res.status(200).json({
-          success: true,
-          msg: "File uploaded!",
-          cloudinaryUrl: result.secure_url, // <-- most useful field
-          result, // optionally send the full object
-        });
-      },
-    );
+    logInfo("Access Token on req:", req.accessToken);
 
-    uploadStream.end(file.buffer);
+    await User.findByIdAndUpdate(req.accessToken.userId, {
+      picture: result.secure_url,
+    });
+
+    return res.status(200).json({
+      success: true,
+      msg: "File uploaded!",
+      cloudinaryUrl: result.secure_url,
+      result,
+    });
   } catch (error) {
     logError(error);
     return res.status(500).json({
