@@ -30,14 +30,10 @@ export const cloudinaryController = async (req, res) => {
       uploadStream.end(file.buffer);
     });
 
-    // logInfo("Access Token on req:", req.accessToken);
-
     const decodedToken = await AccessToken.fromJWT(token);
     if (!decodedToken) {
       return res.status(401).json({ message: "Invalid or expired token" });
     }
-
-    logInfo("Decoded user ID:", decodedToken.user);
 
     req.decodedToken = decodedToken;
 
@@ -46,7 +42,9 @@ export const cloudinaryController = async (req, res) => {
       new: true,
     });
 
-    logInfo("Updated user document:", updateResult);
+    if (process.env.NODE_ENV === "development") {
+      logInfo("Updated user document:", updateResult);
+    }
 
     return res.status(200).json({
       success: true,
