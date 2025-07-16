@@ -28,6 +28,7 @@ export const getUserProfile = async (req, res) => {
         email: user.email,
         address: user.address,
         country: user.country,
+        picture: user.picture || null, // Include picture if available
       },
     });
   } catch (error) {
@@ -68,6 +69,7 @@ export const updateUserProfile = async (req, res) => {
         lastName: updatedUser.lastName,
         address: updatedUser.address,
         country: updatedUser.country,
+        picture: user.picture || null,
       },
       msg: "User profile updated successfully",
     });

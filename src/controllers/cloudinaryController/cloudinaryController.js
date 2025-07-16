@@ -37,10 +37,13 @@ export const cloudinaryController = async (req, res) => {
 
     req.decodedToken = decodedToken;
 
-    const updateResult = await User.findByIdAndUpdate(decodedToken.user, {
-      picture: result.secure_url,
-      new: true,
-    });
+    const updateResult = await User.findByIdAndUpdate(
+      decodedToken.user,
+      {
+        picture: result.secure_url,
+      },
+      { new: true },
+    );
 
     if (process.env.NODE_ENV === "development") {
       logInfo("Updated user document:", updateResult);
@@ -50,7 +53,7 @@ export const cloudinaryController = async (req, res) => {
       success: true,
       msg: "File uploaded!",
       cloudinaryUrl: result.secure_url,
-      result,
+      user: updateResult,
     });
   } catch (error) {
     logError(error);
