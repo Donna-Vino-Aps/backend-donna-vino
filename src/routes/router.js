@@ -33,4 +33,4 @@ apiRouter.use("/upload", cloudinaryRouter);
 // );
 // apiRouter.use("/subscribe", subscribeRouter);
 
-export { router };
+export default router;

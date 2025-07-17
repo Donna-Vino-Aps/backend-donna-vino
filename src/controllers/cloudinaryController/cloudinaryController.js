@@ -1,16 +1,9 @@
 import cloudinary from "../../config/cloudinary.js";
 import { logError, logInfo } from "../../util/logging.js";
 import User from "../../models/userModels.js";
-import { AccessToken } from "../../models/index.js";
 
 export const cloudinaryController = async (req, res) => {
   const file = req.file;
-
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
-  }
-  const token = authHeader.split(" ")[1];
 
   if (!file) {
     return res
@@ -30,20 +23,26 @@ export const cloudinaryController = async (req, res) => {
       uploadStream.end(file.buffer);
     });
 
-    const decodedToken = await AccessToken.fromJWT(token);
-    if (!decodedToken) {
-      return res.status(401).json({ message: "Invalid or expired token" });
+    const userId = req.accessToken.user;
+
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, msg: "Unauthorized request." });
     }
 
-    req.decodedToken = decodedToken;
-
     const updateResult = await User.findByIdAndUpdate(
-      decodedToken.user,
+      userId,
       {
         picture: result.secure_url,
       },
       { new: true },
     );
+
+    if (!updateResult) {
+      logError(`User not found for ID: ${userId}`);
+      return res.status(404).json({ success: false, msg: "User not found." });
+    }
 
     if (process.env.NODE_ENV === "development") {
       logInfo("Updated user document:", updateResult);

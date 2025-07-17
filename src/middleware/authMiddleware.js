@@ -45,7 +45,7 @@ export const sendUnauthorized = (res, message = "Access denied.") => {
  * @param {import("express").NextFunction} next - Callback to pass control to next middleware
  */
 export const authMiddleware = async (req, res, next) => {
-  const path = req.originalUrl;
+  const path = req.path;
 
   const isProtected = checkIfProtected(path);
 

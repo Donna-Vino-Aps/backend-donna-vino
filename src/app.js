@@ -1,6 +1,6 @@
 import express from "express";
 import morgan from "morgan";
-import { router } from "./routes/router.js";
+import router from "./routes/router.js";
 import cookieParser from "cookie-parser";
 import corsConfig from "./config/cors.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
@@ -15,7 +15,9 @@ app.use(cookieParser());
 app.use(authMiddleware);
 app.use(globalLimiter);
 
-// Mount the router that includes cloudinary and others
+// Mount the top-level router
+// All routing logic must be implemented in ./routes and its children — none should be defined here
 app.use(router);
 
 export default app;
+// Debug-only middleware used to log HTTP requests in development.
