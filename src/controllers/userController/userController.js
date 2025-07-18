@@ -69,7 +69,7 @@ export const updateUserProfile = async (req, res) => {
         lastName: updatedUser.lastName,
         address: updatedUser.address,
         country: updatedUser.country,
-        picture: updatedUserser.picture || null,
+        picture: updatedUser.picture || null,
       },
       msg: "User profile updated successfully",
     });

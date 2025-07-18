@@ -23,12 +23,14 @@ export const cloudinaryController = async (req, res) => {
       uploadStream.end(file.buffer);
     });
 
-    const userId = req.accessToken.user;
+    logInfo("accessToken:", req.accessToken);
+
+    const userId = req.accessToken.userId;
 
     if (!userId) {
       return res
         .status(401)
-        .json({ success: false, msg: "Unauthorized request." });
+        .json({ success: false, msg: "User ID missing in token" });
     }
 
     const updateResult = await User.findByIdAndUpdate(
