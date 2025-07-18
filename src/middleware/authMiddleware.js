@@ -1,6 +1,6 @@
 import protectedAPIs from "../config/protectedAPIs.js";
 import { AccessToken } from "../models/index.js";
-import { logError } from "../util/logging.js";
+import { logError, logInfo } from "../util/logging.js";
 
 /**
  * Checks whether a given request path is protected.
@@ -73,6 +73,7 @@ export const authMiddleware = async (req, res, next) => {
       return sendUnauthorized(res, "Access denied. Invalid token.");
     }
 
+    logInfo("authMiddleware - token set:", req.accessToken);
     // Attach the valid token to the request for downstream use
     req.accessToken = token;
 

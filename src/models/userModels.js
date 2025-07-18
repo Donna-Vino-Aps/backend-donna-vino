@@ -17,6 +17,7 @@ const SALT_ROUNDS = 10;
  * @property {string} [address] - User's address
  * @property {string} [country] - User's country
  * @property {Date} createdAt - Date the user was created
+ * @property {string} picture - the URL of the user's profile picture stored in Cloudinary
  */
 
 const nameRegex = /^[a-zA-ZÆØÅæøå0-9]+(?:[-\s][a-zA-ZÆØÅæøå0-9]+)*$/;
