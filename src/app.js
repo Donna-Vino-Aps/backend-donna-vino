@@ -16,7 +16,7 @@ import cookieParser from "cookie-parser";
 import corsConfig from "./config/cors.js";
 import { authMiddleware } from "./middleware/authMiddleware.js";
 import { globalLimiter } from "./middleware/rateLimitMiddleware.js";
-import cloudinaryRouter from "./routes/cloudinaryRouter.js";
+import cloudinaryRouter from "./routes/cloudinaryRoutes.js";
 
 // Create an express server
 const app = express();
