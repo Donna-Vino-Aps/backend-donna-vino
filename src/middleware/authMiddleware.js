@@ -60,6 +60,8 @@ export const authMiddleware = async (req, res, next) => {
     return sendUnauthorized(res, "Authentication required.");
   }
 
+  logInfo("Authorization header:", authorization);
+
   // Extract the token part from the "Bearer <token>" format
   const tokenString = authorization.split(" ")[1];
   if (!tokenString) {
@@ -69,13 +71,14 @@ export const authMiddleware = async (req, res, next) => {
   try {
     // Verify the token and check if it exists in the DB (not revoked)
     const token = await AccessToken.fromJWT(tokenString);
+    logInfo("Decoded token:", token);
     if (!token) {
       return sendUnauthorized(res, "Access denied. Invalid token.");
     }
 
-    logInfo("authMiddleware - token set:", req.accessToken);
     // Attach the valid token to the request for downstream use
     req.accessToken = token;
+    logInfo("authMiddleware - token set:", req.accessToken);
 
     // Proceed to the next middleware or route handler
     next();

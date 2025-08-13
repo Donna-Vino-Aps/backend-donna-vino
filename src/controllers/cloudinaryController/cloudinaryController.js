@@ -25,7 +25,7 @@ export const cloudinaryController = async (req, res) => {
 
     logInfo("accessToken:", req.accessToken);
 
-    const userId = req.accessToken.userId;
+    const userId = req.accessToken.user;
 
     if (!userId) {
       return res
