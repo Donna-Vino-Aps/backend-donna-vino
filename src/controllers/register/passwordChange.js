@@ -37,7 +37,7 @@ export async function handleChangePassword(req, res) {
 
     if (isSamePassword) {
       return res.status(400).json({
-        message: "New password cannot be the same as the current password.",
+        message: "This password has been used before.",
       });
     }
     user.password = await bcrypt.hash(password, 10);
