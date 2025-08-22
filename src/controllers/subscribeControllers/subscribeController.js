@@ -2,7 +2,7 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import PreSubscribedUser from "../../models/subscribe/preSubscribeModel.js";
 import SubscribedUser from "../../models/subscribe/subscribedModel.js";
-import { sendEmail } from "../../util/emailUtils.js";
+import { sendEmail, addContactToResend } from "../../util/emailUtils.js";
 import { logInfo, logError } from "../../util/logging.js";
 import {
   isTokenUsed,
@@ -135,6 +135,7 @@ export const subscribeController = async (req, res) => {
       .replace("{{UNSUBSCRIBE_URL}}", unsubscribeRequestUrl);
 
     await sendEmail(to, subject, emailTemplate);
+    await addContactToResend(to);
 
     logInfo(`Welcome email with unsubscribe option sent to ${to}`);
 
