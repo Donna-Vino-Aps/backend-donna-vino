@@ -5,6 +5,7 @@ const allowedOrigins = [
   "https://www.donnavino.dk",
   "https://donnavino.dk",
   "http://localhost:3000",
+  "http://localhost:3002",
   "http://localhost:5000",
   "http://localhost:5001",
   "https://donna-vino-ecommerce-45b8fd279992.herokuapp.com",

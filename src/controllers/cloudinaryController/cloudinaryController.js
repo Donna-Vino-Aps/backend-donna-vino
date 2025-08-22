@@ -1,44 +1,50 @@
 import cloudinary from "../../config/cloudinary.js";
 import { logError } from "../../util/logging.js";
+import User from "../../models/userModels.js";
 
 export const cloudinaryController = async (req, res) => {
-  const file = req.file; // multer saves the file in req.file
+  const file = req.file;
 
   if (!file) {
-    return res
-      .status(400)
-      .json({ success: false, msg: "No file received by controller" });
+    return res.status(400).json({ success: false, msg: "No file received" });
   }
 
   try {
-    const uploadStream = cloudinary.uploader.upload_stream(
-      {
-        folder: "user_profiles",
-      },
-      (error, result) => {
-        if (error) {
-          return res.status(500).json({
-            success: false,
-            msg: "Image upload failed",
-            error: error.message,
-          });
-        }
+    const result = await new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        { folder: "user_profiles" },
+        (error, result) => {
+          if (error) reject(error);
+          else resolve(result);
+        },
+      );
+      uploadStream.end(file.buffer);
+    });
 
-        res.status(200).json({
-          success: true,
-          msg: "File uploaded!",
-          url: result.secure_url,
-          result,
-        });
-      },
+    const userId = req.user;
+    if (!userId) {
+      return res
+        .status(401)
+        .json({ success: false, msg: "User not authenticated" });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { avatar: result.secure_url },
+      { new: true },
     );
 
-    uploadStream.end(file.buffer);
+    res.status(200).json({
+      success: true,
+      msg: "File uploaded and user updated!",
+      url: updatedUser.avatar,
+      result,
+    });
   } catch (error) {
     logError(error);
-    return res.status(500).json({
+    res.status(500).json({
       success: false,
-      msg: "Unexpected server error during upload",
+      msg: "Error uploading image or updating user",
       error: error.message,
     });
   }

@@ -24,7 +24,7 @@ apiRouter.use("/register", registerRouter);
 apiRouter.use("/user", userRouter);
 apiRouter.use("/test", testRouter);
 apiRouter.use("/reviews", reviewRouter);
-router.use("/upload", cloudinaryRouter);
+apiRouter.use("/upload", cloudinaryRouter);
 // apiRouter.use(
 //   "/contact-us",
 //   contactLimiter,
