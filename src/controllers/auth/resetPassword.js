@@ -9,7 +9,6 @@ import { baseDonnaVinoEcommerceWebUrl } from "../../config/environment.js";
  *
  * Workflow:
  * - Checks if the user exists for the provided email.
- * - If the user does not exist, returns an error.
  * - If the user exists, generates a password reset token and sends a reset password link via email to the user.
  *
  * @route POST /api/register/reset-password
