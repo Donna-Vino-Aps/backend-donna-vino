@@ -5,6 +5,18 @@ import { resendVerificationLimiter } from "../middleware/rateLimitMiddleware.js"
 const registerRouter = express.Router();
 
 registerRouter.post("/", register.signUp);
+registerRouter.post(
+  "/reset-password",
+  register.resetPassword.sendPasswordReset,
+);
+registerRouter.post(
+  "/resend-password-reset",
+  register.resetPassword.resendPasswordReset,
+);
+registerRouter.post(
+  "/change-password",
+  register.passwordChange.handleChangePassword,
+);
 registerRouter.post("/:provider", register.providerSignUp);
 
 registerRouter.get("/email/confirm", register.email.confirm);
